@@ -20,9 +20,7 @@ pub async fn signup(
     code: String,
 ) -> Result<(), ServerFnError> {
     let pool = get_pool()?;
-
     User::validate_signup(&name, &email, &password, &code)?;
-
     let default_privacy_level: i32 = PrivacyLevel::Followers.into();
     let username = User::generate_username_from_email(&email)?;
     let user = User::create(
@@ -38,7 +36,6 @@ pub async fn signup(
         default_privacy_level,
     )
     .await?;
-
     AuthService::send_activation_email(user.id, &user.name, &user.email).await?;
     leptos_axum::redirect("/signup/email-sent");
     Ok(())
@@ -113,7 +110,6 @@ pub fn SignupPage() -> impl IntoView {
                         "Terms of Service"
                     </a> "."
                 </p>
-
                 <p class="mt-4 text-gray-600">
                     "Already have an account? "
                     <a href="/login" class="text-blue-500 hover:underline">

@@ -13,21 +13,19 @@ use crate::component::link::Link;
 use crate::component::template::{ErrorComponent, ListNotFoundComponent, LoadingComponent};
 use crate::exercise::create_page::ExerciseCreate;
 use crate::exercise::delete_page::{ExerciseDelete, ExerciseDeleteForm};
-use crate::exercise::model::ExerciseQueryWithPrevious;
 use crate::set::create_form::{SetCreate, SetCreateForm};
 use crate::set::delete_page::{SetDelete, SetDeleteForm};
-use crate::set::model::SetQueryWithPrevious;
 use crate::set::update_page::{SetRowUpdateForm, SetUpdate};
 use crate::util::param::{get_date, get_username};
+
 use crate::workout::create_page::WorkoutCreate;
 use crate::workout::delete_page::{WorkoutDelete, WorkoutDeleteForm};
-use crate::workout::model::WorkoutQueryWithPrevious;
+use crate::workout::model::{
+    ExerciseQueryWithPrevious, SetQueryWithPrevious, WorkoutQueryWithPrevious,
+};
 
 #[cfg(feature = "ssr")]
-use crate::{
-    auth::model::User, auth::service::get_request_user, setup::get_pool,
-    workout::model::WorkoutDetail,
-};
+use crate::{auth::model::User, auth::service::get_request_user, setup::get_pool};
 
 #[server(endpoint = "user-workout-day")]
 pub async fn get_workout_day(
@@ -36,18 +34,12 @@ pub async fn get_workout_day(
 ) -> Result<Vec<WorkoutQueryWithPrevious>, ServerFnError> {
     let user = get_request_user()?;
     let pool = get_pool()?;
-
     User::check_view_permission(&pool, &user, &username).await?;
     let query = WorkoutQueryWithPrevious::get(&pool, &username, date).await?;
-
-    let q2 = WorkoutDetail::aggregate_workout_day_data(&pool, &username, date).await?;
-
-    let json = serde_json::to_string_pretty(&query).unwrap();
-    let json2 = serde_json::to_string_pretty(&q2).unwrap();
-
+    // let q2 = WorkoutDetail::aggregate_workout_day_data(&pool, &username, date).await?;
+    // let json = serde_json::to_string_pretty(&query).unwrap();
+    // let json2 = serde_json::to_string_pretty(&q2).unwrap();
     // Print the JSON string
-    println!("{}", json);
-    println!("{}", json2);
     Ok(query)
 }
 
@@ -244,7 +236,6 @@ pub fn SetListItemComponent(
             username, date, workout_id, exercise_id, data.set_id,
         )
     };
-
     let previous_set_view = match (
         data.previous_weight,
         data.previous_reps,

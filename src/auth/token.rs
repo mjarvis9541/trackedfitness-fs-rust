@@ -8,7 +8,6 @@ use crate::error::{Error, Result};
 
 #[derive(Debug, Deserialize, Serialize, PartialEq)]
 pub enum TokenType {
-    Auth,
     Activation,
     PasswordReset,
     EmailChange,
@@ -78,7 +77,6 @@ impl JwtManager {
         let config = get_config();
 
         let duration = match token_type {
-            TokenType::Auth => config.token_duration_authentication,
             TokenType::Activation => config.token_duration_account_activation,
             TokenType::PasswordReset => config.token_duration_password_reset,
             TokenType::EmailChange => config.token_duration_email_change,

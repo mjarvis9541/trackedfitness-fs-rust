@@ -54,7 +54,6 @@ impl AuthService {
                 format!("{}/password-reset/confirm?token={}", config.domain, token)
             }
             TokenType::EmailChange => format!("{}/confirm-email?token={}", config.domain, token),
-            _ => String::new(),
         }
     }
 

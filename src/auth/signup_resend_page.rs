@@ -12,18 +12,13 @@ use crate::{auth::model::User, auth::service::AuthService, error::Error, setup::
 #[server(endpoint = "signup-resend")]
 async fn signup_request_resend(email: String) -> Result<(), ServerFnError> {
     let pool = get_pool()?;
-
     User::validate_email(&email)?;
-
     let user = User::get_by_email(&pool, &email)
         .await?
         .ok_or(Error::NotFound)?;
-
     user.ensure_email_not_verified()?;
     user.ensure_account_not_active()?;
-
     AuthService::send_activation_email(user.id, &user.name, &user.email).await?;
-
     leptos_axum::redirect("/signup/email-sent");
     Ok(())
 }
@@ -40,16 +35,13 @@ pub fn SignupResendPage() -> impl IntoView {
     view! {
         <Title text="Resend Activation Email"/>
         <main class="p-4 lg:p-8">
-
             <div class="p-4 mx-auto max-w-md bg-white border shadow-md">
                 <h1 class="mb-4 text-xl font-bold">"Resend Activation Email"</h1>
-
                 <p class="mb-4">
                     "If you've not received an activation code via email, enter your email address and we'll send you a new one."
                 </p>
                 <div class="mb-4 text-red-500 font-bold">{action_error}</div>
                 <div class="mb-4 text-red-500 font-bold">{non_field_errors}</div>
-
                 <ActionForm action>
                     <TextInputImproved
                         name="email"

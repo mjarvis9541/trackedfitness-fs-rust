@@ -1,17 +1,15 @@
-use std::collections::BTreeMap;
-
 use chrono::prelude::*;
 use sqlx::postgres::PgRow;
 use sqlx::{FromRow, PgPool, Row};
 use uuid::Uuid;
 
 use crate::error::Result;
-use crate::exercise::model::{ExerciseQuery, ExerciseQueryWithPrevious};
-use crate::set::model::{SetQuery, SetQueryWithPrevious};
+use crate::exercise::model::ExerciseQuery;
+use crate::set::model::SetQuery;
 use crate::util::datetime::{get_week_end, get_week_start};
 
 use super::model::{
-    ExerciseDTO, SetDTO, WorkoutBase, WorkoutDTO, WorkoutDetail, WorkoutQuery,
+    ExerciseQueryWithPrevious, SetQueryWithPrevious, WorkoutBase, WorkoutQuery,
     WorkoutQueryWithPrevious, WorkoutWeek,
 };
 
@@ -418,197 +416,33 @@ impl FromRow<'_, PgRow> for WorkoutQueryWithPrevious {
     }
 }
 
-impl WorkoutDetail {
-    pub async fn get_all_by_username_date(
-        pool: &PgPool,
-        username: &str,
-        date: NaiveDate,
-    ) -> Result<Vec<Self>> {
-        let query = sqlx::query_file_as!(Self, "sql/workout_day_list.sql", username, date)
-            .fetch_all(pool)
-            .await?;
-        Ok(query)
-    }
-
-    pub async fn aggregate_workout_day_data(
-        pool: &PgPool,
-        username: &str,
-        date: NaiveDate,
-    ) -> Result<Vec<WorkoutDTO>> {
-        let workout_query = WorkoutDetail::get_all_by_username_date(pool, username, date).await?;
-
-        let mut workouts_map: BTreeMap<Uuid, WorkoutDTO> = BTreeMap::new();
-
-        for detail in workout_query {
-            let workout_entry =
-                workouts_map
-                    .entry(detail.workout_id)
-                    .or_insert_with(|| WorkoutDTO {
-                        workout_id: detail.workout_id,
-                        user_id: detail.user_id,
-                        username: detail.username.clone(),
-                        date: detail.workout_date,
-                        exercise_count: detail.workout_exercise_count.unwrap_or(0),
-                        set_count: detail.workout_set_count.unwrap_or(0),
-                        rep_count: detail.workout_rep_count.unwrap_or(0),
-                        exercise_list: vec![],
-                    });
-
-            let mut exercise_exists = false;
-            for exercise in &mut workout_entry.exercise_list {
-                if exercise.exercise_id == detail.exercise_id {
-                    exercise_exists = true;
-
-                    if let (Some(set_id), Some(weight), Some(reps), Some(rest), Some(order)) = (
-                        detail.set_id,
-                        detail.weight,
-                        detail.reps,
-                        detail.rest,
-                        detail.set_order,
-                    ) {
-                        let set_entry = SetDTO {
-                            workout_id: detail.workout_id,
-                            exercise_id: detail.exercise_id,
-                            set_id,
-                            username: detail.username.clone(),
-                            date: detail.workout_date,
-                            weight,
-                            reps,
-                            rest,
-                            order,
-                        };
-                        exercise.set_list.push(set_entry);
-                    }
-
-                    // Optionally handle previous sets if needed
-                    if let (
-                        Some(prev_set_id),
-                        Some(prev_weight),
-                        Some(prev_reps),
-                        Some(prev_order),
-                    ) = (
-                        detail.previous_set_id,
-                        detail.previous_weight,
-                        detail.previous_reps,
-                        detail.set_order,
-                    ) {
-                        let prev_set_entry = SetDTO {
-                            workout_id: detail.previous_workout_id.unwrap_or(detail.workout_id),
-                            exercise_id: detail.previous_exercise_id.unwrap_or(detail.exercise_id),
-                            set_id: prev_set_id,
-                            username: detail.username.clone(),
-                            date: detail.previous_workout_date.unwrap_or(detail.workout_date),
-                            weight: prev_weight,
-                            reps: prev_reps,
-                            rest: detail.rest.unwrap_or(0),
-                            order: prev_order,
-                        };
-                        exercise.previous_set_list.push(prev_set_entry);
-                    }
-                    break;
-                }
-            }
-
-            if !exercise_exists {
-                let mut new_exercise = ExerciseDTO {
-                    workout_id: detail.workout_id,
-                    exercise_id: detail.exercise_id,
-                    username: detail.username.clone(),
-                    date: detail.workout_date,
-                    movement_name: detail.movement_name.clone(),
-                    muscle_group_name: detail.muscle_group_name.clone().unwrap_or_default(),
-                    set_list: vec![],
-                    previous_set_list: vec![],
-                };
-
-                if let (Some(set_id), Some(weight), Some(reps), Some(rest), Some(order)) = (
-                    detail.set_id,
-                    detail.weight,
-                    detail.reps,
-                    detail.rest,
-                    detail.set_order,
-                ) {
-                    let set_entry = SetDTO {
-                        workout_id: detail.workout_id,
-                        exercise_id: detail.exercise_id,
-                        set_id,
-                        username: detail.username.clone(),
-                        date: detail.workout_date,
-                        weight,
-                        reps,
-                        rest,
-                        order,
-                    };
-                    new_exercise.set_list.push(set_entry);
-                }
-
-                // Optionally handle previous sets if needed
-                if let (Some(prev_set_id), Some(prev_weight), Some(prev_reps), Some(prev_order)) = (
-                    detail.previous_set_id,
-                    detail.previous_weight,
-                    detail.previous_reps,
-                    detail.set_order,
-                ) {
-                    let prev_set_entry = SetDTO {
-                        workout_id: detail.previous_workout_id.unwrap_or(detail.workout_id),
-                        exercise_id: detail.previous_exercise_id.unwrap_or(detail.exercise_id),
-                        set_id: prev_set_id,
-                        username: detail.username.clone(),
-                        date: detail.previous_workout_date.unwrap_or(detail.workout_date),
-                        weight: prev_weight,
-                        reps: prev_reps,
-                        rest: detail.rest.unwrap_or(0),
-                        order: prev_order,
-                    };
-                    new_exercise.previous_set_list.push(prev_set_entry);
-                }
-
-                workout_entry.exercise_list.push(new_exercise);
-            }
-        }
-
-        let iter = workouts_map
-            .into_iter()
-            .map(|(_, workout)| workout)
-            .collect();
-
-        Ok(iter)
+impl FromRow<'_, PgRow> for SetQueryWithPrevious {
+    fn from_row(row: &PgRow) -> sqlx::Result<Self> {
+        Ok(Self {
+            set_id: row.try_get("set_id")?,
+            order: row.try_get("set_order")?,
+            weight: row.try_get("weight")?,
+            reps: row.try_get("reps")?,
+            rest: row.try_get("rest")?,
+            previous_workout_id: row.try_get("previous_workout_id")?,
+            previous_workout_date: row.try_get("previous_workout_date")?,
+            previous_exercise_id: row.try_get("previous_exercise_id")?,
+            previous_weight: row.try_get("previous_weight")?,
+            previous_reps: row.try_get("previous_reps")?,
+        })
     }
 }
 
-// #[derive(Debug, Deserialize, Serialize, Clone, Default)]
-// pub struct WorkoutQueryWithPrevious {
-//     pub user_id: Uuid,
-//     pub workout_id: Uuid,
-//     pub workout_date: NaiveDate,
-//     pub created_at: DateTime<Utc>,
-//     pub username: String,
-//     pub exercise_count: i64,
-//     pub set_count: i64,
-//     pub rep_count: i64,
-//     pub exercises: Vec<ExerciseQueryWithPrevious>,
-// }
-// #[derive(Debug, Deserialize, Serialize, Clone, Default)]
-// pub struct ExerciseQueryWithPrevious {
-//     pub exercise_id: Uuid,
-//     pub movement_name: String,
-//     pub muscle_group_name: String,
-//     pub order: i32,
-//     pub set_count: i64,
-//     pub rep_count: i64,
-//     pub sets: Vec<SetQueryWithPrevious>,
-// }
-
-// #[derive(Debug, Deserialize, Serialize, Clone, Default)]
-// pub struct SetQueryWithPrevious {
-//     pub set_id: Uuid,
-//     pub order: i32,
-//     pub weight: Decimal,
-//     pub reps: i32,
-//     pub rest: i32,
-//     pub previous_workout_id: Option<Uuid>,
-//     pub previous_workout_date: Option<NaiveDate>,
-//     pub previous_exercise_id: Option<Uuid>,
-//     pub previous_weight: Option<Decimal>,
-//     pub previous_reps: Option<i32>,
-// }
+impl FromRow<'_, PgRow> for ExerciseQueryWithPrevious {
+    fn from_row(row: &PgRow) -> sqlx::Result<Self> {
+        Ok(Self {
+            exercise_id: row.try_get("exercise_id")?,
+            movement_name: row.try_get("movement_name")?,
+            muscle_group_name: row.try_get("muscle_group_name")?,
+            order: row.try_get("exercise_order")?,
+            set_count: row.try_get("exercise_set_count").unwrap_or(0),
+            rep_count: row.try_get("exercise_rep_count").unwrap_or(0),
+            sets: Vec::new(),
+        })
+    }
+}

@@ -6,9 +6,7 @@ use uuid::Uuid;
 use crate::error::Result;
 use crate::exercise::model::ExerciseModel;
 use crate::exercise_plan::model::ExercisePlan;
-use crate::set::model::{
-    MergedSetInputData, SetModel, SetQuery, SetQueryWithPrevious, SetToCreate,
-};
+use crate::set::model::{MergedSetInputData, SetModel, SetQuery, SetToCreate};
 
 impl MergedSetInputData {
     pub fn merge_from_exercise_sets(
@@ -261,23 +259,6 @@ impl FromRow<'_, PgRow> for SetQuery {
             order: row.try_get("set_order")?,
             weight: row.try_get("set_weight")?,
             reps: row.try_get("set_reps")?,
-        })
-    }
-}
-
-impl FromRow<'_, PgRow> for SetQueryWithPrevious {
-    fn from_row(row: &PgRow) -> sqlx::Result<Self> {
-        Ok(Self {
-            set_id: row.try_get("set_id")?,
-            order: row.try_get("set_order")?,
-            weight: row.try_get("weight")?,
-            reps: row.try_get("reps")?,
-            rest: row.try_get("rest")?,
-            previous_workout_id: row.try_get("previous_workout_id")?,
-            previous_workout_date: row.try_get("previous_workout_date")?,
-            previous_exercise_id: row.try_get("previous_exercise_id")?,
-            previous_weight: row.try_get("previous_weight")?,
-            previous_reps: row.try_get("previous_reps")?,
         })
     }
 }

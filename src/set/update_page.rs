@@ -10,8 +10,8 @@ use crate::component::button::{Button, SubmitButton};
 use crate::component::icon::{Chevron, IconCheck};
 use crate::component::input::NumberInput;
 use crate::component::template::{DetailPageTemplate, ErrorComponent, LoadingComponent};
-use crate::set::model::SetQueryWithPrevious;
 use crate::util::validation_error::{extract_other_errors, get_non_field_errors};
+use crate::workout::model::SetQueryWithPrevious;
 use crate::workout::router::SetDetailParam;
 
 #[cfg(feature = "ssr")]
@@ -34,7 +34,6 @@ pub async fn set_order_update(set_id: Uuid, order: i32) -> Result<(), ServerFnEr
         return Err(ServerFnError::new("must be a postivie number"));
     }
     SetModel::update_order(&pool, set.id, new_order, user.id).await?;
-
     Ok(())
 }
 

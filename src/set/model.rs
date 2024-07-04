@@ -27,20 +27,6 @@ pub struct SetQuery {
 }
 
 #[derive(Debug, Deserialize, Serialize, Clone, Default)]
-pub struct SetQueryWithPrevious {
-    pub set_id: Uuid,
-    pub order: i32,
-    pub weight: Decimal,
-    pub reps: i32,
-    pub rest: i32,
-    pub previous_workout_id: Option<Uuid>,
-    pub previous_workout_date: Option<NaiveDate>,
-    pub previous_exercise_id: Option<Uuid>,
-    pub previous_weight: Option<Decimal>,
-    pub previous_reps: Option<i32>,
-}
-
-#[derive(Debug, Deserialize, Serialize, Clone, Default)]
 pub struct SetToCreate {
     pub exercise_num: i32,
     pub weight: Decimal,

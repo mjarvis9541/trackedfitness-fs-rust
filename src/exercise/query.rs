@@ -4,7 +4,7 @@ use sqlx::{FromRow, PgPool, Row};
 use uuid::Uuid;
 
 use crate::error::Result;
-use crate::exercise::model::{ExerciseModel, ExerciseQuery, ExerciseQueryWithPrevious};
+use crate::exercise::model::{ExerciseModel, ExerciseQuery};
 use crate::exercise_plan::model::ExercisePlan;
 use crate::set::model::SetQuery;
 
@@ -278,20 +278,6 @@ impl ExerciseQuery {
         }
 
         Ok(exercise)
-    }
-}
-
-impl FromRow<'_, PgRow> for ExerciseQueryWithPrevious {
-    fn from_row(row: &PgRow) -> sqlx::Result<Self> {
-        Ok(Self {
-            exercise_id: row.try_get("exercise_id")?,
-            movement_name: row.try_get("movement_name")?,
-            muscle_group_name: row.try_get("muscle_group_name")?,
-            order: row.try_get("exercise_order")?,
-            set_count: row.try_get("exercise_set_count").unwrap_or(0),
-            rep_count: row.try_get("exercise_rep_count").unwrap_or(0),
-            sets: Vec::new(),
-        })
     }
 }
 

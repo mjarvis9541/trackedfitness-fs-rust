@@ -6,12 +6,9 @@ use leptos_router::*;
 pub fn SignupDonePage() -> impl IntoView {
     view! {
         <Title text="Email Sent"/>
-
         <main class="p-4 lg:p-8">
             <div class="p-4 mx-auto max-w-md bg-white border shadow-md">
-
                 <h1 class="mb-4 text-xl font-bold">"Email Sent"</h1>
-
                 <div class="space-y-4">
                     <p>"A verification email has been sent to your email address."</p>
                     <p>
