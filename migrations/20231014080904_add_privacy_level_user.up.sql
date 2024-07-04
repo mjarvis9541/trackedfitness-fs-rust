@@ -1,0 +1,2 @@
+ALTER TABLE users_user
+ADD COLUMN privacy_level INTEGER NOT NULL DEFAULT 0

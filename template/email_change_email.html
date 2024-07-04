@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Email Change Request</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        background-color: #f4f4f4;
+        margin: 0;
+        padding: 0;
+      }
+      .container {
+        max-width: 600px;
+        margin: 0 auto;
+        padding: 20px;
+        background-color: #fff;
+        border-radius: 8px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+      }
+      h1 {
+        color: #333;
+      }
+      p {
+        color: #555;
+      }
+      .btn {
+        display: inline-block;
+        padding: 10px 20px;
+        background-color: #007bff;
+        color: #fff;
+        text-decoration: none;
+        border-radius: 5px;
+      }
+      .btn:hover {
+        background-color: #0056b3;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h1>Email Change Request</h1>
+      <p>Dear {{ name }},</p>
+      <p>
+        We have received a request to change the email address associated with
+        your account. For security purposes, we require your confirmation to
+        proceed with this action.
+      </p>
+      <p>
+        If you did not initiate this request, please disregard this email. Your
+        account security may be at risk, and we recommend contacting our support
+        team immediately.
+      </p>
+      <p>
+        To confirm the email change request, please click on the following link:
+      </p>
+      <a class="btn" href="{{ confirmation_link }}" style="background-color: #007bff; color: #fff; text-decoration: none; border-radius: 5px; padding: 10px 20px;">Confirm Email Change</a>
+      <p>
+        If the above link does not work, copy and paste the following URL into
+        your browser:
+      </p>
+      <p>{{ confirmation_link }}</p>
+      <p>
+        Once you confirm the email change request, your account will be updated
+        with the new email address.
+      </p>
+      <p>
+        For your security, this link will expire in {{ duration }}. If you do
+        not confirm the email change request within this time frame, you will need to request
+        another change request link.
+      </p>
+      <p>Thank you for your attention to this matter.</p>
+      <p>Best regards,<br />Trackedfitness</p>
+      <p>https://www.trackedfitness.com</p>
+    </div>
+  </body>
+</html>

@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Account Activation</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        background-color: #f4f4f4;
+        margin: 0;
+        padding: 0;
+      }
+      .container {
+        max-width: 600px;
+        margin: 0 auto;
+        padding: 20px;
+        background-color: #fff;
+        border-radius: 8px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+      }
+      h1 {
+        color: #333;
+      }
+      p {
+        color: #555;
+      }
+      .btn {
+        display: inline-block;
+        padding: 10px 20px;
+        background-color: #007bff;
+        color: #fff;
+        text-decoration: none;
+        border-radius: 5px;
+      }
+      .btn:hover {
+        background-color: #0056b3;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h1>Account Activation</h1>
+      <p>Dear {{ name }},</p>
+      <p>Welcome to Trackedfitness! We're excited to have you on board.</p>
+      <p>To activate your account, please click on the following link:</p>
+      <a class="btn" href="{{ confirmation_link }}" style="background-color: #007bff; color: #fff; text-decoration: none; border-radius: 5px; padding: 10px 20px;">Activate Account</a>
+      <p>
+        If the above link does not work, copy and paste the following URL into
+        your browser:
+      </p>
+      <p>{{ confirmation_link }}</p>
+      <p>
+        After activation, you'll be able to access all the features and benefits
+        of our platform.
+      </p>
+      <p>
+        For your security, this link will expire in {{ duration }}. If you do
+        not activate your account within this time frame, you will need to request
+        another account activation link.
+      </p>
+      <p>
+        If you did not sign up for an account with us, please ignore this email.
+      </p>
+      <p>Thank you for choosing Trackedfitness!</p>
+      <p>Best regards,<br />Trackedfitness</p>
+      <p>https://www.trackedfitness.com</p>
+    </div>
+  </body>
+</html>
+trackedfitness.aws@gmail.com

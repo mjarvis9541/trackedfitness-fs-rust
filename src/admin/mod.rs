@@ -1,0 +1,14 @@
+pub mod admin_follower_list_page;
+pub mod detail_page;
+pub mod follower_create_form;
+pub mod follower_detail_page;
+pub mod layout;
+pub mod router;
+pub mod user_block_create_form;
+pub mod user_block_detail_page;
+pub mod user_block_list_page;
+pub mod user_create_page;
+pub mod user_detail_page;
+pub mod user_list_page;
+pub mod user_select;
+pub mod user_stats_list;

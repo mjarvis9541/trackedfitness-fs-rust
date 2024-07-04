@@ -1,0 +1,3 @@
+ALTER TABLE food
+ALTER COLUMN food_description DROP NOT NULL,
+ALTER COLUMN food_category DROP NOT NULL;

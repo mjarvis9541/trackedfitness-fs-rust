@@ -1,0 +1,135 @@
+[package]
+edition = "2021"
+name = "trackedfitness"
+version = "0.1.0"
+
+[lib]
+crate-type = ["cdylib", "rlib"]
+
+
+[dependencies]
+axum = { version = "0.7.4", optional = true }
+leptos = { version = "0.6.12", features = ["nightly"] }
+leptos_axum = { version = "0.6.12", optional = true }
+leptos_meta = { version = "0.6.12", features = ["nightly"] }
+leptos_router = { version = "0.6.12", features = ["nightly"] }
+
+wasm-bindgen = { version = "=0.2.92" }
+console_error_panic_hook = "0.1"
+
+http = "1"
+
+chrono = { version = "0.4.30", features = ["serde"] }
+rust_decimal = "1.32.0"
+serde = { version = "1", features = ["derive"] }
+uuid = { version = "1.4.1", features = ["serde"] }
+
+jsonwebtoken = { version = "9.2.0", optional = true }
+bcrypt = { version = "0.15.0", optional = true }
+dotenvy = { version = "0.15.7", optional = true }
+
+sqlx = { version = "0.7.1", features = [
+    "postgres",
+    "chrono",
+    "runtime-tokio",
+    "uuid",
+    "rust_decimal",
+    "tls-rustls",
+], optional = true }
+
+
+tokio = { version = "1.36.0", features = ["rt-multi-thread"], optional = true }
+tower = { version = "0.4.13", optional = true }
+tower-http = { version = "0.5.1", features = ["fs", "trace"], optional = true }
+tracing = { version = "0.1.40", optional = true }
+tracing-subscriber = { version = "0.3.18", optional = true }
+
+lettre = { version = "0.11.4", optional = true, features = [
+    "tokio1",
+    "builder",
+    "smtp-transport",
+    "tokio1-rustls-tls",
+], default-features = false }
+
+lazy_static = { version = "1.4.0" }
+thiserror = "1.0.58"
+serde_json = "1.0.116"
+derive_more = "0.99.18"
+async-trait = "0.1.80"
+
+tera = { version = "1.19.1", optional = true }
+regex = { version = "1.10.3", optional = true }
+rand = { version = "0.8.5", optional = true }
+indexmap = { version = "2.2.6", optional = true }
+strum = { version = "0.26.3", features = ["derive"] }
+strum_macros = "0.26.4"
+
+# file upload
+server_fn = { version = "0.6.12", features = ["multipart"] }
+web-sys = { version = "0.3.69", features = [
+    "FormData",
+    "HtmlFormElement",
+    "SubmitEvent",
+] }
+
+[features]
+default = ["ssr", "hydrate"]
+hydrate = ["leptos_meta/hydrate", "leptos_router/hydrate", "leptos/hydrate"]
+ssr = [
+    "dep:axum",
+    "dep:bcrypt",
+    "dep:dotenvy",
+    "dep:indexmap",
+    "dep:jsonwebtoken",
+    "dep:leptos_axum",
+    "dep:lettre",
+    "dep:rand",
+    "dep:regex",
+    "dep:sqlx",
+    "dep:tera",
+    "dep:tokio",
+    "dep:tower-http",
+    "dep:tower",
+    "dep:tracing-subscriber",
+    "dep:tracing",
+    "leptos_meta/ssr",
+    "leptos_router/ssr",
+    "leptos/ssr",
+]
+
+
+[package.metadata.leptos]
+output-name = "trackedfitness"
+site-root = "target/site"
+site-pkg-dir = "pkg"
+style-file = "style/tailwind.css"
+tailwind-input-file = "style/tailwind.css"
+tailwind-config-file = "tailwind.config.js"
+assets-dir = "public"
+site-addr = "0.0.0.0:3000"
+reload-port = 3001
+end2end-cmd = "npx playwright test"
+end2end-dir = "end2end"
+browserquery = "defaults"
+env = "DEV"
+bin-features = ["ssr"]
+bin-default-features = false
+lib-features = ["hydrate"]
+lib-default-features = false
+lib-profile-release = "wasm-release"
+
+[profile.wasm-release]
+inherits = "release"
+opt-level = 'z'
+lto = true
+codegen-units = 1
+panic = "abort"
+
+[profile.dev.package.sqlx-macros]
+opt-level = 3
+
+[profile.dev]
+incremental = true
+
+[profile.release]
+incremental = true

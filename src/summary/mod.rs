@@ -1,0 +1,12 @@
+pub mod component;
+pub mod diet_target_month;
+pub mod diet_target_week;
+pub mod diet_week;
+pub mod model;
+pub mod month_page;
+#[cfg(feature = "ssr")]
+pub mod repository_impl;
+pub mod router;
+#[cfg(feature = "ssr")]
+pub mod service;
+pub mod week_page;

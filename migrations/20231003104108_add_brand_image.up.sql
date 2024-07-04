@@ -1,0 +1,2 @@
+ALTER TABLE food_brand
+ADD COLUMN image_url VARCHAR(255)

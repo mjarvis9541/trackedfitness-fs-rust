@@ -1,0 +1,10 @@
+.DS_Store
+.env
+.local/
+.vscode/
+build/
+Cargo.lock
+end2end/node_modules/
+public/images/brand/*
+public/images/profile/*
+target/

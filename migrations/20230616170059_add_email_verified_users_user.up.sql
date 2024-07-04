@@ -1,0 +1,2 @@
+ALTER TABLE users_user
+ADD COLUMN email_verified BOOLEAN NOT NULL DEFAULT FALSE
