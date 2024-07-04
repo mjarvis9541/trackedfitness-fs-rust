@@ -22,7 +22,7 @@ async fn user_create(
     privacy_level: i32,
 ) -> Result<(), ServerFnError> {
     crate::auth::service::extract_superuser_from_request()?;
-    let pool = expect_context::<sqlx::PgPool>();
+    let pool = crate::setup::get_pool()?;
     let user = crate::auth::model::User::create(
         &pool,
         &name,
@@ -46,9 +46,9 @@ pub fn AdminUserCreatePage() -> impl IntoView {
     provide_context(resource);
 
     let action = Action::<UserCreate, _>::server();
-
     let error = move || extract_error_message(&action);
     let non_field_errors = move || process_non_field_errors(error);
+
     let error = Signal::derive(error);
     view! {
         <Title text="Create User"/>

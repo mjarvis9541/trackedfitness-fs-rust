@@ -6,9 +6,7 @@ use rust_decimal::Decimal;
 
 use crate::component::button::SubmitButton;
 use crate::component::input::{NumberInput, TextInputImproved};
-use crate::component::select::{
-    FieldSelect, ACTIVITY_LEVEL_OPTIONS, FITNESS_GOAL_OPTIONS, SEX_OPTIONS,
-};
+use crate::component::select::FieldSelectB;
 use crate::component::template::{DetailPageTemplate, ErrorComponent, LoadingComponent};
 use crate::profile::model::Profile;
 use crate::util::param::get_username;
@@ -93,21 +91,41 @@ pub fn ProfileUpdatePage() -> impl IntoView {
     let response = move || {
         resource.and_then(|data| {
             let data = data.clone();
+            let sex_options = vec![("", "Select"), ("M", "Male"), ("F", "Female")];
+            let activity_options = vec![
+                ("", "Select"),
+                ("SD", "Sedentary - little or no exercise/desk job"),
+                (
+                    "LA",
+                    "Lightly Active - light exercise/sports 1-3 days a week",
+                ),
+                (
+                    "MA",
+                    "Moderately Active - Moderate exercise/sports 3-5 days a week",
+                ),
+                ("VA", "Very Active - Heavy exercise/sports 6-7 days a week"),
+                (
+                    "EA",
+                    "Extremely Active - Very heavy exercise/physical job/training twice a day",
+                ),
+            ];
+            let goal_options = vec![
+                ("", "Select"),
+                ("LW", "Lose Weight"),
+                ("MW", "Maintain Weight"),
+                ("GW", "Gain Weight"),
+            ];
             view! {
                 <ActionForm action>
                     <input type="hidden" name="id" value=data.id.to_string()/>
                     <input type="hidden" name="username" value=data.username/>
-                    <FieldSelect
+                    <FieldSelectB
                         name="activity_level"
-                        options=&ACTIVITY_LEVEL_OPTIONS
+                        options=activity_options
                         value=data.activity_level
                     />
-                    <FieldSelect
-                        name="fitness_goal"
-                        options=&FITNESS_GOAL_OPTIONS
-                        value=data.fitness_goal
-                    />
-                    <FieldSelect name="sex" options=&SEX_OPTIONS value=data.sex/>
+                    <FieldSelectB name="fitness_goal" options=goal_options value=data.fitness_goal/>
+                    <FieldSelectB name="sex" options=sex_options value=data.sex/>
 
                     <NumberInput
                         action_value

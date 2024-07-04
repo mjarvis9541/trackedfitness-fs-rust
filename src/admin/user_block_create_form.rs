@@ -14,7 +14,7 @@ async fn admin_user_block_create(
     blocked_status: String,
 ) -> Result<(), ServerFnError> {
     crate::auth::service::extract_superuser_from_request()?;
-    let pool = expect_context::<sqlx::PgPool>();
+    let pool = crate::setup::get_pool()?;
     let status = blocked_status.parse::<i32>().unwrap_or_default();
     crate::user_block::model::UserBlock::create(&pool, blocker_id, blocked_id, status).await?;
     Ok(())

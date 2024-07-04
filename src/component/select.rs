@@ -90,37 +90,6 @@ lazy_static! {
         ("2", "Followers Only - Only followers can view your profile"),
         ("3", "Private - No users can view your profile"),
     ];
-    pub static ref SERVING_FORM_OPTIONS: Vec<(&'static str, &'static str)> = vec![
-        ("", "Select"),
-        ("g", "100g"),
-        ("ml", "100ml"),
-        ("srv", "1 Serving")
-    ];
-    pub static ref SEX_OPTIONS: Vec<(&'static str, &'static str)> =
-        vec![("", "Select"), ("M", "Male"), ("F", "Female")];
-    pub static ref ACTIVITY_LEVEL_OPTIONS: Vec<(&'static str, &'static str)> = vec![
-        ("", "Select"),
-        ("SD", "Sedentary - little or no exercise/desk job"),
-        (
-            "LA",
-            "Lightly Active - light exercise/sports 1-3 days a week",
-        ),
-        (
-            "MA",
-            "Moderately Active - Moderate exercise/sports 3-5 days a week",
-        ),
-        ("VA", "Very Active - Heavy exercise/sports 6-7 days a week"),
-        (
-            "EA",
-            "Extremely Active - Very heavy exercise/physical job/training twice a day",
-        ),
-    ];
-    pub static ref FITNESS_GOAL_OPTIONS: Vec<(&'static str, &'static str)> = vec![
-        ("", "Select"),
-        ("LW", "Lose Weight"),
-        ("MW", "Maintain Weight"),
-        ("GW", "Gain Weight"),
-    ];
     pub static ref FOOD_SORT_OPTIONS: Vec<(&'static str, &'static str)> = {
         let mut options = vec![
             ("name", "Food (A-z)"),
@@ -373,6 +342,23 @@ pub fn FieldSelectB(
     #[prop(optional, into)] value: MaybeSignal<String>,
     options: Vec<(&'static str, &'static str)>,
 ) -> impl IntoView {
+    let options_view = move || {
+        options
+            .clone()
+            .into_iter()
+            .map(|(option_value, label)| {
+                let selected_value = value.get();
+                view! {
+                    <option
+                        value=option_value
+                        prop:selected=move || *option_value == selected_value
+                    >
+                        {label}
+                    </option>
+                }
+            })
+            .collect_view()
+    };
     view! {
         <label class="block mb-4">
             <span class="block mb-1 text-sm font-bold">{capitalize_and_replace(label)}</span>
@@ -380,24 +366,7 @@ pub fn FieldSelectB(
                 name=name
                 class="block py-2.5 px-3 w-full bg-white rounded border focus:border-blue-500 focus:ring-2 focus:ring-blue-500 focus:outline-none"
             >
-                {move || {
-                    options
-                        .clone()
-                        .into_iter()
-                        .map(|(option_value, label)| {
-                            let selected_value = value.get();
-                            view! {
-                                <option
-                                    value=option_value
-                                    prop:selected=move || *option_value == selected_value
-                                >
-                                    {label}
-                                </option>
-                            }
-                        })
-                        .collect_view()
-                }}
-
+                {options_view}
             </select>
         </label>
     }

@@ -22,7 +22,6 @@ pub async fn brand_update(id: Uuid, name: String) -> Result<(), ServerFnError> {
     object.can_view(&user)?;
     Brand::validate(&name)?;
     let updated = Brand::update(&pool, object.id, &name, user.id).await?;
-
     leptos_axum::redirect(&format!("/food/brands/{}", updated.slug));
     Ok(())
 }

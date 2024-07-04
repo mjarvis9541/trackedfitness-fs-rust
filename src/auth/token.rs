@@ -1,8 +1,4 @@
-use leptos::*;
-
 use chrono::{TimeDelta, Utc};
-use http::request::Parts;
-use http::{header, HeaderMap};
 use jsonwebtoken::{decode, encode, Header, Validation};
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
@@ -116,43 +112,5 @@ impl JwtManager {
         }
 
         Ok(claims)
-    }
-}
-
-impl AuthToken {
-    pub fn validate(token: &str) -> Result<Self> {
-        let config = get_config();
-        let validation = Validation::default();
-        let token_data = decode::<Self>(token, &config.decoding_key, &validation)?;
-        Ok(token_data.claims)
-    }
-
-    pub fn validate_from_headers(headers: &HeaderMap) -> Option<Self> {
-        let config = get_config();
-        headers.get(header::COOKIE).and_then(|x| {
-            x.to_str().ok().and_then(|cookie_str| {
-                cookie_str
-                    .split("; ")
-                    .find(|&x| x.starts_with(&config.auth_cookie_name))
-                    .and_then(|cookie| cookie.split('=').last())
-                    .and_then(|token| Self::validate(token).ok())
-            })
-        })
-    }
-
-    pub fn get_user() -> Result<Self> {
-        let req = use_context::<Parts>().ok_or(Error::InternalServer)?;
-        let token = Self::validate_from_headers(&req.headers).ok_or(Error::Unauthorized)?;
-        Ok(token)
-    }
-
-    pub fn get_superuser() -> Result<Self> {
-        let req = use_context::<Parts>().ok_or(Error::InternalServer)?;
-        let token = Self::validate_from_headers(&req.headers).ok_or(Error::Unauthorized)?;
-        if token.is_superuser {
-            Ok(token)
-        } else {
-            Err(Error::Unauthorized)
-        }
     }
 }

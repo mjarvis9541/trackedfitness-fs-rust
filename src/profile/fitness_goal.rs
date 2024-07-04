@@ -54,6 +54,7 @@ impl FitnessGoal {
     }
 }
 
+#[cfg(feature = "ssr")]
 #[derive(Debug)]
 pub struct TargetModifier {
     pub energy_factor: Decimal,
@@ -66,6 +67,7 @@ pub struct TargetModifier {
     pub salt: Decimal,
 }
 
+#[cfg(feature = "ssr")]
 impl From<FitnessGoal> for TargetModifier {
     fn from(value: FitnessGoal) -> Self {
         match value {

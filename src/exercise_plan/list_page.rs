@@ -27,9 +27,8 @@ pub async fn get_exercise_plan_list(
     size: i64,
     page: i64,
 ) -> Result<ListResponse<ExercisePlanQuery>, ServerFnError> {
-    let user = get_request_user()?;
+    let _user = get_request_user()?;
     let pool = get_pool()?;
-
     let count = ExercisePlanQuery::count(&pool, &search).await?;
     let results = ExercisePlanQuery::filter(&pool, &search, &order, size, page).await?;
     Ok(ListResponse { count, results })

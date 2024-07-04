@@ -9,7 +9,10 @@ use crate::error_extract::extract_error_message;
 use crate::util::param::{get_date, get_username};
 
 #[cfg(feature = "ssr")]
-use crate::{auth::model::User, auth::service::get_request_user, diet::model::Diet, error::Error};
+use crate::{
+    auth::model::User, auth::service::get_request_user, diet::model::Diet, error::Error,
+    setup::get_pool,
+};
 
 #[server(endpoint = "diet-copy-previous-day")]
 pub async fn diet_copy_previous_day(
@@ -17,14 +20,13 @@ pub async fn diet_copy_previous_day(
     date: NaiveDate,
 ) -> Result<(), ServerFnError> {
     let request_user = get_request_user()?;
-    let pool = expect_context::<sqlx::PgPool>();
+    let pool = get_pool()?;
 
     let user = User::get_by_username(&pool, &username)
         .await?
         .ok_or(Error::NotFound)?;
 
     Diet::can_create(&request_user, user.id)?;
-
     let previous_date = date - chrono::TimeDelta::days(1);
 
     let previous_day_diet_logs = Diet::all_by_user_id_date(&pool, user.id, previous_date).await?;

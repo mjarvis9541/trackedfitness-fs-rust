@@ -21,7 +21,7 @@ async fn admin_user_block_update(
     blocked_status: i32,
 ) -> Result<(), ServerFnError> {
     crate::auth::service::extract_superuser_from_request()?;
-    let pool = expect_context::<sqlx::PgPool>();
+    let pool = crate::setup::get_pool()?;
     UserBlock::update(&pool, id, blocker_id, blocked_id, blocked_status).await?;
     Ok(())
 }
@@ -29,7 +29,7 @@ async fn admin_user_block_update(
 #[server]
 async fn get_admin_user_block_detail(id: Uuid) -> Result<UserBlock, ServerFnError> {
     crate::auth::service::extract_superuser_from_request()?;
-    let pool = expect_context::<sqlx::PgPool>();
+    let pool = crate::setup::get_pool()?;
     let object = UserBlock::get_object_or_404(&pool, id).await?;
     Ok(object)
 }

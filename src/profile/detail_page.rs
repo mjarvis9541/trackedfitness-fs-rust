@@ -4,14 +4,17 @@ use leptos_router::*;
 use chrono::prelude::*;
 
 use super::detail_table::ProfileDetailTable;
-use super::model::{Profile, ProfileMetric};
+use super::model::ProfileMetric;
 use crate::component::template::{
     DetailPageTemplate, ErrorComponent, LoadingComponent, UpdateDeleteButtonRow,
 };
 use crate::util::param::{get_date, get_username};
 
 #[cfg(feature = "ssr")]
-use crate::{auth::model::User, auth::service::get_request_user, error::Error, setup::get_pool};
+use crate::{
+    auth::model::User, auth::service::get_request_user, error::Error, profile::model::Profile,
+    setup::get_pool,
+};
 
 #[server(endpoint = "profile-detail-latest")]
 pub async fn get_profile_detail_latest(

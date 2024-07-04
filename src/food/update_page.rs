@@ -10,7 +10,7 @@ use crate::brand::select::{get_brand_select, BrandSelect};
 use crate::component::button::SubmitButton;
 use crate::component::input::{NumberInput, TextInputImproved};
 
-use crate::component::select::{FieldSelect, SERVING_FORM_OPTIONS};
+use crate::component::select::FieldSelectB;
 use crate::component::template::{DetailPageTemplate, ErrorComponent, LoadingComponent};
 use crate::util::param::get_slug;
 use crate::util::validation_error::{extract_other_errors, get_non_field_errors};
@@ -130,7 +130,12 @@ pub fn FoodUpdatePage() -> impl IntoView {
             let protein = format!("{:.2}", data.protein);
             let salt = format!("{:.2}", data.salt);
             let brand_id = data.brand_id;
-
+            let serving_options = vec![
+                ("", "Select"),
+                ("g", "100g"),
+                ("ml", "100ml"),
+                ("srv", "1 Serving"),
+            ];
             view! {
                 <ActionForm action>
                     <input type="hidden" name="slug" value=slug/>
@@ -141,7 +146,7 @@ pub fn FoodUpdatePage() -> impl IntoView {
                         placeholder="Enter food name, e.g. Chicken Breast"
                     />
                     <BrandSelect selected=brand_id/>
-                    <FieldSelect name="serving" value=serving options=&SERVING_FORM_OPTIONS/>
+                    <FieldSelectB name="serving" value=serving options=serving_options/>
 
                     <NumberInput
                         placeholder="0"

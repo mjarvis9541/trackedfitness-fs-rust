@@ -32,7 +32,7 @@ async fn get_admin_user_list(
 ) -> Result<ListResponse<User>, ServerFnError> {
     use crate::util::database::Filter;
     crate::auth::service::extract_superuser_from_request()?;
-    let pool = expect_context::<sqlx::PgPool>();
+    let pool = crate::setup::get_pool()?;
 
     let mut qbc = sqlx::QueryBuilder::new("SELECT COUNT(*) FROM users_user WHERE TRUE");
     qbc.filter("username", "ilike", &search);

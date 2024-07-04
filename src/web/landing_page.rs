@@ -180,19 +180,6 @@ pub fn LandingPage() -> impl IntoView {
                         "Terms of Service"
                     </a>
                 </div>
-                <div class="mt-4">
-                    <a href="#" class="text-orange-500 hover:text-orange-700">
-                        "Facebook"
-                    </a>
-                    " | "
-                    <a href="#" class="text-orange-500 hover:text-orange-700">
-                        "X"
-                    </a>
-                    " | "
-                    <a href="#" class="text-orange-500 hover:text-orange-700">
-                        "Instagram"
-                    </a>
-                </div>
             </div>
         </footer>
     }

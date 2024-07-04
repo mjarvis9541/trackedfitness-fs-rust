@@ -14,7 +14,7 @@ pub async fn admin_follower_create(
     status: i32,
 ) -> Result<(), ServerFnError> {
     crate::auth::service::extract_superuser_from_request()?;
-    let pool = expect_context::<sqlx::PgPool>();
+    let pool = crate::setup::get_pool()?;
     crate::follower::model::Follower::create(&pool, user_id, follower_id, status).await?;
     Ok(())
 }

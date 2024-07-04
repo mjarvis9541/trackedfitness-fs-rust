@@ -10,10 +10,7 @@ use crate::training_plan::router::WorkoutPlanDetailParam;
 use crate::workout_plan::detail_page::get_workout_plan_detail;
 
 #[cfg(feature = "ssr")]
-use crate::{
-    auth::service::get_request_user, error::Error, setup::get_pool,
-    workout_plan::model::WorkoutPlan,
-};
+use crate::{auth::service::get_request_user, setup::get_pool, workout_plan::model::WorkoutPlan};
 
 #[server(endpoint = "workout-plan-delete")]
 pub async fn workout_plan_delete(

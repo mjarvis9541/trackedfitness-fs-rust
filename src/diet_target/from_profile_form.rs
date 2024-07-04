@@ -11,14 +11,13 @@ use crate::util::validation_error::{extract_other_errors, get_non_field_errors};
 use crate::{
     auth::model::User,
     auth::service::get_request_user,
+    diet_target::model::DietTargetInput,
     diet_target::model::{DietTarget, DietTargetBase},
     error::Error,
     profile::fitness_goal::{FitnessGoal, TargetModifier},
     profile::model::Profile,
     setup::get_pool,
 };
-
-use super::model::DietTargetInput;
 
 #[server]
 pub async fn target_from_profile_create(

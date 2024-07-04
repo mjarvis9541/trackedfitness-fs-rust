@@ -22,7 +22,7 @@ pub async fn get_diet_target_month_summary(
     username: String,
     date: NaiveDate,
 ) -> Result<UserWeekSummary, ServerFnError> {
-    let user = get_request_user()?;
+    let _user = get_request_user()?;
     let pool = get_pool()?;
     let start = get_month_start_comprehensive(date);
     let end = get_month_end_comprehensive(date);

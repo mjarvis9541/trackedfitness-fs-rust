@@ -25,16 +25,13 @@ pub async fn workout_plan_update(
 ) -> Result<(), ServerFnError> {
     let user = get_request_user()?;
     let pool = get_pool()?;
-
     let workout_plan = WorkoutPlan::get_object_or_404(&pool, id).await?;
-
     let data = WorkoutPlanInput {
         user_id: user.id,
         name,
     };
     data.validate()?;
     let workout_plan = WorkoutPlan::update(&pool, workout_plan.id, &data, user.id).await?;
-
     if let Some(_redirect_to) = redirect_to {
         leptos_axum::redirect(&format!(
             "/training-plans/workout-plans/{}",

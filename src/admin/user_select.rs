@@ -9,7 +9,7 @@ use crate::util::text::capitalize_and_replace;
 #[server]
 pub async fn get_user_select() -> Result<Vec<SelectUuidName>, ServerFnError> {
     crate::auth::service::extract_superuser_from_request()?;
-    let pool = expect_context::<sqlx::PgPool>();
+    let pool = crate::setup::get_pool()?;
     Ok(crate::auth::model::User::option_list_id(&pool).await?)
 }
 

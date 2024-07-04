@@ -34,18 +34,16 @@ pub async fn upload_file_action(data: MultipartData) -> Result<(), ServerFnError
     }
 
     let mut slug = String::new();
-    let mut file_name = String::new();
     let mut file_extension = String::new();
     let mut file_chunks = Vec::new();
 
     while let Ok(Some(mut field)) = data.next_field().await {
         let field_name = field.name().unwrap_or_default().to_string();
-
         if field_name == "brand_slug" {
             slug = field.text().await.unwrap_or_default();
             dbg!(slug.clone());
         } else if field_name == "file_to_upload" {
-            file_name = field.file_name().unwrap_or_default().to_string();
+            let file_name = field.file_name().unwrap_or_default().to_string();
             file_extension = Path::new(&file_name)
                 .extension()
                 .unwrap_or_default()
@@ -70,8 +68,7 @@ pub async fn upload_file_action(data: MultipartData) -> Result<(), ServerFnError
         }
     }
 
-    let query = Brand::update_image_url(&pool, &slug, &new_file_name, user.id).await?;
-
+    Brand::update_image_url(&pool, &slug, &new_file_name, user.id).await?;
     Ok(())
 }
 

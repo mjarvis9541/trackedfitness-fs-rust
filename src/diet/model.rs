@@ -5,6 +5,8 @@ use rust_decimal::Decimal;
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 
+use crate::diet_target::model::DietTarget;
+
 #[derive(Debug, Deserialize, Serialize, Clone, Default)]
 pub struct Diet {
     pub id: Uuid,
@@ -290,11 +292,8 @@ impl DietDayDTO {
     }
 }
 
-use crate::diet_target::model::DietTarget;
-
 impl DietTarget {
     pub fn format(&self) -> FormattedFoodData {
-        dbg!(self);
         FormattedFoodData {
             energy: format!("{:.0}kcal", self.energy),
             fat: format!("{:.1}g", self.fat),

@@ -15,10 +15,11 @@ use crate::summary::component::DaySummaryListItem;
 use crate::summary::model::{UserDaySummary, Variant};
 use crate::util::param::{extract_page, extract_param, extract_size, get_username};
 
-use super::model::DietTarget;
-
 #[cfg(feature = "ssr")]
-use crate::{auth::model::User, auth::service::get_request_user, setup::get_pool};
+use crate::{
+    auth::model::User, auth::service::get_request_user, diet_target::model::DietTarget,
+    setup::get_pool,
+};
 
 #[server(endpoint = "diet-target-list")]
 pub async fn get_diet_target_list(

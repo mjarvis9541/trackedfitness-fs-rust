@@ -1,6 +1,7 @@
 use leptos::*;
 use leptos_meta::*;
 use leptos_router::*;
+
 use uuid::Uuid;
 
 use crate::auth::model::User;
@@ -19,7 +20,7 @@ use crate::error::Error;
 #[server]
 pub async fn get_admin_user_detail(id: Uuid) -> Result<User, ServerFnError> {
     crate::auth::service::extract_superuser_from_request()?;
-    let pool = expect_context::<sqlx::PgPool>();
+    let pool = crate::setup::get_pool()?;
     let query = User::get_by_id(&pool, id).await?.ok_or(Error::NotFound)?;
     Ok(query)
 }
@@ -37,7 +38,7 @@ pub async fn admin_user_update(
     privacy_level: i32,
 ) -> Result<(), ServerFnError> {
     crate::auth::service::extract_superuser_from_request()?;
-    let pool = expect_context::<sqlx::PgPool>();
+    let pool = crate::setup::get_pool()?;
     User::update(
         &pool,
         id,

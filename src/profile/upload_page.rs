@@ -4,13 +4,11 @@ use server_fn::codec::{MultipartData, MultipartFormData};
 use wasm_bindgen::JsCast;
 use web_sys::{FormData, HtmlFormElement, SubmitEvent};
 
-use chrono::prelude::*;
-
 use crate::component::button::SubmitButton;
 use crate::component::template::DetailPageTemplate;
 
 #[cfg(feature = "ssr")]
-use ::{std::env, std::fs::File, std::io::Write, std::path::Path, uuid::Uuid};
+use ::{chrono::prelude::*, std::env, std::fs::File, std::io::Write, std::path::Path, uuid::Uuid};
 
 #[cfg(feature = "ssr")]
 pub fn generate_profile_image_filename(user_id: Uuid, file_extension: &str) -> String {
@@ -31,27 +29,20 @@ pub async fn profile_image_upload(data: MultipartData) -> Result<(), ServerFnErr
     let current_dir = env::current_dir().map_err(|e| ServerFnError::new(e.to_string()))?;
     let upload_dir = current_dir.join("public/images/profile");
 
-    let mut username = String::new();
-    let mut file_name = String::new();
     let mut file_extension = String::new();
     let mut file_chunks = Vec::new();
 
-    // extracts the data
     while let Ok(Some(mut field)) = data.next_field().await {
         let field_name = field.name().unwrap_or_default().to_string();
-        if field_name == "username" {
-            username = field.text().await.unwrap_or_default();
-            println!("username: {}", &username);
-        } else if field_name == "file_upload" {
-            file_name = field.file_name().unwrap_or_default().to_string();
-            println!("file name: {}", &file_name);
+        if field_name == "file_upload" {
+            let file_name = field.file_name().unwrap_or_default().to_string();
             file_extension = Path::new(&file_name)
                 .extension()
                 .unwrap_or_default()
                 .to_str()
                 .unwrap_or_default()
                 .to_string();
-            // could validate the file extension here.
+
             while let Ok(Some(chunk)) = field.chunk().await {
                 file_chunks.push(chunk);
             }

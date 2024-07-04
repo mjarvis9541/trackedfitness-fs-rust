@@ -1,6 +1,5 @@
 use std::collections::HashSet;
 
-use leptos::server_fn::codec::GetUrl;
 use leptos::*;
 use leptos_meta::*;
 use leptos_router::*;
@@ -20,7 +19,7 @@ use crate::util::datetime::format_datetime;
 use crate::util::misc::ListResponse;
 use crate::util::param::{extract_page, extract_param, extract_size};
 
-#[server(endpoint = "get-admin-follower-list", input = GetUrl)]
+#[server(endpoint = "get-admin-follower-list")]
 pub async fn get_admin_follower_list(
     username: String,
     follower: String,
@@ -30,8 +29,8 @@ pub async fn get_admin_follower_list(
     page: i64,
 ) -> Result<ListResponse<Follower>, ServerFnError> {
     crate::auth::service::extract_superuser_from_request()?;
+    let pool = crate::setup::get_pool()?;
 
-    let pool = expect_context::<sqlx::PgPool>();
     let count = Follower::count(&pool, &username, &follower, &status).await?;
     let results =
         Follower::filter(&pool, &username, &follower, &status, &order, size, page).await?;

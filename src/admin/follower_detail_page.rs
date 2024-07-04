@@ -21,7 +21,7 @@ pub async fn admin_follower_update(
     status: i32,
 ) -> Result<(), ServerFnError> {
     crate::auth::service::extract_superuser_from_request()?;
-    let pool = expect_context::<sqlx::PgPool>();
+    let pool = crate::setup::get_pool()?;
     Follower::update(&pool, id, user_id, follower_id, status).await?;
     Ok(())
 }
@@ -29,7 +29,7 @@ pub async fn admin_follower_update(
 #[server(endpoint = "admin-follower-detail", input = GetUrl)]
 pub async fn get_admin_follower_detail(id: Uuid) -> Result<Follower, ServerFnError> {
     crate::auth::service::extract_superuser_from_request()?;
-    let pool = expect_context::<sqlx::PgPool>();
+    let pool = crate::setup::get_pool()?;
     let query = Follower::get_object_or_404(&pool, id).await?;
     Ok(query)
 }

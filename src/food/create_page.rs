@@ -9,7 +9,7 @@ use crate::component::button::SubmitButton;
 use crate::component::template::DetailPageTemplate;
 
 use crate::component::input::{NumberInput, TextInputImproved};
-use crate::component::select::{FieldSelect, SERVING_FORM_OPTIONS};
+use crate::component::select::FieldSelectB;
 use crate::util::validation_error::{extract_other_errors, get_non_field_errors};
 
 #[cfg(feature = "ssr")]
@@ -100,7 +100,12 @@ pub fn FoodCreatePage() -> impl IntoView {
 
     let brand_resource = Resource::once(get_brand_select);
     provide_context(brand_resource);
-
+    let serving_options = vec![
+        ("", "Select"),
+        ("g", "100g"),
+        ("ml", "100ml"),
+        ("srv", "1 Serving"),
+    ];
     view! {
         <DetailPageTemplate title="New Food">
             <div class="mb-4 text-red-500 font-bold">{action_error}</div>
@@ -113,7 +118,7 @@ pub fn FoodCreatePage() -> impl IntoView {
                     placeholder="Enter food name, e.g. Chicken Breast"
                 />
                 <BrandSelect/>
-                <FieldSelect name="serving" options=&SERVING_FORM_OPTIONS/>
+                <FieldSelectB name="serving" options=serving_options/>
 
                 <NumberInput action_value placeholder="0" name="energy" label="Energy (kcal)"/>
                 <NumberInput action_value placeholder="0.0" name="fat" step="0.01" label="Fat (g)"/>

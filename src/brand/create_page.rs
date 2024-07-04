@@ -14,12 +14,9 @@ use crate::{auth::service::get_request_user, brand::model::Brand, setup::get_poo
 pub async fn brand_create(name: String) -> Result<(), ServerFnError> {
     let user = get_request_user()?;
     let pool = get_pool()?;
-
     Brand::can_create(&user).await?;
     Brand::validate(&name)?;
-
     let object = Brand::create(&pool, &name, user.id).await?;
-
     leptos_axum::redirect(&format!("/food/brands/{}", object.slug));
     Ok(())
 }

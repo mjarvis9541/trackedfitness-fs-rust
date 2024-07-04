@@ -71,7 +71,6 @@ impl Nutrition {
         }
     }
     pub fn format(&self) -> FormattedFoodData {
-        dbg!(self);
         FormattedFoodData {
             energy: format!("{:.0}kcal", self.energy),
             fat: format!("{:.1}g", self.fat),

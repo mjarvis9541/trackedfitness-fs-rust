@@ -16,12 +16,10 @@ use crate::{auth::service::get_request_user, error::Error, setup::get_pool};
 pub async fn get_brand_detail(slug: String) -> Result<BrandQuery, ServerFnError> {
     let user = get_request_user()?;
     let pool = get_pool()?;
-
     let object = BrandQuery::get_by_slug(&pool, &slug)
         .await?
         .ok_or(Error::NotFound)?;
     object.can_view(&user)?;
-
     Ok(object)
 }
 

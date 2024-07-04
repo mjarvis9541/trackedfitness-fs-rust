@@ -20,7 +20,7 @@ pub async fn get_admin_user_stat_list(
     page: i64,
 ) -> Result<Vec<UserStat>, ServerFnError> {
     crate::auth::service::extract_superuser_from_request()?;
-    let pool = expect_context::<sqlx::PgPool>();
+    let pool = crate::setup::get_pool()?;
     let results = UserStat::filter(&pool, &search, &order, size, page).await?;
     Ok(results)
 }

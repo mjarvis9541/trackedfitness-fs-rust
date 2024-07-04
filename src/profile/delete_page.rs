@@ -53,7 +53,7 @@ pub fn ProfileDeletePage() -> impl IntoView {
                 <ActionForm action>
                     <input type="hidden" name="id" value=id/>
                     <input type="hidden" name="username" value=username/>
-                    <SubmitButton loading=action_loading label="Delete"/>
+                    <SubmitButton loading=action_loading label="Delete Profile"/>
                 </ActionForm>
             }
         })

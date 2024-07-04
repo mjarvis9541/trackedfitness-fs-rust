@@ -28,7 +28,7 @@ pub async fn get_admin_user_block_list(
     page: i64,
 ) -> Result<ListResponse<UserBlock>, ServerFnError> {
     crate::auth::service::extract_superuser_from_request()?;
-    let pool = expect_context::<sqlx::PgPool>();
+    let pool = crate::setup::get_pool()?;
     let count = UserBlock::count(&pool, &blocker, &blocked, &status).await?;
     let results = UserBlock::filter(&pool, &blocker, &blocked, &status, &order, size, page).await?;
     Ok(ListResponse { count, results })

@@ -9,10 +9,12 @@ use crate::util::param::{get_date, get_username};
 use crate::util::validation_error::{extract_other_errors, get_non_field_errors};
 
 use super::detail_page::get_diet_target_detail;
-use super::model::DietTargetBase;
 
 #[cfg(feature = "ssr")]
-use crate::{auth::service::get_request_user, error::Error, setup::get_pool};
+use crate::{
+    auth::service::get_request_user, diet_target::model::DietTargetBase, error::Error,
+    setup::get_pool,
+};
 
 #[server(endpoint = "diet-target-delete")]
 pub async fn diet_target_delete(id: Uuid, username: String) -> Result<(), ServerFnError> {

@@ -2,7 +2,7 @@ use leptos::*;
 use leptos_router::*;
 
 use crate::auth::context::RequestUserContext;
-use crate::component::template::{ErrorComponent, LoadingComponent, ViewEditDeleteButtonRow};
+use crate::component::template::{ErrorComponent, LoadingComponent};
 use crate::util::param::{get_date, get_username};
 
 use super::detail_page::get_profile_detail_latest;
@@ -56,7 +56,29 @@ pub fn ProfileDetailPanelComponent() -> impl IntoView {
                     view! {
                         <ProfileDetailTable data=data.clone()/>
                         <div class=("hidden", is_not_self)>
-                            <ViewEditDeleteButtonRow detail update delete/>
+                            <div class="flex gap-2 justify-end pt-4">
+                                <a
+                                    id="profile-detail"
+                                    class="block py-1.5 px-3 bg-gray-200 rounded hover:bg-gray-300"
+                                    href=detail
+                                >
+                                    "View"
+                                </a>
+                                <a
+                                    id="profile-update"
+                                    class="block py-1.5 px-3 bg-gray-200 rounded hover:bg-gray-300"
+                                    href=update
+                                >
+                                    "Edit"
+                                </a>
+                                <a
+                                    id="profile-delete"
+                                    class="block py-1.5 px-3 bg-gray-200 rounded hover:bg-gray-300"
+                                    href=delete
+                                >
+                                    "Delete"
+                                </a>
+                            </div>
                         </div>
                     }
                 },
