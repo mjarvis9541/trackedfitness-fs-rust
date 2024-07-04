@@ -1,5 +1,5 @@
-describe("Navigation and Login Test", () => {
-  it("Navigates to home screen and logs in", () => {
+describe("navigaste to home screen", () => {
+  it("Navigates to home screen", () => {
     // Visit the home screen
     cy.visit("/");
 
