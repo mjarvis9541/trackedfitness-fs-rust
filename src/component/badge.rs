@@ -4,7 +4,7 @@ use rust_decimal::Decimal;
 #[derive(Debug)]
 pub enum BadgeVariant {
     Primary,
-    Tertiary,
+    // Tertiary,
 }
 
 impl BadgeVariant {
@@ -12,8 +12,7 @@ impl BadgeVariant {
         match self {
             Self::Primary => {
                 "select-none whitespace-nowrap rounded bg-gray-700 px-2 py-1 text-xs text-gray-200"
-            }
-            Self::Tertiary => "text-xs",
+            } // Self::Tertiary => "text-xs",
         }
     }
 }

@@ -5,15 +5,17 @@ use rust_decimal::Decimal;
 use std::collections::HashSet;
 
 use super::model::Food;
+use crate::brand::select::BrandFilter;
 use crate::component::bulk_delete::BulkDeleteForm;
 use crate::component::checkbox::CheckboxListItem;
+use crate::component::input::FilterInput;
 use crate::component::paginator::Paginator;
-use crate::component::select::{FOOD_SORT_OPTIONS, SERVING_OPTIONS};
+use crate::component::select::FilterSelect;
 use crate::component::template::{
     AutoListHeader, ErrorComponent, ListLoadingComponent, ListNotFoundComponent,
     ListPageHeaderWithCreate,
 };
-use crate::food::list_filter_form::FoodListFilterForm;
+
 use crate::food::nutrition_row_calc::FoodNutritionCalculationRow;
 use crate::util::misc::ListResponse;
 use crate::util::param::{extract_page, extract_param, extract_size};
@@ -102,23 +104,58 @@ pub fn FoodListPage() -> impl IntoView {
                 .and_then(|data| data.as_ref().ok().map(|res| res.count))
         })
     };
+    let serving_options = vec![
+        ("", "All"),
+        ("g", "100g"),
+        ("ml", "100ml"),
+        ("srv", "1 Serving"),
+    ];
+    let sort_options = vec![
+        ("name", "Food (A-z)"),
+        ("-name", "Food (Z-a)"),
+        ("brand_name", "Brand (A-z)"),
+        ("-brand_name", "Brand (Z-a)"),
+        ("-energy", "Calories (High-Low)"),
+        ("energy", "Calories (Low-High)"),
+        ("-protein", "Protein (High-Low)"),
+        ("protein", "Protein (Low-High)"),
+        ("-carbohydrate", "Carbs (High-Low)"),
+        ("carbohydrate", "Carbs (Low-High)"),
+        ("-fat", "Fat (High-Low)"),
+        ("fat", "Fat (Low-High)"),
+        ("-saturates", "Saturates (High-Low)"),
+        ("saturates", "Saturates (Low-High)"),
+        ("-sugars", "Sugars (High-Low)"),
+        ("sugars", "Sugars (Low-High)"),
+        ("-fibre", "Fibre (High-Low)"),
+        ("fibre", "Fibre (Low-High)"),
+        ("-salt", "Salt (High-Low)"),
+        ("salt", "Salt (Low-High)"),
+        ("-created_at", "Created (Desc)"),
+        ("created_at", "Created (Asc)"),
+        ("-updated_at", "Updated (Desc)"),
+        ("updated_at", "Updated (Asc)"),
+    ];
     view! {
         <Title text="Food"/>
         <main class="p-4 bg-white border md:m-4">
             <ListPageHeaderWithCreate title="Food" create_href="create">
                 <Transition>{count}</Transition>
             </ListPageHeaderWithCreate>
+
             <section class="flex flex-wrap gap-2 mb-4 lg:mb-2">
-                <FoodListFilterForm
-                    search=Signal::derive(search)
-                    brand=Signal::derive(brand)
-                    serving=Signal::derive(serving)
-                    order=Signal::derive(order)
-                    size=Signal::derive(size)
-                    page=1
-                    options=&FOOD_SORT_OPTIONS
-                    serving_options=&SERVING_OPTIONS
-                />
+                <Form method="GET" action="" class="contents">
+                    <input type="hidden" name="size" value=size/>
+                    <input type="hidden" name="page" value=1/>
+                    <FilterInput name="search" value=Signal::derive(search)/>
+                    <BrandFilter selected=Signal::derive(brand)/>
+                    <FilterSelect
+                        name="serving"
+                        value=Signal::derive(serving)
+                        options=serving_options
+                    />
+                    <FilterSelect name="order" value=Signal::derive(order) options=sort_options/>
+                </Form>
             </section>
             <section class="grid grid-cols-4 lg:grid-cols-checkbox-12">
                 <AutoListHeader all_items checked_items>

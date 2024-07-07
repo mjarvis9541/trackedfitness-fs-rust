@@ -2,7 +2,7 @@ use leptos::*;
 use leptos_router::*;
 
 use crate::component::button::SubmitButton;
-use crate::component::input::TextInputImproved;
+use crate::component::input::TextInput;
 use crate::component::template::DetailPageTemplate;
 use crate::util::validation_error::{extract_other_errors, get_non_field_errors};
 
@@ -33,7 +33,7 @@ pub fn MuscleGroupCreatePage() -> impl IntoView {
             <div class="mb-4 text-red-500 font-bold">{action_error}</div>
             <div class="mb-4 text-red-500 font-bold">{non_field_errors}</div>
             <ActionForm action>
-                <TextInputImproved action_value name="name" placeholder="Enter muscle group name"/>
+                <TextInput action_value name="name" placeholder="Enter muscle group name"/>
                 <SubmitButton loading=action_loading label="Create Muscle Group"/>
             </ActionForm>
         </DetailPageTemplate>

@@ -5,7 +5,7 @@ use chrono::prelude::*;
 use rust_decimal::Decimal;
 
 use crate::component::button::SubmitButton;
-use crate::component::input::{NumberInput, TextInputImproved};
+use crate::component::input::{NumberInput, TextInput};
 use crate::component::template::DetailPageTemplate;
 use crate::util::param::{get_date, get_username};
 use crate::util::validation_error::{extract_other_errors, get_non_field_errors};
@@ -91,7 +91,7 @@ pub fn DietTargetCreatePage() -> impl IntoView {
 
             <ActionForm action>
                 <input type="hidden" name="username" value=username/>
-                <TextInputImproved
+                <TextInput
                     action_value
                     input_type="date"
                     name="date"

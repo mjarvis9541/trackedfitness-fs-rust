@@ -3,8 +3,8 @@ use leptos_meta::*;
 use leptos_router::*;
 
 use crate::component::button::SubmitButton;
-use crate::component::input::ValidatedInput;
-use crate::error_extract::{extract_error_message, process_non_field_errors};
+use crate::component::input::TextInput;
+use crate::util::validation_error::{extract_other_errors, get_non_field_errors};
 
 #[cfg(feature = "ssr")]
 use crate::{auth::model::User, auth::service::get_request_user, error::Error, setup::get_pool};
@@ -16,7 +16,6 @@ pub async fn password_change(
 ) -> Result<(), ServerFnError> {
     let user = get_request_user()?;
     let pool = get_pool()?;
-
     User::validate_password_change(&old_password, &new_password)?;
     let user = User::get_by_username(&pool, &user.username)
         .await?
@@ -30,8 +29,15 @@ pub async fn password_change(
 #[component]
 pub fn PasswordUpdatePage() -> impl IntoView {
     let action = Action::<PasswordChange, _>::server();
-    let error = move || extract_error_message(&action);
-    let non_field_errors = move || process_non_field_errors(error);
+    let action_loading = action.pending();
+    let action_value = action.value();
+    let action_error = move || {
+        extract_other_errors(
+            action_value,
+            &["non_field_errors", "old_password", "new_password"],
+        )
+    };
+    let non_field_errors = move || get_non_field_errors(action_value);
 
     view! {
         <Title text="Change Password"/>
@@ -39,32 +45,26 @@ pub fn PasswordUpdatePage() -> impl IntoView {
             <div class="max-w-sm">
                 <h1 class="mb-2 text-base font-bold">"Change Password"</h1>
                 <p class="mb-4">"Update your password below."</p>
-                <hr class="mb-8"/>
-
-                <div
-                    class="my-4 space-y-2 font-bold text-red-500"
-                    class=("hidden", move || error().is_none())
-                >
-                    {non_field_errors}
-                    {error}
-                </div>
+                <div class="mb-4 text-red-500 font-bold">{action_error}</div>
+                <div class="mb-4 text-red-500 font-bold">{non_field_errors}</div>
                 <ActionForm action>
-
-                    <ValidatedInput
+                    <TextInput
+                        action_value
+                        label="Old password"
                         name="old_password"
                         input_type="password"
                         autocomplete="new-password"
-                        error=Signal::derive(error)
+                        placeholder="Enter your old password"
                     />
-                    <ValidatedInput
+                    <TextInput
+                        action_value
+                        label="New password"
                         name="new_password"
                         input_type="password"
                         autocomplete="new-password"
-                        error=Signal::derive(error)
+                        placeholder="Enter your new password"
                     />
-                    <div class="inline-block mt-6">
-                        <SubmitButton loading=action.pending() label="Update Password"/>
-                    </div>
+                    <SubmitButton loading=action_loading label="Update Password"/>
                 </ActionForm>
             </div>
         </main>

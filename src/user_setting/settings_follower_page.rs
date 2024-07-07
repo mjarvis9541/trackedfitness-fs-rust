@@ -22,7 +22,7 @@ pub fn FollowerRequestListPage() -> impl IntoView {
 
     view! {
         <Title text="Followers"/>
-        <div class="grid grid-cols-4 gap-4 lg:grid-cols-12">
+        <div class="grid grid-cols-4 gap-4 lg:grid-cols-8 mx-auto max-w-7xl">
             <div class="col-span-4 p-4 bg-white">
                 <ReceivedFollowerRequestList/>
             </div>
@@ -30,9 +30,7 @@ pub fn FollowerRequestListPage() -> impl IntoView {
                 <SentFollowerRequestList/>
             </div>
 
-            <div class="col-span-4 p-4 bg-white"></div>
-
-            <div class="col-span-4 p-4 bg-white">
+            <div class="col-span-4 p-4 bg-white border">
                 <CurrentUserFollowerList/>
             </div>
 

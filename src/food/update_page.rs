@@ -8,9 +8,9 @@ use super::detail_page::get_food_detail;
 use crate::brand::select::{get_brand_select, BrandSelect};
 
 use crate::component::button::SubmitButton;
-use crate::component::input::{NumberInput, TextInputImproved};
+use crate::component::input::{NumberInput, TextInput};
 
-use crate::component::select::FieldSelectB;
+use crate::component::select::FieldSelect;
 use crate::component::template::{DetailPageTemplate, ErrorComponent, LoadingComponent};
 use crate::util::param::get_slug;
 use crate::util::validation_error::{extract_other_errors, get_non_field_errors};
@@ -139,14 +139,14 @@ pub fn FoodUpdatePage() -> impl IntoView {
             view! {
                 <ActionForm action>
                     <input type="hidden" name="slug" value=slug/>
-                    <TextInputImproved
+                    <TextInput
                         name="name"
                         action_value
                         value=name
                         placeholder="Enter food name, e.g. Chicken Breast"
                     />
                     <BrandSelect selected=brand_id/>
-                    <FieldSelectB name="serving" value=serving options=serving_options/>
+                    <FieldSelect name="serving" value=serving options=serving_options/>
 
                     <NumberInput
                         placeholder="0"

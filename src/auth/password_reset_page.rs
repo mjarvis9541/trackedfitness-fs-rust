@@ -3,7 +3,7 @@ use leptos_meta::*;
 use leptos_router::*;
 
 use crate::component::button::SubmitButton;
-use crate::component::input::TextInputImproved;
+use crate::component::input::TextInput;
 use crate::util::validation_error::{extract_other_errors, get_non_field_errors};
 
 #[cfg(feature = "ssr")]
@@ -43,7 +43,7 @@ pub fn PasswordResetRequestPage() -> impl IntoView {
 
                 <p class="mb-4">"Enter your email address below to reset your password:"</p>
                 <ActionForm action>
-                    <TextInputImproved
+                    <TextInput
                         action_value
                         name="email"
                         input_type="email"

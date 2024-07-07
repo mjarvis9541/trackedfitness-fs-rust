@@ -5,7 +5,7 @@ use chrono::prelude::*;
 use rust_decimal::Decimal;
 
 use crate::component::button::SubmitButton;
-use crate::component::input::{NumberInput, TextInputImproved};
+use crate::component::input::{NumberInput, TextInput};
 use crate::component::template::{DetailPageTemplate, ErrorComponent, LoadingComponent};
 use crate::util::param::{get_date, get_username};
 use crate::util::validation_error::{extract_other_errors, get_non_field_errors};
@@ -88,7 +88,7 @@ pub fn ProgressUpdatePage() -> impl IntoView {
                 <ActionForm action>
                     <input type="hidden" name="username" value=username/>
                     <input type="hidden" name="redirect_to" value="somewhere"/>
-                    <TextInputImproved action_value name="date" input_type="date" value=date/>
+                    <TextInput action_value name="date" input_type="date" value=date/>
                     <NumberInput
                         action_value
                         name="weight_kg"
@@ -104,7 +104,7 @@ pub fn ProgressUpdatePage() -> impl IntoView {
                         value=energy_burnt
                         placeholder="Enter energy burnt in kcal"
                     />
-                    <TextInputImproved
+                    <TextInput
                         action_value
                         name="notes"
                         value=notes

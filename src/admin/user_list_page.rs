@@ -137,6 +137,28 @@ pub fn AdminUserListPage() -> impl IntoView {
                 .and_then(|res| res.as_ref().ok().map(|res| res.count))
         })
     };
+    let boolean_options = vec![("", "All"), ("true", "True"), ("false", "False")];
+    let privacy_options = vec![
+        ("", "All"),
+        ("0", "N/A"),
+        ("1", "Public"),
+        ("2", "Followers Only"),
+        ("3", "Private"),
+    ];
+    let sort_options = vec![
+        ("username", "Username (A-z)"),
+        ("-username", "Username (Z-a)"),
+        ("name", "Name (A-z)"),
+        ("-name", "Name (Z-a)"),
+        ("email", "Email (A-z)"),
+        ("-email", "Email (Z-a)"),
+        ("created_at", "Created (Asc)"),
+        ("-created_at", "Created (Desc)"),
+        ("updated_at", "Updated (Asc)"),
+        ("-updated_at", "Updated (Desc)"),
+        ("last_login", "Last Login (Asc)"),
+        ("-last_login", "Last Login (Desc)"),
+    ];
     view! {
         <Title text="Admin - Users"/>
         <main class="lg:p-4">
@@ -156,32 +178,32 @@ pub fn AdminUserListPage() -> impl IntoView {
                             name="verified"
                             label="Email Verified"
                             value=Signal::derive(verified)
-                            options=&crate::component::select::BOOLEAN_OPTIONS
+                            options=boolean_options.clone()
                         />
                         <FilterSelect
                             name="active"
                             value=Signal::derive(order)
-                            options=&crate::component::select::BOOLEAN_OPTIONS
+                            options=boolean_options.clone()
                         />
                         <FilterSelect
                             name="staff"
                             value=Signal::derive(staff)
-                            options=&crate::component::select::BOOLEAN_OPTIONS
+                            options=boolean_options.clone()
                         />
                         <FilterSelect
                             name="superuser"
                             value=Signal::derive(superuser)
-                            options=&crate::component::select::BOOLEAN_OPTIONS
+                            options=boolean_options.clone()
                         />
                         <FilterSelect
                             name="privacy"
                             value=Signal::derive(privacy)
-                            options=&crate::component::select::USER_PRIVACY_OPTIONS
+                            options=privacy_options
                         />
                         <FilterSelect
                             name="order"
                             value=Signal::derive(order)
-                            options=&crate::component::select::USER_SORT_OPTIONS
+                            options=sort_options
                         />
                     </Form>
                 </div>

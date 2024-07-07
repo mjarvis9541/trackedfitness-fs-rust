@@ -14,7 +14,7 @@ use crate::workout::day_page::WorkoutDayPage;
 use crate::workout::delete_page::WorkoutDeletePage;
 use crate::workout::detail_page::WorkoutDetailPage;
 use crate::workout::exercise_set_create_page::ExerciseSetCreatePage;
-use crate::workout::from_plan_create_page::WorkoutCreateFromPlanListPage;
+// use crate::workout::from_plan_create_page::WorkoutCreateFromPlanListPage;
 use crate::workout::layout::WorkoutLayout;
 use crate::workout::multi_create::WorkoutExerciseSetCreatePage;
 use crate::workout::update_page::WorkoutUpdatePage;
@@ -64,7 +64,7 @@ pub fn WorkoutRouter() -> impl IntoView {
             <Route path="/:date/:workout_id/update" view=WorkoutUpdatePage/>
             <Route path="/:date/:workout_id/delete" view=WorkoutDeletePage/>
             <Route path="/:date/:workout_id/add-exercise" view=ExerciseSetCreatePage/>
-            <Route path="/:date/:workout_id/add-workout-plan" view=WorkoutCreateFromPlanListPage/>
+            // <Route path="/:date/:workout_id/add-workout-plan" view=WorkoutCreateFromPlanListPage/>
             <Route path="/:date/:workout_id/:exercise_id" view=ExerciseDetailPage/>
             <Route path="/:date/:workout_id/:exercise_id/update" view=ExerciseUpdatePage/>
             <Route path="/:date/:workout_id/:exercise_id/delete" view=ExerciseDeletePage/>

@@ -75,7 +75,6 @@ const GRID_HEADER_CSS: &str =
 #[component]
 pub fn DietFoodGridHeader() -> impl IntoView {
     view! {
-        <div class=GRID_HEADER_CSS></div>
         <div class=GRID_HEADER_CSS>"Calories"</div>
         <div class=GRID_HEADER_CSS>"Protein"</div>
         <div class=GRID_HEADER_CSS>"Carbs"</div>

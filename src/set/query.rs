@@ -5,7 +5,7 @@ use uuid::Uuid;
 
 use crate::error::Result;
 use crate::exercise::model::ExerciseModel;
-use crate::exercise_plan::model::ExercisePlan;
+// use crate::exercise_plan::model::ExercisePlan;
 use crate::set::model::{MergedSetInputData, SetModel, SetQuery, SetToCreate};
 
 impl MergedSetInputData {
@@ -214,25 +214,25 @@ impl SetModel {
     }
 }
 
-impl SetToCreate {
-    pub fn from_exercise_plan(exercise_plans: &[ExercisePlan]) -> Vec<SetToCreate> {
-        exercise_plans
-            .iter()
-            .enumerate()
-            .flat_map(|(index, exercise)| {
-                let exercise_num = index as i32 + 1;
-                (0..exercise.sets)
-                    .map(|_| SetToCreate {
-                        exercise_num,
-                        weight: exercise.weight,
-                        reps: exercise.reps,
-                        rest: exercise.rest,
-                    })
-                    .collect::<Vec<_>>()
-            })
-            .collect()
-    }
-}
+// impl SetToCreate {
+//     pub fn from_exercise_plan(exercise_plans: &[ExercisePlan]) -> Vec<SetToCreate> {
+//         exercise_plans
+//             .iter()
+//             .enumerate()
+//             .flat_map(|(index, exercise)| {
+//                 let exercise_num = index as i32 + 1;
+//                 (0..exercise.sets)
+//                     .map(|_| SetToCreate {
+//                         exercise_num,
+//                         weight: exercise.weight,
+//                         reps: exercise.reps,
+//                         rest: exercise.rest,
+//                     })
+//                     .collect::<Vec<_>>()
+//             })
+//             .collect()
+//     }
+// }
 
 impl FromRow<'_, PgRow> for SetModel {
     fn from_row(row: &PgRow) -> sqlx::Result<Self> {

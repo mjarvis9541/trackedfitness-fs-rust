@@ -4,10 +4,10 @@ use leptos_router::*;
 
 use crate::auth::model::User;
 use crate::component::button::SubmitButton;
-use crate::component::input::ValidatedInput;
-use crate::component::select::{FieldSelect, USER_PRIVACY_FORM_OPTIONS};
+use crate::component::input::TextInput;
+use crate::component::select::FieldSelect;
 use crate::component::template::{ErrorComponent, LoadingComponent};
-use crate::error_extract::{extract_error_message, process_non_field_errors};
+use crate::util::validation_error::{extract_other_errors, get_non_field_errors};
 
 #[cfg(feature = "ssr")]
 use crate::{auth::service::get_request_user, error::Error, setup::get_pool};
@@ -61,7 +61,6 @@ pub fn UserAccountSettingsPage() -> impl IntoView {
         <div class="p-4 bg-white border">
             <h1 class="mb-2 text-base font-bold">"Account Settings"</h1>
             <p class="mb-4">"This is how others will see you on the site."</p>
-            <hr class="mb-8"/>
             <Transition fallback=LoadingComponent>
                 <ErrorBoundary fallback=|errors| {
                     view! { <ErrorComponent errors/> }
@@ -76,16 +75,31 @@ fn UserSettingsUpdateForm(
     data: User,
     action: Action<RequestUserUpdate, Result<(), ServerFnError>>,
 ) -> impl IntoView {
-    let error = move || extract_error_message(&action);
-    let non_field_errors = move || process_non_field_errors(error);
-    let error = Signal::derive(error);
+    let action_loading = action.pending();
+    let action_value = action.value();
+    let action_error = move || {
+        extract_other_errors(
+            action_value,
+            &[
+                "non_field_errors",
+                "name",
+                "username",
+                "email",
+                "privacy_level",
+            ],
+        )
+    };
+    let non_field_errors = move || get_non_field_errors(action_value);
+
     view! {
         <div class="max-w-sm">
-            {non_field_errors} <ActionForm action>
-                <ValidatedInput error name="name" value=data.name/>
-                <ValidatedInput error name="username" value=data.username/>
-                <ValidatedInput
-                    error
+            <div class="mb-4 text-red-500 font-bold">{action_error}</div>
+            <div class="mb-4 text-red-500 font-bold">{non_field_errors}</div>
+            <ActionForm action>
+                <TextInput action_value name="name" value=data.name/>
+                <TextInput action_value name="username" value=data.username/>
+                <TextInput
+                    action_value
                     name="email"
                     input_type="email"
                     value=data.email
@@ -93,10 +107,16 @@ fn UserSettingsUpdateForm(
                 />
                 <FieldSelect
                     name="privacy_level"
-                    options=&USER_PRIVACY_FORM_OPTIONS
+                    options=vec![
+                        ("0", "N/A - All users can view your profile"),
+                        ("1", "Public - All users can view your profile"),
+                        ("2", "Followers Only - Only followers can view your profile"),
+                        ("3", "Private - No users can view your profile"),
+                    ]
+
                     value=data.privacy_level.to_string()
                 />
-                <SubmitButton loading=action.pending() label="Update Settings"/>
+                <SubmitButton loading=action_loading label="Update Settings"/>
             </ActionForm>
         </div>
     }

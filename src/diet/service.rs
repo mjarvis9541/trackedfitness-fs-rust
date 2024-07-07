@@ -102,9 +102,6 @@ impl DietService {
                 .or_insert_with(Vec::new)
                 .push(food);
         }
-        // dbg!(&meal_of_day);
-        // dbg!(&grouped_diet_food);
-
         let meal_dto_list: Vec<DietMealDTO> = meal_of_day
             .into_iter()
             .map(|meal| {
@@ -117,7 +114,6 @@ impl DietService {
                     ordering: meal.ordering,
                     ..Default::default()
                 };
-
                 if let Some(food_list) = grouped_diet_food.get(&meal.id) {
                     for food in food_list {
                         meal_dto.username = food.username.clone();
@@ -134,7 +130,6 @@ impl DietService {
                     meal_dto.food_list = grouped_diet_food.remove(&meal.id).unwrap_or_default();
                     meal_dto.calculate_percentages();
                 }
-
                 meal_dto
             })
             .collect();
@@ -153,8 +148,7 @@ impl DietService {
         diet_day.meal_list = meal_dto_list;
         diet_day.calculate_percentages();
 
-        // let re = Nutrition::default();
-        let re = if let Some(target) = &diet_target {
+        let remaining = if let Some(target) = &diet_target {
             let energy = Decimal::from(target.energy);
             let mut nut = Nutrition {
                 energy: energy - diet_day.energy,
@@ -176,7 +170,7 @@ impl DietService {
         let response = DietDayResponse {
             diet_day,
             diet_target,
-            remaining: re,
+            remaining,
         };
 
         Ok(response)

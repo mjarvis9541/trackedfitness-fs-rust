@@ -2,16 +2,17 @@ use leptos::*;
 use leptos_meta::*;
 use leptos_router::*;
 
+use crate::brand::select::BrandFilter;
 use crate::component::button::Button;
 use crate::component::icon::IconFilePlus;
+use crate::component::input::FilterInput;
 use crate::component::modal::ErrorModal;
 use crate::component::paginator::Paginator;
-use crate::component::select::{DIET_FOOD_SORT_OPTIONS, SERVING_OPTIONS};
+use crate::component::select::FilterSelect;
 use crate::component::template::{
     AddFoodListHeader, ErrorComponent, ListNotFoundComponent, ListPageHeaderWithCreate, Loading,
     Skeleton,
 };
-use crate::food::list_filter_form::FoodListFilterForm;
 use crate::food::model::Food;
 use crate::food::nutrition_row_calc::FoodNutritionCalculationRow;
 use crate::util::datetime::DATE_FORMAT_LONG;
@@ -196,6 +197,42 @@ pub fn DietAddFoodPage() -> impl IntoView {
             })
         })
     };
+    let serving_options = vec![
+        ("", "All"),
+        ("g", "100g"),
+        ("ml", "100ml"),
+        ("srv", "1 Serving"),
+    ];
+    let sort_options = vec![
+        ("name", "Food (A-z)"),
+        ("-name", "Food (Z-a)"),
+        ("brand_name", "Brand (A-z)"),
+        ("-brand_name", "Brand (Z-a)"),
+        ("-last_added_quantity", "Last Added Quantity (Desc)"),
+        ("last_added_quantity", "Last Added Quantity (Asc)"),
+        ("-last_added_date", "Last Added Date (Desc)"),
+        ("last_added_date", "Last Added Date (Asc)"),
+        ("-energy", "Calories (High-Low)"),
+        ("energy", "Calories (Low-High)"),
+        ("-protein", "Protein (High-Low)"),
+        ("protein", "Protein (Low-High)"),
+        ("-carbohydrate", "Carbs (High-Low)"),
+        ("carbohydrate", "Carbs (Low-High)"),
+        ("-fat", "Fat (High-Low)"),
+        ("fat", "Fat (Low-High)"),
+        ("-saturates", "Saturates (High-Low)"),
+        ("saturates", "Saturates (Low-High)"),
+        ("-sugars", "Sugars (High-Low)"),
+        ("sugars", "Sugars (Low-High)"),
+        ("-fibre", "Fibre (High-Low)"),
+        ("fibre", "Fibre (Low-High)"),
+        ("-salt", "Salt (High-Low)"),
+        ("salt", "Salt (Low-High)"),
+        ("-created_at", "Created (Desc)"),
+        ("created_at", "Created (Asc)"),
+        ("-updated_at", "Updated (Desc)"),
+        ("updated_at", "Updated (Asc)"),
+    ];
     view! {
         <Title text="Add Food to Diet"/>
         <main class="p-4 space-y-4 bg-white border md:m-4">
@@ -204,20 +241,20 @@ pub fn DietAddFoodPage() -> impl IntoView {
                 <Transition fallback=Loading>{count}</Transition>
             </ListPageHeaderWithCreate>
             <h2 class="font-bold">{subtitle}</h2>
-
             {error}
-
             <section class="flex flex-wrap gap-2 mb-4 lg:mb-2">
-                <FoodListFilterForm
-                    search=Signal::derive(search)
-                    brand=Signal::derive(brand)
-                    serving=Signal::derive(serving)
-                    order=Signal::derive(order)
-                    size=Signal::derive(size)
-                    page=1
-                    options=&DIET_FOOD_SORT_OPTIONS
-                    serving_options=&SERVING_OPTIONS
-                />
+                <Form method="GET" action="" class="contents">
+                    <input type="hidden" name="size" value=size/>
+                    <input type="hidden" name="page" value=1/>
+                    <FilterInput name="search" value=Signal::derive(search)/>
+                    <BrandFilter selected=Signal::derive(brand)/>
+                    <FilterSelect
+                        name="serving"
+                        value=Signal::derive(serving)
+                        options=serving_options
+                    />
+                    <FilterSelect name="order" value=Signal::derive(order) options=sort_options/>
+                </Form>
             </section>
 
             <section class="grid grid-cols-4 lg:grid-cols-input-12">

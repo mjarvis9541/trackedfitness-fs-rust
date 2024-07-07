@@ -29,7 +29,6 @@ pub async fn get_diet_week_summary(
     let start = get_week_start(date);
     let end = get_week_end(date);
     let query = UserDaySummary::get_diet_range(&pool, &username, start, end).await?;
-    dbg!(&query);
 
     let total_days = query.len() as i32;
     let week_avg = UserDaySummary::calculate_averages(&query, total_days)?;

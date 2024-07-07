@@ -6,9 +6,9 @@ use rust_decimal::Decimal;
 use uuid::Uuid;
 
 use crate::component::button::SubmitButton;
-use crate::component::input::ValidatedInput;
-use crate::error_extract::{extract_error_message, process_non_field_errors};
+use crate::component::input::{NumberInput, TextInput};
 use crate::meal_of_day::select::MealOfDaySelect;
+use crate::util::validation_error::{extract_other_errors, get_non_field_errors};
 
 #[cfg(feature = "ssr")]
 use crate::{
@@ -52,35 +52,30 @@ pub async fn food_to_diet_create(
 
 #[component]
 pub fn FoodToDietForm(food_id: String, data_value: i32, quantity: String) -> impl IntoView {
+    let _quantity = quantity;
     let action = Action::<FoodToDietCreate, _>::server();
-    let loading = action.pending();
 
     let date: String = Utc::now().date_naive().to_string();
 
-    let error = move || extract_error_message(&action);
-    let non_field_errors = move || process_non_field_errors(error);
-    let error = Signal::derive(error);
+    let action_loading = action.pending();
+    let action_value = action.value();
+    let action_error = move || extract_other_errors(action_value, &["name"]);
+    let non_field_errors = move || get_non_field_errors(action_value);
 
     view! {
-        <div>{error}</div>
-        <div>{non_field_errors}</div>
+        <div class="mb-4 text-red-500 font-bold">{action_error}</div>
+        <div class="mb-4 text-red-500 font-bold">{non_field_errors}</div>
 
         <ActionForm action>
             <input type="hidden" name="food_id" value=food_id/>
-            <ValidatedInput error name="date" input_type="date" value=date/>
             <MealOfDaySelect/>
-            <ValidatedInput
-                error
-                name="quantity"
-                label=quantity
-                input_type="number"
-                value=data_value.to_string()
-                step="0.01"
-            />
 
-            <div class="mt-2">
-                <SubmitButton loading label="Add to Diet Log"/>
-            </div>
+            <TextInput action_value name="date" input_type="date" value=date/>
+
+            <NumberInput action_value name="quantity" value=data_value.to_string() step="0.01"/>
+
+            <SubmitButton loading=action_loading label="Add to Diet Log"/>
+
         </ActionForm>
     }
 }

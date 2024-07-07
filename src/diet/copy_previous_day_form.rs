@@ -54,13 +54,14 @@ pub fn DietCopyPreviousDayForm(
 
     let error = move || extract_error_message(&action);
     view! {
-        {error}
-        <ActionForm action class="contents">
-            <input type="hidden" name="username" value=username/>
-            <input type="hidden" name="date" value=date/>
-            <Button label="Copy All Yesterday">
-                <IconCopy/>
-            </Button>
-        </ActionForm>
+        <div>
+            <ActionForm action class="contents">
+                <input type="hidden" name="username" value=username/>
+                <input type="hidden" name="date" value=date/>
+                <Button label="Copy All Yesterday">
+                    <IconCopy/>
+                </Button>
+            </ActionForm>
+        </div>
     }
 }

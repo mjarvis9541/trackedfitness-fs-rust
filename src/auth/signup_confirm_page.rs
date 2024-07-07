@@ -3,9 +3,9 @@ use leptos_meta::*;
 use leptos_router::*;
 
 use crate::component::button::SubmitButton;
-use crate::component::input::ValidatedInput;
-use crate::error_extract::{extract_error_message, process_non_field_errors};
+use crate::component::input::TextInput;
 use crate::util::param::extract_param;
+use crate::util::validation_error::{extract_other_errors, get_non_field_errors};
 
 #[cfg(feature = "ssr")]
 use crate::{
@@ -41,9 +41,10 @@ pub fn SignupConfirmPage(
     let query = use_query_map();
     let token = move || extract_param(&query, "token");
 
-    let error = move || extract_error_message(&action);
-    let non_field_errors = move || process_non_field_errors(error);
-    let error = Signal::derive(error);
+    let action_loading = action.pending();
+    let action_value = action.value();
+    let action_error = move || extract_other_errors(action_value, &["name"]);
+    let non_field_errors = move || get_non_field_errors(action_value);
 
     view! {
         <Title text="Enter Activation Code"/>
@@ -51,12 +52,12 @@ pub fn SignupConfirmPage(
 
             <div class="p-4 mx-auto max-w-md bg-white border shadow-md">
                 <h1 class="mb-4 text-xl font-bold">"Enter Activation Code"</h1>
-                {non_field_errors}
-                {error}
                 <p class="mb-4">"Enter your activation code below to activate your account."</p>
+                <div class="mb-4 text-red-500 font-bold">{action_error}</div>
+                <div class="mb-4 text-red-500 font-bold">{non_field_errors}</div>
                 <ActionForm action>
-                    <ValidatedInput error name="token" label="Activation code" value=token()/>
-                    <SubmitButton loading=action.pending() label="Activate Account"/>
+                    <TextInput action_value name="token" label="Activation code" value=token()/>
+                    <SubmitButton loading=action_loading label="Activate Account"/>
                 </ActionForm>
 
                 <div class="pt-4">

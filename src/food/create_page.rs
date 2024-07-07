@@ -8,8 +8,8 @@ use crate::brand::select::{get_brand_select, BrandSelect};
 use crate::component::button::SubmitButton;
 use crate::component::template::DetailPageTemplate;
 
-use crate::component::input::{NumberInput, TextInputImproved};
-use crate::component::select::FieldSelectB;
+use crate::component::input::{NumberInput, TextInput};
+use crate::component::select::FieldSelect;
 use crate::util::validation_error::{extract_other_errors, get_non_field_errors};
 
 #[cfg(feature = "ssr")]
@@ -112,13 +112,13 @@ pub fn FoodCreatePage() -> impl IntoView {
             <div class="mb-4 text-red-500 font-bold">{non_field_errors}</div>
 
             <ActionForm action>
-                <TextInputImproved
+                <TextInput
                     action_value
                     name="name"
                     placeholder="Enter food name, e.g. Chicken Breast"
                 />
                 <BrandSelect/>
-                <FieldSelectB name="serving" options=serving_options/>
+                <FieldSelect name="serving" options=serving_options/>
 
                 <NumberInput action_value placeholder="0" name="energy" label="Energy (kcal)"/>
                 <NumberInput action_value placeholder="0.0" name="fat" step="0.01" label="Fat (g)"/>

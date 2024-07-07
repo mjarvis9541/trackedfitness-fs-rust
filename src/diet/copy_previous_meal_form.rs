@@ -65,7 +65,6 @@ pub fn DietCopyPreviousForm(meal: String, label: &'static str) -> impl IntoView 
     let error = move || extract_error_message(&action);
 
     view! {
-        {error}
         <ActionForm action class="contents">
             <input type="hidden" name="username" value=username/>
             <input type="hidden" name="date" value=date/>

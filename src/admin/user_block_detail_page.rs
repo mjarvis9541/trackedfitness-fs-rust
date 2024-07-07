@@ -6,12 +6,12 @@ use uuid::Uuid;
 
 use super::user_select::UserSelect;
 use crate::component::button::SubmitButton;
+use crate::component::select::FieldSelect;
 use crate::component::template::{ErrorComponent, LoadingComponent};
 use crate::error_extract::{extract_error_message, process_non_field_errors};
 use crate::user_block::model::UserBlock;
 use crate::util::datetime::format_datetime;
 use crate::util::param::UuidParam;
-use crate::util::text::capitalize_and_replace;
 
 #[server]
 async fn admin_user_block_update(
@@ -36,9 +36,13 @@ async fn get_admin_user_block_detail(id: Uuid) -> Result<UserBlock, ServerFnErro
 
 #[component]
 pub fn AdminUserBlockDetailPage() -> impl IntoView {
-    let action = Action::<AdminUserBlockUpdate, _>::server();
     let params = use_params::<UuidParam>();
     let id = move || params.with(|q| q.as_ref().map(|q| q.id).unwrap_or_default());
+
+    let action = Action::<AdminUserBlockUpdate, _>::server();
+    let error = move || extract_error_message(&action);
+    let non_field_errors = move || process_non_field_errors(error);
+
     let resource = Resource::new(
         move || (id(), action.version().get()),
         |(id, _)| get_admin_user_block_detail(id),
@@ -49,8 +53,6 @@ pub fn AdminUserBlockDetailPage() -> impl IntoView {
     let form_response = move || {
         resource.and_then(|data| view! { <AdminUserBlockUpdateForm data=data.clone() action/> })
     };
-    let error = move || extract_error_message(&action);
-    let non_field_errors = move || process_non_field_errors(error);
     view! {
         <Title text="Admin - Blocked User"/>
         <main class="grid grid-cols-4 gap-4 p-4 md:grid-cols-8 lg:grid-cols-12">
@@ -132,42 +134,5 @@ pub fn AdminUserBlockUpdateForm(
                 <SubmitButton loading=action.pending() label="Update Blocked User"/>
             </div>
         </ActionForm>
-    }
-}
-
-#[component]
-pub fn FieldSelect(
-    name: &'static str,
-    #[prop(default = name)] label: &'static str,
-    #[prop(optional, into)] value: String,
-    options: Vec<(&'static str, &'static str)>,
-) -> impl IntoView {
-    view! {
-        <label class="block mb-4">
-            <span class="block mb-1 text-sm font-bold">{capitalize_and_replace(label)}</span>
-            <select
-                name=name
-                class="block py-2.5 px-3 w-full bg-white rounded border focus:border-blue-500 focus:ring-2 focus:ring-blue-500 focus:outline-none"
-            >
-                {move || {
-                    options
-                        .clone()
-                        .into_iter()
-                        .map(|(option_value, label)| {
-                            let selected_value = value.clone();
-                            view! {
-                                <option
-                                    value=option_value
-                                    prop:selected=move || *option_value == selected_value
-                                >
-                                    {label}
-                                </option>
-                            }
-                        })
-                        .collect_view()
-                }}
-
-            </select>
-        </label>
     }
 }

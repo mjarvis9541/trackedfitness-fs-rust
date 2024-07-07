@@ -57,7 +57,6 @@ pub async fn get_diet_target_week_summary(
         }
     }
     let complete_day_totals = UserDaySummary::fill_missing_days_with_previous(query, start, end)?;
-    // dbg!("completed totals {:?}", &complete_day_totals);
 
     let total_days = complete_day_totals.len() as i32;
     let week_avg = UserDaySummary::calculate_averages(&complete_day_totals, total_days)?;

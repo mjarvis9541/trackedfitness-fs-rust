@@ -3,7 +3,7 @@ use leptos_meta::*;
 use leptos_router::*;
 
 use crate::component::button::SubmitButton;
-use crate::component::input::TextInputImproved;
+use crate::component::input::TextInput;
 use crate::util::param::extract_param;
 use crate::util::validation_error::{extract_other_errors, get_non_field_errors};
 
@@ -55,7 +55,7 @@ pub fn EmailChangeConfirmPage() -> impl IntoView {
                 </p>
 
                 <ActionForm action>
-                    <TextInputImproved
+                    <TextInput
                         action_value
                         name="token"
                         label="Activation code"

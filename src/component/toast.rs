@@ -8,7 +8,6 @@ pub fn ToastSuccess(
 ) -> impl IntoView {
     let is_shown = RwSignal::new(false);
     let hide_element = move |_| is_shown.update(|value| *value = false);
-
     view! {
         <Show when=is_shown>
             <div class="fixed inset-0 z-10 duration-300 bg-black/50" on:click=hide_element>

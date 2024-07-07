@@ -2,7 +2,7 @@ use leptos::*;
 use leptos_router::*;
 
 use crate::component::button::SubmitButton;
-use crate::component::input::{NumberInput, TextInputImproved};
+use crate::component::input::{NumberInput, TextInput};
 use crate::component::template::DetailPageTemplate;
 use crate::util::validation_error::{extract_other_errors, get_non_field_errors};
 
@@ -37,7 +37,7 @@ pub fn MealOfDayCreatePage() -> impl IntoView {
             <div class="mb-4 text-red-500 font-bold">{action_error}</div>
             <div class="mb-4 text-red-500 font-bold">{non_field_errors}</div>
             <ActionForm action>
-                <TextInputImproved action_value name="name" placeholder="Enter meal of day name"/>
+                <TextInput action_value name="name" placeholder="Enter meal of day name"/>
                 <NumberInput
                     action_value
                     name="ordering"

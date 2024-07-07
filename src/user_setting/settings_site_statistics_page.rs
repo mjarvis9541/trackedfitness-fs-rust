@@ -25,7 +25,6 @@ pub fn UserStatsDetailPage() -> impl IntoView {
         <main class="p-4 bg-white">
             <h1 class="mb-2 text-base font-bold">"Site Statistics"</h1>
             <p class="mb-4">"Site Statistics."</p>
-            <hr class="mb-8"/>
             <div class="max-w-md">
                 <Transition fallback=LoadingComponent>
                     <ErrorBoundary fallback=|errors| {

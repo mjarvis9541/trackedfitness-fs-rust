@@ -17,7 +17,6 @@ pub fn Navbar(username: String) -> impl IntoView {
         (format!("/users/{}/month", username), "Month"),
         ("/food".to_string(), "Food"),
         ("/exercises".to_string(), "Exercises"),
-        ("/training-plans".to_string(), "Training Plans"),
     ];
     let side_nav = vec![
         (format!("/users/{}", username), "Profile"),
@@ -33,8 +32,6 @@ pub fn Navbar(username: String) -> impl IntoView {
         ("/food/meals".to_string(), "Meals"),
         ("/exercises".to_string(), "Exercises"),
         ("/exercises/muscle-groups".to_string(), "Muscle Groups"),
-        ("/training-plans".to_string(), "Training Plans"),
-        ("/workout-plans".to_string(), "Workout Plans"),
     ];
     let side_nav_lower = vec![
         ("/settings".to_string(), "Settings"),

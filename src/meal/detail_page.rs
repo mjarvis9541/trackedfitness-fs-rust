@@ -35,9 +35,7 @@ pub async fn get_meal_food_list(meal_id: Uuid) -> Result<Vec<MealFood>, ServerFn
 pub async fn get_meal_detail(id: Uuid) -> Result<Meal, ServerFnError> {
     let user = get_request_user()?;
     let pool = get_pool()?;
-
     let object = Meal::get_by_id(&pool, id).await?.ok_or(Error::NotFound)?;
-
     object.can_view(&user)?;
     Ok(object)
 }
@@ -59,7 +57,7 @@ pub fn MealDetailPage() -> impl IntoView {
                 action_bulk_delete.version().get(),
             )
         },
-        |(id, _, _)| get_meal_detail(id),
+        |(id, ..)| get_meal_detail(id),
     );
     let meal_food_resource = Resource::new(
         move || {
@@ -69,7 +67,7 @@ pub fn MealDetailPage() -> impl IntoView {
                 action_bulk_delete.version().get(),
             )
         },
-        |(id, _, _)| get_meal_food_list(id),
+        |(id, ..)| get_meal_food_list(id),
     );
 
     let all_items = RwSignal::new(HashSet::<String>::new());
@@ -144,7 +142,6 @@ pub fn MealDetailPage() -> impl IntoView {
                     <Transition fallback=ListLoadingComponent>{meal_food_response}</Transition>
                     <Transition>{meal_total_response}</Transition>
                 </section>
-
                 <BulkDeleteForm table="meal_food" action=action_bulk_delete checked_items/>
             </section>
 

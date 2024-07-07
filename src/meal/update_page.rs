@@ -5,7 +5,7 @@ use uuid::Uuid;
 
 use super::detail_page::get_meal_detail;
 use crate::component::button::SubmitButton;
-use crate::component::input::TextInputImproved;
+use crate::component::input::TextInput;
 use crate::component::template::{DetailPageTemplate, ErrorComponent, LoadingComponent};
 use crate::util::param::UuidParam;
 use crate::util::validation_error::{extract_other_errors, get_non_field_errors};
@@ -52,7 +52,7 @@ pub fn MealUpdatePage() -> impl IntoView {
             view! {
                 <ActionForm action>
                     <input type="hidden" name="id" value=id/>
-                    <TextInputImproved
+                    <TextInput
                         action_value
                         name="name"
                         placeholder="Enter meal name"

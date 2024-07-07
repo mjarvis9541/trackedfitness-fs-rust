@@ -5,11 +5,11 @@ use leptos_meta::*;
 use leptos_router::*;
 
 use crate::component::bulk_delete_date::BulkDeleteDateRangeForm;
+use crate::component::input::FilterInput;
 use crate::component::paginator::Paginator;
-use crate::component::select::DATE_SORT_OPTIONS;
+use crate::component::select::FilterSelect;
 use crate::component::template::{
     AutoListHeader, ErrorComponent, ListLoadingComponent, ListNotFoundComponent, Loading,
-    SearchForm,
 };
 use crate::summary::component::DaySummaryListItem;
 use crate::summary::model::{UserDaySummary, Variant};
@@ -107,6 +107,14 @@ pub fn DietTargetListPage() -> impl IntoView {
         })
     };
     let checked_item_count = move || checked_items.with(|items| items.len());
+    let sort_options = vec![
+        ("-date", "Date (Desc)"),
+        ("date", "Date (Asc)"),
+        ("created_at", "Created (Asc)"),
+        ("-created_at", "Created (Desc)"),
+        ("updated_at", "Updated (Asc)"),
+        ("-updated_at", "Updated (Desc)"),
+    ];
     view! {
         <Title text="Diet Target History"/>
         <main class="m-4 p-4 border bg-white">
@@ -124,13 +132,12 @@ pub fn DietTargetListPage() -> impl IntoView {
             </header>
 
             <section class="flex flex-wrap gap-2 mb-4 lg:mb-2">
-                <SearchForm
-                    search=Signal::derive(search)
-                    order=Signal::derive(order)
-                    size=Signal::derive(size)
-                    page=1
-                    options=&DATE_SORT_OPTIONS
-                />
+                <Form method="GET" action="" class="contents">
+                    <input type="hidden" name="size" value=size/>
+                    <input type="hidden" name="page" value=1/>
+                    <FilterInput name="search" value=Signal::derive(search)/>
+                    <FilterSelect name="order" value=Signal::derive(order) options=sort_options/>
+                </Form>
             </section>
             <div class="overflow-x-auto mb-4">
                 <div class="grid grid-cols-checkbox-16">

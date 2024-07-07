@@ -8,26 +8,26 @@ use crate::component::icon::IconUsers;
 pub enum LinkVariant {
     #[default]
     Primary,
-    Secondary,
-    Danger,
+    // Secondary,
+    // Danger,
     Navigation,
     Page,
     UserNavLink,
-    Wide,
+    // Wide,
 }
 
 impl LinkVariant {
     pub fn into_css(&self) -> &'static str {
         match self {
             Self::Primary => "flex gap-2 p-2 whitespace-nowrap bg-gray-100 hover:bg-gray-200 hover:text-white",
-            Self::Secondary => "flex gap-2 p-2 whitespace-nowrap bg-gray-100 hover:bg-amber-200",
-            Self::Danger => {
-                "flex gap-2 p-2 whitespace-nowrap bg-gray-100 hover:bg-red-500 hover:text-white"
-            }
+            // Self::Secondary => "flex gap-2 p-2 whitespace-nowrap bg-gray-100 hover:bg-amber-200",
+            // Self::Danger => {
+                // "flex gap-2 p-2 whitespace-nowrap bg-gray-100 hover:bg-red-500 hover:text-white"
+            // }
             Self::Navigation => "flex gap-2 px-4 py-2 hover:bg-amber-300 hover:text-white duration-300 aria-[current=page]:bg-zinc-600 aria-[current=page]:text-white",
             Self::Page => "flex gap-2 py-2 px-3 whitespace-nowrap duration-300 hover:bg-amber-300 bg-zinc-900 text-zinc-100",
             Self::UserNavLink => "flex gap-2 p-2 whitespace-nowrap hover:bg-amber-200 aria-[current=page]:bg-amber-200",
-            Self::Wide => "flex gap-2 px-4 py-2 hover:bg-amber-200 aria-[current=page]:bg-amber-200"
+            // Self::Wide => "flex gap-2 px-4 py-2 hover:bg-amber-200 aria-[current=page]:bg-amber-200"
         }
     }
 }

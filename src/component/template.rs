@@ -2,13 +2,10 @@ use std::collections::HashSet;
 
 use leptos::*;
 use leptos_meta::*;
-use leptos_router::*;
 
 use crate::component::checkbox::{CheckboxListHeader, CheckboxListItem};
 use crate::component::icon::{IconEditA, IconTrash};
-use crate::component::input::FilterInput;
 use crate::component::link::Link;
-use crate::component::select::FilterSelect;
 
 #[component]
 pub fn DetailPageTemplate(title: &'static str, children: Children) -> impl IntoView {
@@ -239,24 +236,6 @@ pub fn AddFoodListHeader(
         <div class="hidden p-2 font-bold text-right border-b lg:block">"Fibre"</div>
         <div class="hidden p-2 font-bold text-right border-b lg:block">"Salt"</div>
         <div class="hidden p-2 font-bold text-right border-b lg:block"></div>
-    }
-}
-
-#[component]
-pub fn SearchForm(
-    search: Signal<String>,
-    order: Signal<String>,
-    size: Signal<i64>,
-    page: i64,
-    options: &'static [(&'static str, &'static str)],
-) -> impl IntoView {
-    view! {
-        <Form method="GET" action="" class="contents">
-            <FilterInput name="search" value=search/>
-            <FilterSelect name="order" value=order options/>
-            <input type="hidden" name="size" value=size/>
-            <input type="hidden" name="page" value=page/>
-        </Form>
     }
 }
 

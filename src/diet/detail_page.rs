@@ -55,11 +55,11 @@ fn DietDetailPageComponent(data: DietFoodQuery) -> impl IntoView {
             <a href=data.food_detail_url() class="block mb-2 text-xl font-bold">
                 {title}
             </a>
-            <a href=data.brand_detail_url() class="block mb-4 font-bold">
+            <a href=data.brand_detail_url() class="block mb-4 font-bold capitalize">
                 {&data.brand_name}
             </a>
-            <NutritionInformation data=data/>
         </section>
+        <NutritionInformation data=data/>
         <UpdateDeleteButtonRow/>
     }
 }

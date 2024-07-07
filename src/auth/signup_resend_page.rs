@@ -3,7 +3,7 @@ use leptos_meta::*;
 use leptos_router::*;
 
 use crate::component::button::SubmitButton;
-use crate::component::input::TextInputImproved;
+use crate::component::input::TextInput;
 use crate::util::validation_error::{extract_other_errors, get_non_field_errors};
 
 #[cfg(feature = "ssr")]
@@ -43,7 +43,7 @@ pub fn SignupResendPage() -> impl IntoView {
                 <div class="mb-4 text-red-500 font-bold">{action_error}</div>
                 <div class="mb-4 text-red-500 font-bold">{non_field_errors}</div>
                 <ActionForm action>
-                    <TextInputImproved
+                    <TextInput
                         name="email"
                         label="Email address"
                         placeholder="Enter your email address"

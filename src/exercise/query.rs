@@ -5,7 +5,6 @@ use uuid::Uuid;
 
 use crate::error::Result;
 use crate::exercise::model::{ExerciseModel, ExerciseQuery};
-use crate::exercise_plan::model::ExercisePlan;
 use crate::set::model::SetQuery;
 
 impl ExerciseModel {
@@ -103,30 +102,30 @@ impl ExerciseModel {
         Ok(query)
     }
 
-    pub async fn bulk_create_from_exercise_plan(
-        pool: &PgPool,
-        workout_id: Uuid,
-        exercises: &[ExercisePlan],
-        request_user_id: Uuid,
-    ) -> Result<Vec<Self>> {
-        let movement_ids: Vec<Uuid> = exercises.iter().map(|e| e.movement_id).collect();
-        let sequences: Vec<i32> = exercises.iter().map(|e| e.sequence).collect();
-        let query = sqlx::query_as!(
-            Self,
-            r#"
-            INSERT INTO exercise (workout_id, movement_id, "order", created_by_id)
-            SELECT $1, UNNEST($2::UUID[]), UNNEST($3::INTEGER[]), $4
-            RETURNING *
-            "#,
-            workout_id,
-            &movement_ids,
-            &sequences,
-            request_user_id,
-        )
-        .fetch_all(pool)
-        .await?;
-        Ok(query)
-    }
+    // pub async fn bulk_create_from_exercise_plan(
+    //     pool: &PgPool,
+    //     workout_id: Uuid,
+    //     exercises: &[ExercisePlan],
+    //     request_user_id: Uuid,
+    // ) -> Result<Vec<Self>> {
+    //     let movement_ids: Vec<Uuid> = exercises.iter().map(|e| e.movement_id).collect();
+    //     let sequences: Vec<i32> = exercises.iter().map(|e| e.sequence).collect();
+    //     let query = sqlx::query_as!(
+    //         Self,
+    //         r#"
+    //         INSERT INTO exercise (workout_id, movement_id, "order", created_by_id)
+    //         SELECT $1, UNNEST($2::UUID[]), UNNEST($3::INTEGER[]), $4
+    //         RETURNING *
+    //         "#,
+    //         workout_id,
+    //         &movement_ids,
+    //         &sequences,
+    //         request_user_id,
+    //     )
+    //     .fetch_all(pool)
+    //     .await?;
+    //     Ok(query)
+    // }
 
     pub async fn delete(pool: &PgPool, id: Uuid) -> Result<Self> {
         let query = sqlx::query_as!(Self, "DELETE FROM exercise WHERE id = $1 RETURNING *", id)

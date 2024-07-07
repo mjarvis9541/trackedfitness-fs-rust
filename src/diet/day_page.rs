@@ -3,6 +3,8 @@ use std::collections::HashSet;
 use leptos::*;
 use leptos_meta::*;
 use leptos_router::*;
+
+use chrono::prelude::*;
 use serde::{Deserialize, Serialize};
 
 use crate::component::bulk_delete::BulkDeleteForm;
@@ -15,19 +17,16 @@ use crate::diet::copy_previous_day_form::{DietCopyPreviousDay, DietCopyPreviousD
 use crate::diet::copy_previous_meal_form::DietCopyPrevious;
 use crate::diet::to_meal_form::{DietToMealForm, SaveToMeal};
 use crate::diet_target::model::DietTarget;
-use crate::util::param::{get_date, get_username};
-use chrono::prelude::*;
-
 use crate::food::model::Nutrition;
+use crate::util::param::{get_date, get_username};
 
 use super::component::{DietFoodGridHeader, DietMealGridHeader};
+use super::model::{DietDayDTO, DietFoodQuery, DietMealDTO};
 
 #[cfg(feature = "ssr")]
 use crate::{
     auth::model::User, auth::service::get_request_user, diet::service::DietService, setup::get_pool,
 };
-
-use super::model::{DietDayDTO, DietFoodQuery, DietMealDTO};
 
 #[derive(Debug, Deserialize, Serialize, Clone)]
 pub struct DietDayResponse {
@@ -41,9 +40,7 @@ async fn get_diet_day(username: String, date: NaiveDate) -> Result<DietDayRespon
     let user = get_request_user()?;
     let pool = get_pool()?;
     User::check_view_permission(&pool, &user, &username).await?;
-
     let response = DietService::aggregate_diet_day_data(&pool, &username, date).await?;
-
     Ok(response)
 }
 
@@ -82,18 +79,17 @@ pub fn DietDayPage() -> impl IntoView {
             let data = data.clone();
             let diet_data = data.diet_day;
             let target_view = data.diet_target.map(|target| {
-                leptos::logging::log!("target: {:?}", target);
                 let total = target.format();
                 view! {
-                    <section class="flex col-span-4 items-center p-2 font-bold bg-gray-50">
+                    <section class="flex col-span-4 items-center p-2 font-bold bg-gray-200">
                         "Target"
                     </section>
                     <div class=DAY_TOTAL_ROW_CSS>{total.energy}</div>
-                    <div class=DAY_TOTAL_ROW_CSS>{total.protein} " - "{total.protein_pct}</div>
+                    <div class=DAY_TOTAL_ROW_CSS>{total.protein}" "{total.protein_pct}</div>
                     <div class=DAY_TOTAL_ROW_CSS>
-                        {total.carbohydrate} " - "{total.carbohydrate_pct}
+                        {total.carbohydrate}" "{total.carbohydrate_pct}
                     </div>
-                    <div class=DAY_TOTAL_ROW_CSS>{total.fat} " - "{total.fat_pct}</div>
+                    <div class=DAY_TOTAL_ROW_CSS>{total.fat}" "{total.fat_pct}</div>
                     <div class=DAY_TOTAL_ROW_CSS>{total.saturates}</div>
                     <div class=DAY_TOTAL_ROW_CSS>{total.sugars}</div>
                     <div class=DAY_TOTAL_ROW_CSS>{total.fibre}</div>
@@ -101,28 +97,25 @@ pub fn DietDayPage() -> impl IntoView {
                 }
             });
             let remain_view = data.remaining.map(|target| {
-                leptos::logging::log!("Remaining: {:?}", target);
                 let total = target.format();
                 view! {
-                    <section class="flex col-span-4 items-center p-2 font-bold bg-gray-50">
+                    <section class="flex col-span-4 items-center p-2 font-bold bg-gray-200">
                         "Remaining"
                     </section>
                     <div class=DAY_TOTAL_ROW_CSS>{total.energy}</div>
-                    <div class=DAY_TOTAL_ROW_CSS>{total.protein} " - "{total.protein_pct}</div>
+                    <div class=DAY_TOTAL_ROW_CSS>{total.protein}" "{total.protein_pct}</div>
                     <div class=DAY_TOTAL_ROW_CSS>
-                        {total.carbohydrate} " - "{total.carbohydrate_pct}
+                        {total.carbohydrate}" "{total.carbohydrate_pct}
                     </div>
-                    <div class=DAY_TOTAL_ROW_CSS>{total.fat} " - "{total.fat_pct}</div>
+                    <div class=DAY_TOTAL_ROW_CSS>{total.fat}" "{total.fat_pct}</div>
                     <div class=DAY_TOTAL_ROW_CSS>{total.saturates}</div>
                     <div class=DAY_TOTAL_ROW_CSS>{total.sugars}</div>
                     <div class=DAY_TOTAL_ROW_CSS>{total.fibre}</div>
                     <div class=DAY_TOTAL_ROW_CSS>{total.salt}</div>
                 }
             });
-
             view! {
                 <DietDayComponent data=diet_data checked_items/>
-
                 {target_view}
                 {remain_view}
             }
@@ -145,8 +138,10 @@ pub fn DietDayPage() -> impl IntoView {
                 </Transition>
             </section>
             <section class="flex flex-wrap gap-x-2 p-2 mt-2 bg-gray-200">
-                <div class="hidden gap-x-2 lg:flex">
+                <div class="hidden lg:block">
                     <BulkDeleteForm table="food_log" action=action_diet_bulk_delete checked_items/>
+                </div>
+                <div>
                     <Button
                         label="Save as Meal"
                         disabled=disabled_save_modal
@@ -164,8 +159,9 @@ pub fn DietDayPage() -> impl IntoView {
     }
 }
 
-const DAY_TOTAL_ROW_CSS: &str =
-    "flex items-center justify-end p-2 border-b border-t bg-gray-200 text-xs font-bold";
+const DAY_TOTAL_ROW_CSS: &str = "flex items-center justify-end p-2 bg-gray-200 text-xs font-bold";
+const SECONDARY_DAY_TOTAL_ROW_CSS: &str =
+    "hidden md:flex items-center justify-end p-2 bg-gray-200 text-xs font-bold";
 
 #[component]
 pub fn DietDayComponent(
@@ -173,7 +169,6 @@ pub fn DietDayComponent(
     checked_items: RwSignal<HashSet<String>>,
 ) -> impl IntoView {
     let total = data.format();
-
     let meal_list = data.meal_list;
     let diet_meal_list_view = meal_list
         .into_iter()
@@ -181,26 +176,25 @@ pub fn DietDayComponent(
             view! { <DietMealComponent data=meal checked_items/> }
         })
         .collect_view();
-
     view! {
         {diet_meal_list_view}
-
         <div class="col-span-full h-2 bg-gray-100 lg:hidden"></div>
-
-        <section class="flex col-span-4 items-center p-2 font-bold bg-gray-50">"Total"</section>
+        <section class="flex col-span-4 items-center p-2 font-bold bg-gray-200">"Total"</section>
         <div class=DAY_TOTAL_ROW_CSS>{total.energy}</div>
-        <div class=DAY_TOTAL_ROW_CSS>{total.protein} " "{total.protein_pct}</div>
-        <div class=DAY_TOTAL_ROW_CSS>{total.carbohydrate} " "{total.carbohydrate_pct}</div>
-        <div class=DAY_TOTAL_ROW_CSS>{total.fat} " "{total.fat_pct}</div>
-        <div class=DAY_TOTAL_ROW_CSS>{total.saturates}</div>
-        <div class=DAY_TOTAL_ROW_CSS>{total.sugars}</div>
-        <div class=DAY_TOTAL_ROW_CSS>{total.fibre}</div>
-        <div class=DAY_TOTAL_ROW_CSS>{total.salt}</div>
+        <div class=DAY_TOTAL_ROW_CSS>{total.protein}" "{total.protein_pct}</div>
+        <div class=DAY_TOTAL_ROW_CSS>{total.carbohydrate}" "{total.carbohydrate_pct}</div>
+        <div class=DAY_TOTAL_ROW_CSS>{total.fat}" "{total.fat_pct}</div>
+        <div class=SECONDARY_DAY_TOTAL_ROW_CSS>{total.saturates}</div>
+        <div class=SECONDARY_DAY_TOTAL_ROW_CSS>{total.sugars}</div>
+        <div class=SECONDARY_DAY_TOTAL_ROW_CSS>{total.fibre}</div>
+        <div class=SECONDARY_DAY_TOTAL_ROW_CSS>{total.salt}</div>
     }
 }
 
-const TOTAL_ROW_CSS: &str =
-    "flex items-center justify-end p-2 border-b border-t bg-gray-200/75 font-bold text-xs";
+const MEAL_TOTAL_ROW_CSS: &str =
+    "flex items-center justify-end p-2 bg-gray-200/75 font-bold text-xs";
+const SECONDARY_MEAL_TOTAL_ROW_CSS: &str =
+    "hidden md:flex items-center justify-end p-2 bg-gray-200/75 font-bold text-xs";
 
 #[component]
 pub fn DietMealComponent(
@@ -236,11 +230,9 @@ pub fn DietMealComponent(
                 </div>
             </div>
         </header>
-
         <DietMealGridHeader/>
         {diet_food_list_view}
-
-        <div class="flex justify-between p-2 border bg-gray-200/75 col-span-4">
+        <div class="flex justify-between p-2 bg-gray-200/75 col-span-4">
             <div class="font-bold">"Total"</div>
             <div class="flex gap-2">
                 <a class="hover:underline font-semibold" href=&add_food_url>
@@ -251,25 +243,24 @@ pub fn DietMealComponent(
                 </a>
             </div>
         </div>
-        <div class=TOTAL_ROW_CSS>{total.energy}</div>
-        <div class=TOTAL_ROW_CSS>{total.protein} " "{total.protein_pct}</div>
-        <div class=TOTAL_ROW_CSS>{total.carbohydrate} " "{total.carbohydrate_pct}</div>
-        <div class=TOTAL_ROW_CSS>{total.fat} " "{total.fat_pct}</div>
-        <div class=TOTAL_ROW_CSS>{total.saturates}</div>
-        <div class=TOTAL_ROW_CSS>{total.sugars}</div>
-        <div class=TOTAL_ROW_CSS>{total.fibre}</div>
-        <div class=TOTAL_ROW_CSS>{total.salt}</div>
-
+        <div class=MEAL_TOTAL_ROW_CSS>{total.energy}</div>
+        <div class=MEAL_TOTAL_ROW_CSS>{total.protein}" "{total.protein_pct}</div>
+        <div class=MEAL_TOTAL_ROW_CSS>{total.carbohydrate}" "{total.carbohydrate_pct}</div>
+        <div class=MEAL_TOTAL_ROW_CSS>{total.fat}" "{total.fat_pct}</div>
+        <div class=SECONDARY_MEAL_TOTAL_ROW_CSS>{total.saturates}</div>
+        <div class=SECONDARY_MEAL_TOTAL_ROW_CSS>{total.sugars}</div>
+        <div class=SECONDARY_MEAL_TOTAL_ROW_CSS>{total.fibre}</div>
+        <div class=SECONDARY_MEAL_TOTAL_ROW_CSS>{total.salt}</div>
         <section class="col-span-full h-2"></section>
     }
 }
 
 const TITLE_ROW_CSS: &str =
-    "col-span-4 flex items-center gap-2 py-1 group-odd:bg-gray-50 group-hover:bg-amber-200";
+    "col-span-4 flex items-center gap-2 py-1 pr-2 group-odd:bg-gray-50 group-hover:bg-amber-200";
 const ROW_CSS: &str =
-    "flex items-center justify-end border-b p-2 group-odd:bg-gray-50 group-hover:bg-amber-200";
-const ROW_SECONDARY_CSS: &str =
-    "md:flex items-center justify-end border-b p-2 group-odd:bg-gray-50 group-hover:bg-amber-200";
+    "flex items-center justify-end p-2 group-odd:bg-gray-50 group-hover:bg-amber-200";
+const SECONDARY_ROW_CSS: &str =
+    "hidden md:flex items-center justify-end p-2 group-odd:bg-gray-50 group-hover:bg-amber-200";
 
 #[component]
 pub fn DietFoodComponent(
@@ -277,8 +268,8 @@ pub fn DietFoodComponent(
     checked_items: RwSignal<HashSet<String>>,
 ) -> impl IntoView {
     let formatted = data.format();
+    let detail_url = data.diet_detail_url();
     let update_url = data.diet_update_url();
-    let food_url = data.food_detail_url();
     let brand_url = data.brand_detail_url();
 
     let serving = data.get_serving_display();
@@ -294,10 +285,10 @@ pub fn DietFoodComponent(
                     <CheckboxListItem id=diet_id checked_items/>
                 </div>
                 <div class="flex-1">
-                    <a href=food_url class="block font-bold md:font-normal">
+                    <a href=detail_url class="block font-bold md:font-normal">
                         {food_name}
                     </a>
-                    <a href=brand_url class="block text-xs text-gray-600">
+                    <a href=brand_url class="block text-xs text-gray-600 capitalize">
                         {brand_name}
                     </a>
                 </div>
@@ -312,10 +303,10 @@ pub fn DietFoodComponent(
             <div class=ROW_CSS>{formatted.protein}</div>
             <div class=ROW_CSS>{formatted.carbohydrate}</div>
             <div class=ROW_CSS>{formatted.fat}</div>
-            <div class=ROW_SECONDARY_CSS>{formatted.saturates}</div>
-            <div class=ROW_SECONDARY_CSS>{formatted.sugars}</div>
-            <div class=ROW_SECONDARY_CSS>{formatted.fibre}</div>
-            <div class=ROW_SECONDARY_CSS>{formatted.salt}</div>
+            <div class=SECONDARY_ROW_CSS>{formatted.saturates}</div>
+            <div class=SECONDARY_ROW_CSS>{formatted.sugars}</div>
+            <div class=SECONDARY_ROW_CSS>{formatted.fibre}</div>
+            <div class=SECONDARY_ROW_CSS>{formatted.salt}</div>
         </section>
     }
 }

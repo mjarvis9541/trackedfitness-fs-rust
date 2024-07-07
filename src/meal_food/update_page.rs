@@ -1,5 +1,4 @@
 use leptos::*;
-use leptos_meta::*;
 use leptos_router::*;
 
 use rust_decimal::Decimal;
@@ -8,10 +7,10 @@ use uuid::Uuid;
 use super::detail_page::get_meal_food_detail;
 use super::model::MealFood;
 use crate::component::button::SubmitButton;
-use crate::component::input::ValidatedInput;
-use crate::component::template::{ErrorComponent, LoadingComponent};
-use crate::error_extract::{extract_error_message, process_non_field_errors};
+use crate::component::input::NumberInput;
+use crate::component::template::{DetailPageTemplate, ErrorComponent, LoadingComponent};
 use crate::food::router::MealFoodParam;
+use crate::util::validation_error::{extract_other_errors, get_non_field_errors};
 
 #[cfg(feature = "ssr")]
 use crate::{
@@ -49,35 +48,23 @@ async fn meal_food_update(
 
 #[component]
 pub fn MealFoodUpdatePage() -> impl IntoView {
-    let action = Action::<MealFoodUpdate, _>::server();
-
-    let error = move || extract_error_message(&action);
-    let non_field_errors = move || process_non_field_errors(error);
-
     let params = use_params::<MealFoodParam>();
     let id = move || params.with(|p| p.as_ref().map(|p| p.meal_food_id).unwrap_or_default());
+
+    let action = Action::<MealFoodUpdate, _>::server();
 
     let resource = Resource::new(id, get_meal_food_detail);
     let response =
         move || resource.and_then(|data| view! { <MealFoodUpdateForm data=data.clone() action/> });
 
     view! {
-        <Title text="Edit Meal Food"/>
-        <main class="p-4">
-            <div class="grid grid-cols-4 gap-4 md:grid-cols-12">
-                <div class="col-span-4">
-                    <div class="p-4 bg-white border">
-                        <h1 class="mb-2 text-base font-bold">"Edit Meal Food"</h1>
-                        {non_field_errors}
-                        <Transition fallback=LoadingComponent>
-                            <ErrorBoundary fallback=|errors| {
-                                view! { <ErrorComponent errors/> }
-                            }>{response}</ErrorBoundary>
-                        </Transition>
-                    </div>
-                </div>
-            </div>
-        </main>
+        <DetailPageTemplate title="Edit Meal Food">
+            <Transition fallback=LoadingComponent>
+                <ErrorBoundary fallback=|errors| {
+                    view! { <ErrorComponent errors/> }
+                }>{response}</ErrorBoundary>
+            </Transition>
+        </DetailPageTemplate>
     }
 }
 
@@ -86,8 +73,10 @@ pub fn MealFoodUpdateForm(
     data: MealFood,
     action: Action<MealFoodUpdate, Result<(), ServerFnError>>,
 ) -> impl IntoView {
-    let error = move || extract_error_message(&action);
-    let error = Signal::derive(error);
+    let action_loading = action.pending();
+    let action_value = action.value();
+    let action_error = move || extract_other_errors(action_value, &["name"]);
+    let non_field_errors = move || get_non_field_errors(action_value);
     view! {
         <header class="mb-4">
             <h1 class="text-xl font-bold">
@@ -101,14 +90,15 @@ pub fn MealFoodUpdateForm(
                 </A>
             </p>
         </header>
-
+        <div class="mb-4 text-red-500 font-bold">{action_error}</div>
+        <div class="mb-4 text-red-500 font-bold">{non_field_errors}</div>
         <ActionForm action>
             <input type="hidden" name="meal_food_id" value=data.id.to_string()/>
             <input type="hidden" name="meal_id" value=data.meal_id.to_string()/>
             <input type="hidden" name="food_id" value=data.food_id.to_string()/>
+            <NumberInput action_value name="quantity" value=format!("{:.2}", data.data_value)/>
+            <SubmitButton loading=action_loading label="Update Meal Food"/>
 
-            <ValidatedInput error name="quantity" value=format!("{:.2}", data.data_value)/>
-            <SubmitButton loading=action.pending() label="Update Meal Food"/>
         </ActionForm>
     }
 }

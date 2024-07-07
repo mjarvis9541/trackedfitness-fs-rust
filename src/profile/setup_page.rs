@@ -5,8 +5,8 @@ use chrono::prelude::*;
 use rust_decimal::Decimal;
 
 use crate::component::button::SubmitButton;
-use crate::component::input::{NumberInput, TextInputImproved};
-use crate::component::select::FieldSelectB;
+use crate::component::input::{NumberInput, TextInput};
+use crate::component::select::FieldSelect;
 use crate::component::template::DetailPageTemplate;
 use crate::util::param::get_username;
 use crate::util::validation_error::{extract_other_errors, get_non_field_errors};
@@ -122,13 +122,13 @@ pub fn InitialSetupPage() -> impl IntoView {
             <div class="mb-4 text-red-500 font-bold">{non_field_errors}</div>
             <ActionForm action>
                 <input type="hidden" name="username" value=username/>
-                <FieldSelectB name="activity_level" options=activity_options/>
-                <FieldSelectB name="fitness_goal" options=goal_options/>
-                <FieldSelectB name="sex" options=sex_options/>
+                <FieldSelect name="activity_level" options=activity_options/>
+                <FieldSelect name="fitness_goal" options=goal_options/>
+                <FieldSelect name="sex" options=sex_options/>
 
                 <NumberInput action_value name="height" label="Height (cm)" step="1"/>
                 <NumberInput action_value name="weight" label="Weight (kg)" step="0.01"/>
-                <TextInputImproved
+                <TextInput
                     action_value
                     name="date_of_birth"
                     label="Date of Birth"

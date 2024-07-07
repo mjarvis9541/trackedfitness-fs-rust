@@ -183,14 +183,14 @@ impl DietFoodQuery {
     }
 
     pub fn food_detail_url(&self) -> String {
-        format!("/food/{}", self.brand_slug)
+        format!("/food/{}", self.food_slug)
     }
 
     pub fn brand_detail_url(&self) -> String {
-        format!("/food/brands/{}", self.food_slug)
+        format!("/food/brands/{}", self.brand_slug)
     }
 
-    pub fn diet_day_detail_url(&self) -> String {
+    pub fn diet_day_url(&self) -> String {
         format!("/users/{}/diet/{}", self.username, self.date)
     }
 

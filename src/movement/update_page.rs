@@ -3,7 +3,7 @@ use leptos_router::*;
 
 use super::detail_page::get_movement_detail;
 use crate::component::button::SubmitButton;
-use crate::component::input::TextInputImproved;
+use crate::component::input::TextInput;
 use crate::component::template::{DetailPageTemplate, ErrorComponent, LoadingComponent};
 use crate::muscle_group::select::MuscleGroupFormSelect;
 use crate::util::param::get_slug;
@@ -55,7 +55,7 @@ pub fn MovementUpdatePage() -> impl IntoView {
             view! {
                 <ActionForm action>
                     <input type="hidden" name="id" value=id/>
-                    <TextInputImproved
+                    <TextInput
                         name="name"
                         value=name
                         action_value

@@ -5,9 +5,9 @@ use leptos_router::*;
 use super::user_select::{get_user_select, UserSelectResource};
 use crate::component::button::SubmitButton;
 use crate::component::checkbox::CheckboxInput;
-use crate::component::input::ValidatedInput;
-use crate::component::select::{FieldSelect, USER_PRIVACY_FORM_OPTIONS};
-use crate::error_extract::{extract_error_message, process_non_field_errors};
+use crate::component::input::TextInput;
+use crate::component::select::FieldSelect;
+use crate::util::validation_error::{extract_other_errors, get_non_field_errors};
 
 #[server]
 async fn user_create(
@@ -46,28 +46,34 @@ pub fn AdminUserCreatePage() -> impl IntoView {
     provide_context(resource);
 
     let action = Action::<UserCreate, _>::server();
-    let error = move || extract_error_message(&action);
-    let non_field_errors = move || process_non_field_errors(error);
+    let action_loading = action.pending();
+    let action_value = action.value();
+    let action_error = move || {
+        extract_other_errors(
+            action_value,
+            &["non_field_errors", "name", "email", "password"],
+        )
+    };
+    let non_field_errors = move || get_non_field_errors(action_value);
 
-    let error = Signal::derive(error);
     view! {
         <Title text="Create User"/>
 
         <div class="p-4 m-4 max-w-md bg-white border">
             <h1 class="mb-4 text-base font-bold">"Create User"</h1>
-            {error}
-            {non_field_errors}
+            <div class="mb-4 text-red-500 font-bold">{action_error}</div>
+            <div class="mb-4 text-red-500 font-bold">{non_field_errors}</div>
             <ActionForm action>
-                <ValidatedInput error name="name"/>
-                <ValidatedInput
-                    error
+                <TextInput action_value name="name"/>
+                <TextInput
+                    action_value
                     name="email"
                     input_type="email"
                     placeholder="michael@example.com"
                 />
-                <ValidatedInput error name="username" autocomplete="new-password"/>
-                <ValidatedInput
-                    error
+                <TextInput action_value name="username" autocomplete="new-password"/>
+                <TextInput
+                    action_value
                     name="password"
                     input_type="password"
                     autocomplete="new-password"
@@ -76,8 +82,17 @@ pub fn AdminUserCreatePage() -> impl IntoView {
                 <CheckboxInput name="is_active"/>
                 <CheckboxInput name="is_staff"/>
                 <CheckboxInput name="is_superuser"/>
-                <FieldSelect name="privacy_level" options=&USER_PRIVACY_FORM_OPTIONS/>
-                <SubmitButton loading=action.pending() label="Create User"/>
+                <FieldSelect
+                    name="privacy_level"
+                    options=vec![
+                        ("0", "N/A - All users can view your profile"),
+                        ("1", "Public - All users can view your profile"),
+                        ("2", "Followers Only - Only followers can view your profile"),
+                        ("3", "Private - No users can view your profile"),
+                    ]
+                />
+
+                <SubmitButton loading=action_loading label="Create User"/>
             </ActionForm>
         </div>
     }

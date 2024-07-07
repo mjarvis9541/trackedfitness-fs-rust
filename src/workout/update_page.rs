@@ -5,7 +5,7 @@ use chrono::prelude::*;
 use uuid::Uuid;
 
 use crate::component::button::SubmitButton;
-use crate::component::input::TextInputImproved;
+use crate::component::input::TextInput;
 use crate::component::template::{DetailPageTemplate, ErrorComponent, LoadingComponent};
 use crate::util::validation_error::{extract_other_errors, get_non_field_errors};
 
@@ -68,7 +68,7 @@ pub fn WorkoutUpdatePage() -> impl IntoView {
                 <ActionForm action>
                     <input type="hidden" name="workout_id" value=workout_id/>
                     <input type="hidden" name="redirect_to" value=redirect_to_url/>
-                    <TextInputImproved action_value name="date" input_type="date" value=date/>
+                    <TextInput action_value name="date" input_type="date" value=date/>
                     <SubmitButton loading=action_loading label="Update Workout"/>
                 </ActionForm>
             }

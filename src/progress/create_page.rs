@@ -4,7 +4,7 @@ use leptos_router::*;
 use rust_decimal::Decimal;
 
 use crate::component::button::SubmitButton;
-use crate::component::input::{NumberInput, TextInputImproved};
+use crate::component::input::{NumberInput, TextInput};
 use crate::component::template::DetailPageTemplate;
 use crate::util::param::{get_date, get_username};
 use crate::util::validation_error::{extract_other_errors, get_non_field_errors};
@@ -86,7 +86,7 @@ pub fn ProgressCreatePage() -> impl IntoView {
             <div class="mb-4 text-red-500 font-bold">{non_field_errors}</div>
             <ActionForm action>
                 <input type="hidden" name="username" value=username/>
-                <TextInputImproved
+                <TextInput
                     action_value
                     input_type="date"
                     name="date"
@@ -94,7 +94,7 @@ pub fn ProgressCreatePage() -> impl IntoView {
                 />
                 <NumberInput action_value name="weight_kg" step="0.01" label="Weight (kg)"/>
                 <NumberInput action_value name="energy_burnt" label="Energy Burnt (kcal)"/>
-                <TextInputImproved action_value name="notes"/>
+                <TextInput action_value name="notes"/>
 
                 <SubmitButton loading=action_loading label="Log Progress"/>
             </ActionForm>

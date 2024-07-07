@@ -19,14 +19,14 @@ pub fn DaySummaryListItem(
     } else if data.actual {
         "p-2 border-b flex items-center justify-end group-hover:bg-amber-200 group-odd:bg-gray-50"
     } else if total_row {
-        "p-2 border-b flex items-center justify-end bg-gray-200 font-bold border-t"
+        "p-2 border-b flex items-center justify-end bg-gray-100 font-bold"
     } else {
         "p-2 border-b flex items-center justify-end group-hover:bg-amber-200 group-odd:bg-gray-50"
     };
 
     let row_header = if total_row {
         view! {
-            <div class="p-2 border-b flex items-center bg-gray-200 font-bold col-span-3">
+            <div class="p-2 border-b flex items-center bg-gray-100 font-bold col-span-3">
                 "Week Average"
             </div>
         }

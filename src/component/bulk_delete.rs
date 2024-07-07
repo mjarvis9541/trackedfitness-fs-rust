@@ -27,17 +27,27 @@ pub async fn bulk_delete(
     let user = get_request_user()?;
     let pool = get_pool()?;
 
-    if !user.is_superuser && !ALLOWED_TABLES.contains(&table.as_str()) {
-        return Err(ServerFnError::new(
-            "You are not allowed to delete these items",
-        ));
-    }
     let items = items.ok_or_else(|| ServerFnError::new("Nothing selected"))?;
     let uuid_list =
         parse_uuids_from_strings(&items).map_err(|_| ServerFnError::new("Invalid id selection"))?;
 
-    let user_id = user.id;
+    if user.is_superuser {
+        let sql = format!("DELETE FROM {table} WHERE id = ANY ($1)");
+        let query = sqlx::query(&sql)
+            .bind(&uuid_list)
+            .execute(&pool)
+            .await?
+            .rows_affected();
+        return Ok(query);
+    }
 
+    if !ALLOWED_TABLES.contains(&table.as_str()) {
+        return Err(ServerFnError::new(
+            "You are not allowed to delete these items",
+        ));
+    }
+
+    let user_id = user.id;
     let check_sql = format!("SELECT user_id FROM {table} WHERE id = ANY ($1)");
 
     let all_owner_ids_match_user = sqlx::query(&check_sql)
@@ -93,8 +103,6 @@ pub fn BulkDeleteForm(
 
     view! {
         <div>
-            <div class="mb-4 text-red-500 font-bold">{action_error}</div>
-            <div class="mb-4 text-red-500 font-bold">{non_field_errors}</div>
             <ActionForm action on:submit=handle_submit>
                 <input type="hidden" name="table" value=table/>
                 <input type="hidden" name="items" value=""/>

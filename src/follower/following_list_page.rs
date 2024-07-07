@@ -3,11 +3,10 @@ use leptos_meta::*;
 use leptos_router::*;
 
 use super::model::Follower;
+use crate::component::input::FilterInput;
 use crate::component::paginator::Paginator;
-use crate::component::select::USER_SORT_OPTIONS;
-use crate::component::template::{
-    ErrorComponent, ListNotFoundComponent, LoadingComponent, SearchForm,
-};
+use crate::component::select::FilterSelect;
+use crate::component::template::{ErrorComponent, ListNotFoundComponent, LoadingComponent};
 use crate::follower::component::FollowerListItem;
 use crate::util::misc::ListResponse;
 use crate::util::param::{extract_page, extract_param, extract_size, get_username};
@@ -67,7 +66,20 @@ pub fn UserFollowingPage() -> impl IntoView {
         })
     };
     let count = move || resource.map(|res| res.as_ref().map(|res| res.count).unwrap_or_default());
-
+    let sort_options = vec![
+        ("username", "Username (A-z)"),
+        ("-username", "Username (Z-a)"),
+        ("name", "Name (A-z)"),
+        ("-name", "Name (Z-a)"),
+        ("email", "Email (A-z)"),
+        ("-email", "Email (Z-a)"),
+        ("created_at", "Created (Asc)"),
+        ("-created_at", "Created (Desc)"),
+        ("updated_at", "Updated (Asc)"),
+        ("-updated_at", "Updated (Desc)"),
+        ("last_login", "Last Login (Asc)"),
+        ("-last_login", "Last Login (Desc)"),
+    ];
     view! {
         <Title text="Following"/>
         <main class="p-4 m-4 bg-white border">
@@ -75,15 +87,15 @@ pub fn UserFollowingPage() -> impl IntoView {
                 <h1 class="text-xl font-bold">"Following"</h1>
                 <p class="text-gray-500">"Results: " <Transition>{count}</Transition></p>
             </header>
-            <section class="flex flex-wrap gap-2 mb-4 lg:mb-2">
-                <SearchForm
-                    search=Signal::derive(search)
-                    order=Signal::derive(order)
-                    size=Signal::derive(size)
-                    page=1
-                    options=&USER_SORT_OPTIONS
-                />
+            <section class="flex flex-wrap gap-2 mb-2 whitespace-nowrap">
+                <Form method="GET" action="" class="contents">
+                    <input type="hidden" name="page" value=1/>
+                    <input type="hidden" name="size" value=size/>
+                    <FilterInput name="search" value=Signal::derive(search)/>
+                    <FilterSelect name="order" value=Signal::derive(order) options=sort_options/>
+                </Form>
             </section>
+
             <section class="my-4">
                 <Transition fallback=LoadingComponent>
                     <ErrorBoundary fallback=|errors| {

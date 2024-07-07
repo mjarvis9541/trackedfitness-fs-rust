@@ -28,3 +28,9 @@ pub struct Meal {
     pub username: String,
     pub nutrition: Nutrition,
 }
+
+impl Meal {
+    pub fn get_detail_href(&self) -> String {
+        format!("/food/meals/{}", self.id)
+    }
+}

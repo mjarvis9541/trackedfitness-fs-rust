@@ -4,7 +4,7 @@ use leptos_router::*;
 use uuid::Uuid;
 
 use crate::component::button::SubmitButton;
-use crate::component::input::TextInputImproved;
+use crate::component::input::TextInput;
 use crate::component::template::{DetailPageTemplate, ErrorComponent, LoadingComponent};
 use crate::util::param::get_slug;
 use crate::util::validation_error::{extract_other_errors, get_non_field_errors};
@@ -46,12 +46,7 @@ pub fn BrandUpdatePage() -> impl IntoView {
             view! {
                 <ActionForm action>
                     <input type="hidden" name="id" value=id/>
-                    <TextInputImproved
-                        action_value
-                        name="name"
-                        value=name
-                        placeholder="Enter brand name"
-                    />
+                    <TextInput action_value name="name" value=name placeholder="Enter brand name"/>
                     <SubmitButton loading=action_loading label="Edit Brand"/>
                 </ActionForm>
             }

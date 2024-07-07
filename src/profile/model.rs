@@ -57,7 +57,7 @@ pub struct ProfileMetric {
     pub activity_level: String,
     pub sex: String,
     pub height: Decimal,
-    pub date_of_birth: NaiveDate,
+    // pub date_of_birth: NaiveDate,
     pub fitness_goal: String,
     pub updated_at: Option<DateTime<Utc>>,
     pub created_at: DateTime<Utc>,
@@ -69,6 +69,7 @@ pub struct ProfileMetric {
     pub latest_weight_date: Option<NaiveDate>,
     pub username: String,
     //
+    pub age: u32,
     pub activity_level_display: String,
     pub basal_metabolic_rate: Decimal,
     pub body_mass_index: Decimal,
@@ -86,6 +87,7 @@ impl From<Profile> for ProfileMetric {
         //     .parse::<ActivityLevel>()
         //     .unwrap_or_default();
         // let sex = data.sex.parse::<Sex>().unwrap_or_default();
+        let age = data.get_age();
 
         let activity_level_display = ActivityLevel::from_str(&data.activity_level)
             .unwrap_or_default()
@@ -106,7 +108,7 @@ impl From<Profile> for ProfileMetric {
             activity_level: data.activity_level,
             sex: data.sex,
             height: data.height,
-            date_of_birth: data.date_of_birth,
+            age,
             fitness_goal: data.fitness_goal,
             updated_at: data.updated_at,
             created_at: data.created_at,

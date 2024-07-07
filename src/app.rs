@@ -27,7 +27,7 @@ use crate::meal_of_day::detail_page::MealOfDayDetailPage;
 use crate::meal_of_day::list_page::MealOfDayListPage;
 use crate::meal_of_day::update_page::MealOfDayUpdatePage;
 use crate::movement::router::MovementRouter;
-use crate::training_plan::router::TrainingPlanRouter;
+// use crate::training_plan::router::TrainingPlanRouter;
 use crate::user::router::UserRouter;
 use crate::user_setting::settings_router::UserSettingsRouter;
 // use crate::util::use_interval::use_interval;
@@ -63,7 +63,6 @@ pub fn App() -> impl IntoView {
     provide_context(request_user_ctx);
     let follower_count = FollowerCount::new();
     provide_context(follower_count);
-
     // let follower_req = create_action(|&()| pending_follower_request_notification());
     // use_interval(60000, move || {
     //     leptos::logging::log!("Checking pending follower requests.");
@@ -75,7 +74,6 @@ pub fn App() -> impl IntoView {
     //         Err(_) => follower_count.0.set(0),
     //     })
     // };
-
     let login = Action::<Login, _>::server();
     let logout = Action::<Logout, _>::server();
     let signup_confirm = Action::<SignupConfirm, _>::server();
@@ -110,7 +108,6 @@ pub fn App() -> impl IntoView {
             content="Track your diet and workout progress effortlessly with our calorie-counting and training tracking web app. Achieve your fitness goals efficiently by monitoring your intake and activities in one convenient platform. Start optimizing your health journey today!"
         />
         <Body class="text-sm text-gray-900 bg-gray-100"/>
-
         <Router fallback=|| NotFound.into_view()>
             <Transition>
                 <ErrorBoundary fallback=|_| {
@@ -118,7 +115,6 @@ pub fn App() -> impl IntoView {
                 }>{response}</ErrorBoundary>
             </Transition>
             // <div class="hidden">{value}</div>
-
             <Routes>
                 <AdminRouter/>
                 <Route path="/" view=LandingPage/>
@@ -149,7 +145,6 @@ pub fn App() -> impl IntoView {
                     <Route path="/meal-of-day/:slug/delete" view=MealOfDayDeletePage/>
                     <UserRouter/>
                     <MovementRouter/>
-                    <TrainingPlanRouter/>
                     <UserSettingsRouter/>
                 </Route>
             </Routes>

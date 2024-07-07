@@ -3,7 +3,7 @@ use leptos_router::*;
 
 use super::user_select::UserSelect;
 use crate::component::button::SubmitButton;
-use crate::component::select::{FieldSelect, FORM_BLOCKED_STATUS_OPTIONS};
+use crate::component::select::FieldSelect;
 
 use uuid::Uuid;
 
@@ -24,11 +24,12 @@ async fn admin_user_block_create(
 pub fn AdminUserBlockCreateForm(
     action: Action<AdminUserBlockCreate, Result<(), ServerFnError>>,
 ) -> impl IntoView {
+    let blocked_options = vec![("0", "Unblocked"), ("1", "Blocked")];
     view! {
         <ActionForm action>
             <UserSelect name="blocker_id" label="blocker"/>
             <UserSelect name="blocked_id" label="blocked"/>
-            <FieldSelect name="blocked_status" options=&FORM_BLOCKED_STATUS_OPTIONS/>
+            <FieldSelect name="blocked_status" options=blocked_options/>
             <SubmitButton loading=action.pending() label="Create Blocked User"/>
         </ActionForm>
     }

@@ -3,7 +3,7 @@ use leptos_meta::*;
 use leptos_router::*;
 
 use crate::component::button::SubmitButton;
-use crate::error_extract::extract_error_message;
+use crate::util::validation_error::{extract_other_errors, get_non_field_errors};
 
 #[server(endpoint = "logout")]
 pub async fn logout() -> Result<(), ServerFnError> {
@@ -23,16 +23,17 @@ pub fn LogoutPage(logout: Action<Logout, Result<(), ServerFnError>>) -> impl Int
     //         }
     //     })
     // });
-    let error = move || extract_error_message(&logout);
-
+    let action_value = logout.value();
+    let action_error = move || extract_other_errors(action_value, &["non_field_errors"]);
+    let non_field_errors = move || get_non_field_errors(action_value);
     view! {
         <Title text="Log out"/>
         <main class="p-4 lg:p-8">
-
             <div class="p-4 mx-auto max-w-md bg-white border shadow-md">
                 <h1 class="mb-4 text-xl font-bold">"Log out"</h1>
                 <p class="mb-4">"Are you sure you wish to log out?"</p>
-                <div class="my-4 space-y-2 font-bold text-red-500">{error}</div>
+                <div class="mb-4 text-red-500 font-bold">{action_error}</div>
+                <div class="mb-4 text-red-500 font-bold">{non_field_errors}</div>
                 <ActionForm action=logout>
                     <SubmitButton loading=logout.pending() label="Log out"/>
                 </ActionForm>

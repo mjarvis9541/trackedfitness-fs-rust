@@ -5,7 +5,7 @@ use uuid::Uuid;
 
 use super::user_select::UserSelect;
 use crate::component::button::SubmitButton;
-use crate::component::select::{FieldSelect, FOLLOWER_STATUS_FORM_OPTIONS};
+use crate::component::select::FieldSelect;
 
 #[server(endpoint = "admin-follower-create")]
 pub async fn admin_follower_create(
@@ -27,7 +27,10 @@ pub fn AdminFollowerCreateForm(
         <ActionForm action>
             <UserSelect name="user_id" label="user"/>
             <UserSelect name="follower_id" label="follower"/>
-            <FieldSelect name="status" options=&FOLLOWER_STATUS_FORM_OPTIONS/>
+            <FieldSelect
+                name="status"
+                options=vec![("0", "Pending"), ("1", "Accepted"), ("2", "Declined")]
+            />
             <SubmitButton loading=action.pending() label="Create Follower"/>
         </ActionForm>
     }

@@ -5,8 +5,8 @@ use chrono::prelude::*;
 use rust_decimal::Decimal;
 
 use crate::component::button::SubmitButton;
-use crate::component::input::{NumberInput, TextInputImproved};
-use crate::component::select::FieldSelectB;
+use crate::component::input::{NumberInput, TextInput};
+use crate::component::select::FieldSelect;
 use crate::component::template::{DetailPageTemplate, ErrorComponent, LoadingComponent};
 use crate::profile::model::Profile;
 use crate::util::param::get_username;
@@ -119,13 +119,13 @@ pub fn ProfileUpdatePage() -> impl IntoView {
                 <ActionForm action>
                     <input type="hidden" name="id" value=data.id.to_string()/>
                     <input type="hidden" name="username" value=data.username/>
-                    <FieldSelectB
+                    <FieldSelect
                         name="activity_level"
                         options=activity_options
                         value=data.activity_level
                     />
-                    <FieldSelectB name="fitness_goal" options=goal_options value=data.fitness_goal/>
-                    <FieldSelectB name="sex" options=sex_options value=data.sex/>
+                    <FieldSelect name="fitness_goal" options=goal_options value=data.fitness_goal/>
+                    <FieldSelect name="sex" options=sex_options value=data.sex/>
 
                     <NumberInput
                         action_value
@@ -135,7 +135,7 @@ pub fn ProfileUpdatePage() -> impl IntoView {
                         placeholder="Enter your height in cm"
                         value=data.height.to_string()
                     />
-                    <TextInputImproved
+                    <TextInput
                         action_value
                         name="date_of_birth"
                         label="Date of Birth"

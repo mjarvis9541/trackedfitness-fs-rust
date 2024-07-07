@@ -5,7 +5,7 @@ use uuid::Uuid;
 
 use super::detail_page::get_muscle_group;
 use crate::component::button::SubmitButton;
-use crate::component::input::TextInputImproved;
+use crate::component::input::TextInput;
 use crate::component::template::{DetailPageTemplate, ErrorComponent, LoadingComponent};
 use crate::util::param::get_slug;
 use crate::util::validation_error::{extract_other_errors, get_non_field_errors};
@@ -49,7 +49,7 @@ pub fn MuscleGroupUpdatePage() -> impl IntoView {
             view! {
                 <ActionForm action>
                     <input type="hidden" name="id" value=id/>
-                    <TextInputImproved
+                    <TextInput
                         name="name"
                         value=name
                         action_value

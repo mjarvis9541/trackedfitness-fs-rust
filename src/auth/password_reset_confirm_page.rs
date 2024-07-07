@@ -3,7 +3,7 @@ use leptos_meta::*;
 use leptos_router::*;
 
 use crate::component::button::SubmitButton;
-use crate::component::input::TextInputImproved;
+use crate::component::input::TextInput;
 use crate::util::param::extract_param;
 use crate::util::validation_error::{extract_other_errors, get_non_field_errors};
 
@@ -62,7 +62,7 @@ pub fn PasswordResetConfirmPage() -> impl IntoView {
 
                 <ActionForm action>
                     <input type="hidden" name="token" value=token/>
-                    <TextInputImproved
+                    <TextInput
                         name="password"
                         input_type="password"
                         autocomplete="new-password"

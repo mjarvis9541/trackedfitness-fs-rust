@@ -3,7 +3,7 @@ use leptos_meta::*;
 use leptos_router::*;
 
 use crate::component::button::SubmitButton;
-use crate::component::input::TextInputImproved;
+use crate::component::input::TextInput;
 use crate::util::validation_error::{extract_other_errors, get_non_field_errors};
 
 #[cfg(feature = "ssr")]
@@ -56,7 +56,7 @@ pub fn LoginPage(login: Action<Login, Result<(), ServerFnError>>) -> impl IntoVi
                 <div class="mb-4 text-red-500 font-bold">{action_error}</div>
                 <div class="mb-4 text-red-500 font-bold">{non_field_errors}</div>
                 <ActionForm action=login>
-                    <TextInputImproved
+                    <TextInput
                         name="email"
                         input_type="email"
                         label="Email address"
@@ -64,7 +64,7 @@ pub fn LoginPage(login: Action<Login, Result<(), ServerFnError>>) -> impl IntoVi
                         action_value
                     />
 
-                    <TextInputImproved
+                    <TextInput
                         name="password"
                         input_type="password"
                         placeholder="Enter your password"

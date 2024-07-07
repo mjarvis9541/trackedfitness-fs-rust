@@ -28,7 +28,7 @@ pub fn ProfileSetupComponent() -> impl IntoView {
 }
 
 #[component]
-pub fn ProfileDetailPanelComponent() -> impl IntoView {
+pub fn ProfileDetailPanel() -> impl IntoView {
     let params = use_params_map();
     let username = move || get_username(&params);
     let date = move || get_date(&params);

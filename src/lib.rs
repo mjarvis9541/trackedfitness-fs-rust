@@ -9,7 +9,6 @@ mod diet_target;
 mod error;
 mod error_extract;
 mod exercise;
-mod exercise_plan;
 mod follower;
 mod food;
 mod meal;
@@ -21,7 +20,6 @@ mod profile;
 mod progress;
 mod set;
 mod summary;
-mod training_plan;
 mod user;
 mod user_block;
 mod user_setting;
@@ -29,7 +27,6 @@ mod user_statistic;
 mod util;
 mod web;
 mod workout;
-mod workout_plan;
 
 #[cfg(feature = "ssr")]
 pub mod config;

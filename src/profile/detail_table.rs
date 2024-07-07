@@ -8,16 +8,16 @@ pub fn ProfileDetailTable(data: ProfileMetric) -> impl IntoView {
     let created_at = format_datetime(&Some(data.created_at));
     let updated_at = format_datetime(&data.updated_at);
 
-    let to_latest_weight_href = data.latest_weight_date.map_or_else(
-        || "#".to_string(),
-        |date| format!("/users/{}/progress/{}", data.username, date),
-    );
     let latest_weight = data
         .latest_weight
         .map_or_else(|| "#".to_string(), |weight| format!("{:.2}kg", weight));
     let latest_weight_date = data.latest_weight_date.map_or_else(
         || "-".to_string(),
         |d| d.format(DATE_FORMAT_SHORT).to_string(),
+    );
+    let latest_weight_href = data.latest_weight_date.map_or_else(
+        || "#".to_string(),
+        |date| format!("/users/{}/progress/{}", data.username, date),
     );
 
     view! {
@@ -33,7 +33,7 @@ pub fn ProfileDetailTable(data: ProfileMetric) -> impl IntoView {
                     <tr>
                         <td class="p-2 w-1/2 text-left border">"Weight"</td>
                         <td class="p-2 w-1/2 text-right border">
-                            <a href=to_latest_weight_href class="hover:underline">
+                            <a href=latest_weight_href class="hover:underline">
                                 {latest_weight}
                                 <div class="text-xs text-gray-500">{latest_weight_date}</div>
                             </a>
@@ -45,7 +45,7 @@ pub fn ProfileDetailTable(data: ProfileMetric) -> impl IntoView {
                     </tr>
                     <tr>
                         <td class="p-2 w-1/2 text-left border">"Age"</td>
-                    // <td class="p-2 w-1/2 text-right border">{data.get_age()}</td>
+                        <td class="p-2 w-1/2 text-right border">{data.age}</td>
                     </tr>
                     <tr>
                         <td class="p-2 w-1/2 text-left border">

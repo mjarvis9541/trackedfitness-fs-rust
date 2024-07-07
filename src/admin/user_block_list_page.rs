@@ -92,7 +92,21 @@ pub fn AdminUserBlockListPage() -> impl IntoView {
                 .and_then(|data| data.as_ref().ok().map(|res| res.count))
         })
     };
-
+    let blocked_options = vec![("", "All"), ("0", "Unblocked"), ("1", "Blocked")];
+    let sort_options = vec![
+        ("username", "Username (A-z)"),
+        ("-username", "Username (Z-a)"),
+        ("name", "Name (A-z)"),
+        ("-name", "Name (Z-a)"),
+        ("email", "Email (A-z)"),
+        ("-email", "Email (Z-a)"),
+        ("created_at", "Created (Asc)"),
+        ("-created_at", "Created (Desc)"),
+        ("updated_at", "Updated (Asc)"),
+        ("-updated_at", "Updated (Desc)"),
+        ("last_login", "Last Login (Asc)"),
+        ("-last_login", "Last Login (Desc)"),
+    ];
     view! {
         <Title text="Admin - Blocked Users"/>
         <main class="lg:p-4">
@@ -108,7 +122,7 @@ pub fn AdminUserBlockListPage() -> impl IntoView {
                             </p>
                         </header>
 
-                        <div class="flex flex-wrap gap-2 mb-2 whitespace-nowrap">
+                        <section class="flex flex-wrap gap-2 mb-2 whitespace-nowrap">
                             <Form method="GET" action="" class="contents">
                                 <input type="hidden" name="page" value=1/>
                                 <input type="hidden" name="size" value=size/>
@@ -117,15 +131,15 @@ pub fn AdminUserBlockListPage() -> impl IntoView {
                                 <FilterSelect
                                     name="status"
                                     value=Signal::derive(status)
-                                    options=&crate::component::select::BLOCKED_STATUS_OPTIONS
+                                    options=blocked_options
                                 />
                                 <FilterSelect
                                     name="order"
                                     value=Signal::derive(order)
-                                    options=&crate::component::select::USER_SORT_OPTIONS
+                                    options=sort_options
                                 />
                             </Form>
-                        </div>
+                        </section>
                     </div>
 
                     <section class="grid overflow-auto p-4 whitespace-nowrap bg-white grid-cols-checkbox-6">

@@ -3,7 +3,7 @@ use leptos_meta::*;
 use leptos_router::*;
 
 use crate::component::button::SubmitButton;
-use crate::component::input::TextInputImproved;
+use crate::component::input::TextInput;
 use crate::util::validation_error::{extract_other_errors, get_non_field_errors};
 
 #[cfg(feature = "ssr")]
@@ -18,11 +18,9 @@ pub async fn email_change_request(email: String) -> Result<(), ServerFnError> {
     let pool = get_pool()?;
 
     User::validate_email(&email)?;
-
     if User::get_by_email(&pool, &email).await?.is_some() {
         use_context::<leptos_axum::ResponseOptions>()
             .map(|res| res.set_status(http::StatusCode::BAD_REQUEST));
-
         return Err(ServerFnError::new("This email is taken"));
     }
 
@@ -55,23 +53,17 @@ pub fn EmailChangeRequestPage() -> impl IntoView {
             <div class="max-w-sm">
                 <h1 class="mb-2 text-base font-bold">"Change Email"</h1>
                 <p class="mb-4">"Update your email address below."</p>
-
-                <hr class="mb-8"/>
                 <div class="mb-4 text-red-500 font-bold">{action_error}</div>
                 <div class="mb-4 text-red-500 font-bold">{non_field_errors}</div>
-
                 <ActionForm action>
-                    <TextInputImproved
+                    <TextInput
                         name="email"
-                        label="Email address"
-                        placeholder="Enter your email address"
+                        label="New email address"
+                        placeholder="Enter your new email address"
                         input_type="email"
                         action_value
                     />
-
-                    <div class="inline-block mt-6">
-                        <SubmitButton loading=action_loading label="Continue"/>
-                    </div>
+                    <SubmitButton loading=action_loading label="Continue"/>
                 </ActionForm>
             </div>
         </main>

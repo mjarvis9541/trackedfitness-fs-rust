@@ -4,7 +4,7 @@ use leptos_router::*;
 use uuid::Uuid;
 
 use crate::component::button::SubmitButton;
-use crate::component::input::TextInputImproved;
+use crate::component::input::TextInput;
 use crate::component::template::DetailPageTemplate;
 use crate::muscle_group::select::{get_muscle_group_form_select, MuscleGroupFormSelect};
 use crate::util::validation_error::{extract_other_errors, get_non_field_errors};
@@ -41,7 +41,7 @@ pub fn MovementCreatePage() -> impl IntoView {
             <div class="mb-4 text-red-500 font-bold">{action_error}</div>
             <div class="mb-4 text-red-500 font-bold">{non_field_errors}</div>
             <ActionForm action>
-                <TextInputImproved action_value name="name" placeholder="Enter exercise name"/>
+                <TextInput action_value name="name" placeholder="Enter exercise name"/>
                 <MuscleGroupFormSelect/>
                 <SubmitButton loading=action_loading label="Create Exercise"/>
             </ActionForm>

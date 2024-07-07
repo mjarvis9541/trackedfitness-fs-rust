@@ -99,7 +99,24 @@ pub fn AdminFollowerListPage() -> impl IntoView {
                 .and_then(|res| res.as_ref().map(|res| res.count).ok())
         })
     };
-
+    let status_options = vec![
+        ("", "All"),
+        ("0", "Pending"),
+        ("1", "Accepted"),
+        ("2", "Declined"),
+    ];
+    let sort_options = vec![
+        ("username", "Username (A-z)"),
+        ("-username", "Username (Z-a)"),
+        ("follower", "Follower (A-z)"),
+        ("-follower", "Follower (Z-a)"),
+        ("created_at", "Created (Asc)"),
+        ("-created_at", "Created (Desc)"),
+        ("updated_at", "Updated (Asc)"),
+        ("-updated_at", "Updated (Desc)"),
+        ("status", "Status (Asc)"),
+        ("-status", "Status (Desc)"),
+    ];
     view! {
         <Title text="Admin - User Followers"/>
         <main class="lg:p-4">
@@ -124,12 +141,12 @@ pub fn AdminFollowerListPage() -> impl IntoView {
                             <FilterSelect
                                 name="status"
                                 value=Signal::derive(status)
-                                options=&crate::component::select::FOLLOWER_STATUS_OPTIONS
+                                options=status_options
                             />
                             <FilterSelect
                                 name="order"
                                 value=Signal::derive(order)
-                                options=&crate::component::select::FOLLOWER_SORT_OPTIONS
+                                options=sort_options
                             />
                         </Form>
                     </section>

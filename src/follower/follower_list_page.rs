@@ -5,7 +5,7 @@ use leptos_router::*;
 use super::model::Follower;
 use crate::component::input::FilterInput;
 use crate::component::paginator::Paginator;
-use crate::component::select::FieldSelectB;
+use crate::component::select::FieldSelect;
 use crate::component::template::{ErrorComponent, ListNotFoundComponent, LoadingComponent};
 use crate::follower::component::FollowerListItem;
 use crate::util::misc::ListResponse;
@@ -86,7 +86,7 @@ pub fn UserFollowerListPage() -> impl IntoView {
             <section class="flex flex-wrap gap-2 mb-4 lg:mb-2">
                 <Form method="GET" action="" class="contents">
                     <FilterInput name="search" value=Signal::derive(search)/>
-                    <FieldSelectB name="order" value=Signal::derive(order) options=order_options/>
+                    <FieldSelect name="order" value=Signal::derive(order) options=order_options/>
                     <input type="hidden" name="size" value=size/>
                     <input type="hidden" name="page" value=page/>
                 </Form>

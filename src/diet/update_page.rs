@@ -6,7 +6,7 @@ use rust_decimal::Decimal;
 use uuid::Uuid;
 
 use crate::component::button::SubmitButton;
-use crate::component::input::{NumberInput, TextInputImproved};
+use crate::component::input::{NumberInput, TextInput};
 use crate::component::template::{DetailPageTemplate, ErrorComponent, LoadingComponent};
 use crate::diet::detail_page::get_diet_detail;
 use crate::meal_of_day::select::MealOfDaySelect;
@@ -76,13 +76,13 @@ pub fn DietUpdatePage() -> impl IntoView {
             let title = data.title();
             view! {
                 <h1 class="mb-2 text-xl font-bold">{title}</h1>
-                <p class="mb-4 font-bold">{data.brand_name}</p>
+                <p class="mb-4 font-bold capitalize">{data.brand_name}</p>
 
                 <ActionForm action>
                     <input type="hidden" name="username" value=data.username/>
                     <input type="hidden" name="food_id" value=data.food_id.to_string()/>
                     <input type="hidden" name="id" value=data.id.to_string()/>
-                    <TextInputImproved
+                    <TextInput
                         action_value
                         name="date"
                         input_type="date"

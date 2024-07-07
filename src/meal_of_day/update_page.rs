@@ -2,7 +2,7 @@ use leptos::*;
 use leptos_router::*;
 
 use crate::component::button::SubmitButton;
-use crate::component::input::{NumberInput, TextInputImproved};
+use crate::component::input::{NumberInput, TextInput};
 use crate::component::template::{DetailPageTemplate, ErrorComponent, LoadingComponent};
 use crate::util::param::get_slug;
 use crate::util::validation_error::{extract_other_errors, get_non_field_errors};
@@ -57,7 +57,7 @@ pub fn MealOfDayUpdatePage() -> impl IntoView {
             view! {
                 <ActionForm action>
                     <input type="hidden" name="slug" value=slug/>
-                    <TextInputImproved name="name" value=name action_value/>
+                    <TextInput name="name" value=name action_value/>
                     <NumberInput name="ordering" step="1" value=order action_value/>
                     <SubmitButton loading=action_loading label="Update Meal of Day"/>
                 </ActionForm>

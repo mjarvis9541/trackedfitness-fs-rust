@@ -46,7 +46,7 @@ pub fn DietDeletePage() -> impl IntoView {
     let response = move || {
         resource.and_then(|data| {
             let id = data.id.to_string();
-            let redirect_url = data.diet_day_detail_url();
+            let redirect_url = data.diet_day_url();
             view! {
                 <p class="mb-4">"Are you sure you wish to delete this diet target?"</p>
                 <p class="mb-4">"Ths action cannot be undone."</p>

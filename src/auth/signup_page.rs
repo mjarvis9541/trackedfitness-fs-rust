@@ -3,7 +3,7 @@ use leptos_meta::*;
 use leptos_router::*;
 
 use crate::component::button::SubmitButton;
-use crate::component::input::TextInputImproved;
+use crate::component::input::TextInput;
 use crate::util::validation_error::{extract_other_errors, get_non_field_errors};
 
 #[cfg(feature = "ssr")]
@@ -71,7 +71,7 @@ pub fn SignupPage() -> impl IntoView {
                 <div class="mb-4 text-red-500 font-bold">{action_error}</div>
                 <div class="mb-4 text-red-500 font-bold">{non_field_errors}</div>
                 <ActionForm action>
-                    <TextInputImproved
+                    <TextInput
                         name="code"
                         input_type="password"
                         label="Early access code"
@@ -79,20 +79,20 @@ pub fn SignupPage() -> impl IntoView {
                         placeholder="Enter your early access code"
                         action_value
                     />
-                    <TextInputImproved
+                    <TextInput
                         name="name"
                         label="Full name"
                         placeholder="Enter your full name"
                         action_value
                     />
-                    <TextInputImproved
+                    <TextInput
                         name="email"
                         label="Email address"
                         placeholder="Enter your email address"
                         input_type="email"
                         action_value
                     />
-                    <TextInputImproved
+                    <TextInput
                         name="password"
                         input_type="password"
                         autocomplete="new-password"

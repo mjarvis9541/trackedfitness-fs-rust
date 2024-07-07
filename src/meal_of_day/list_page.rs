@@ -83,6 +83,16 @@ pub fn MealOfDayListPage() -> impl IntoView {
                 .and_then(|data| data.as_ref().ok().map(|res| res.count))
         })
     };
+    let sort_options = vec![
+        ("name", "Name (A-z)"),
+        ("-name", "Name (Z-a)"),
+        ("ordering", "Order (Asc)"),
+        ("-ordering", "Order (Desc)"),
+        ("created_at", "Created (Asc)"),
+        ("-created_at", "Created (Desc)"),
+        ("updated_at", "Updated (Asc)"),
+        ("-updated_at", "Updated (Desc)"),
+    ];
 
     view! {
         <Title text="Meal of Day"/>
@@ -94,7 +104,7 @@ pub fn MealOfDayListPage() -> impl IntoView {
                     <Transition fallback=Loading>{count}</Transition>
                 </ListPageHeaderWithCreate>
 
-                <div class="flex flex-wrap gap-x-2 mb-2">
+                <section class="flex flex-wrap gap-x-2 mb-2">
                     <Form method="GET" action="" class="contents">
                         <input type="hidden" name="page" value=1/>
                         <input type="hidden" name="size" value=size/>
@@ -102,10 +112,10 @@ pub fn MealOfDayListPage() -> impl IntoView {
                         <FilterSelect
                             name="order"
                             value=Signal::derive(order)
-                            options=&crate::component::select::MEAL_OF_DAY_SORT_OPTIONS
+                            options=sort_options
                         />
                     </Form>
-                </div>
+                </section>
 
                 <div class="grid grid-cols-checkbox-4">
                     <AutoListHeader all_items checked_items>

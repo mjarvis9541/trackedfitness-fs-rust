@@ -5,9 +5,10 @@ use leptos_router::*;
 use std::collections::HashSet;
 
 use crate::component::checkbox::CheckboxListItem;
-use crate::component::select::USER_STAT_SORT_OPTIONS;
+use crate::component::input::FilterInput;
+use crate::component::select::FilterSelect;
 use crate::component::template::{
-    AutoListHeader, ErrorComponent, ListLoadingComponent, ListNotFoundComponent, SearchForm,
+    AutoListHeader, ErrorComponent, ListLoadingComponent, ListNotFoundComponent,
 };
 use crate::user_statistic::model::UserStat;
 use crate::util::param::{extract_page, extract_param, extract_size};
@@ -56,20 +57,77 @@ pub fn AdminUserStatListPage() -> impl IntoView {
         })
     };
 
+    let sort_options = vec![
+        ("username", "Username (A-z)"),
+        ("-username", "Username (Z-a)"),
+        ("-follower_count", "Follower Count (Desc)"),
+        ("follower_count", "Follower Count (Asc)"),
+        ("-following_count", "Following Count (Desc)"),
+        ("following_count", "Following Count (Asc)"),
+        ("-diet_count", "Diet Count (Desc)"),
+        ("diet_count", "Diet Count (Asc)"),
+        ("-diet_day_log_count", "Diet Day Log Count (Desc)"),
+        ("diet_day_log_count", "Diet Day Log Count (Asc)"),
+        ("-diet_target_count", "Diet Target Count (Desc)"),
+        ("diet_target_count", "Diet Target Count (Asc)"),
+        ("-progress_count", "Progress Count (Desc)"),
+        ("progress_count", "Progress Count (Asc)"),
+        ("-workout_count", "Workout Count (Desc)"),
+        ("workout_count", "Workout Count (Asc)"),
+        ("-workout_day_log_count", "Workout Day Log Count (Desc)"),
+        ("workout_day_log_count", "Workout Day Log Count (Asc)"),
+        ("-exercise_count", "Exercise Count (Desc)"),
+        ("exercise_count", "Exercise Count (Asc)"),
+        ("-set_count", "Set Count (Desc)"),
+        ("set_count", "Set Count (Asc)"),
+        ("-rep_count", "Rep Count (Desc)"),
+        ("rep_count", "Rep Count (Asc)"),
+        ("-food_created_count", "Food Created Count (Desc)"),
+        ("food_created_count", "Food Created Count (Asc)"),
+        ("-brand_created_count", "Brand Created Count (Desc)"),
+        ("brand_created_count", "Brand Created Count (Asc)"),
+        ("-meal_created_count", "Meal Created Count (Desc)"),
+        ("meal_created_count", "Meal Created Count (Asc)"),
+        ("-meal_food_created_count", "Meal Food Created Count (Desc)"),
+        ("meal_food_created_count", "Meal Food Created Count (Asc)"),
+        (
+            "-meal_of_day_created_count",
+            "Meal Of Day Created Count (Desc)",
+        ),
+        (
+            "meal_of_day_created_count",
+            "Meal Of Day Created Count (Asc)",
+        ),
+        ("-movement_created_count", "Movement Created Count (Desc)"),
+        ("movement_created_count", "Movement Created Count (Asc)"),
+        (
+            "-muscle_group_created_count",
+            "Muscle Group Created Count (Desc)",
+        ),
+        (
+            "muscle_group_created_count",
+            "Muscle Group Created Count (Asc)",
+        ),
+    ];
+
     view! {
         <Title text="Admin - User Stats"/>
         <main class="lg:p-4">
             <div class="p-4 bg-white border">
                 <h2 class="mb-4 text-base font-bold">"Admin - User Stats"</h2>
                 <section class="flex flex-wrap gap-2 mb-4 lg:mb-2">
-                    <SearchForm
-                        search=Signal::derive(search)
-                        order=Signal::derive(order)
-                        size=Signal::derive(size)
-                        page=1
-                        options=&USER_STAT_SORT_OPTIONS
-                    />
+                    <Form method="GET" action="" class="contents">
+                        <input type="hidden" name="size" value=size/>
+                        <input type="hidden" name="page" value=1/>
+                        <FilterInput name="search" value=Signal::derive(search)/>
+                        <FilterSelect
+                            name="order"
+                            value=Signal::derive(order)
+                            options=sort_options
+                        />
+                    </Form>
                 </section>
+
                 <section class="grid overflow-auto mb-4 whitespace-nowrap bg-white grid-cols-checkbox-12">
                     <AutoListHeader all_items checked_items>
                         "Username"

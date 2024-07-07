@@ -7,7 +7,7 @@ use uuid::Uuid;
 
 use super::user_select::{get_user_select, UserSelect, UserSelectResource};
 use crate::component::button::SubmitButton;
-use crate::component::select::FieldSelectB;
+use crate::component::select::FieldSelect;
 use crate::component::template::{ErrorComponent, LoadingComponent};
 use crate::follower::model::Follower;
 use crate::util::datetime::format_datetime;
@@ -129,7 +129,7 @@ pub fn AdminFollowerUpdateForm(
             <input type="hidden" name="id" value=data.id.to_string()/>
             <UserSelect name="user_id" label="user" selected=data.user_id/>
             <UserSelect name="follower_id" label="follower" selected=data.follower_id/>
-            <FieldSelectB
+            <FieldSelect
                 name="status"
                 options=vec![("0", "Pending"), ("1", "Accepted"), ("2", "Declined")]
                 value=data.status.to_string()

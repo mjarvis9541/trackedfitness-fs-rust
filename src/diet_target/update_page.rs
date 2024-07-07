@@ -6,7 +6,7 @@ use rust_decimal::Decimal;
 use uuid::Uuid;
 
 use crate::component::button::SubmitButton;
-use crate::component::input::{NumberInput, TextInputImproved};
+use crate::component::input::{NumberInput, TextInput};
 use crate::component::template::{DetailPageTemplate, ErrorComponent, LoadingComponent};
 use crate::util::param::{get_date, get_username};
 use crate::util::validation_error::{extract_other_errors, get_non_field_errors};
@@ -113,7 +113,7 @@ pub fn DietTargetForm(
         <ActionForm action>
             <input type="hidden" name="id" value=data.id.to_string()/>
             <input type="hidden" name="username" value=data.username/>
-            <TextInputImproved
+            <TextInput
                 action_value
                 input_type="date"
                 name="date"

@@ -3,7 +3,7 @@ use leptos_meta::*;
 
 use crate::component::date_navigation::DateNavigation;
 use crate::diet_target::component::DietTargetDetailPanelComponent;
-use crate::profile::component::ProfileDetailPanelComponent;
+use crate::profile::component::ProfileDetailPanel;
 use crate::progress::component::ProgressDetailPanelComponent;
 
 #[component]
@@ -16,7 +16,7 @@ pub fn UserDetailPage() -> impl IntoView {
 
             <div class="grid grid-cols-4 gap-4 md:grid-cols-8 lg:grid-cols-12">
                 <section class="col-span-4">
-                    <ProfileDetailPanelComponent/>
+                    <ProfileDetailPanel/>
                 </section>
 
                 <section class="col-span-4">

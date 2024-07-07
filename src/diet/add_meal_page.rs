@@ -7,11 +7,12 @@ use uuid::Uuid;
 
 use crate::component::button::Button;
 use crate::component::icon::IconFilePlus;
+use crate::component::input::FilterInput;
 use crate::component::paginator::Paginator;
-use crate::component::select::MEAL_SORT_OPTIONS;
+use crate::component::select::FilterSelect;
 use crate::component::template::{
     AddFoodListHeader, ErrorComponent, FoodListItemMacroHeader, ListNotFoundComponent,
-    ListPageHeaderWithCreate, SearchForm, Skeleton,
+    ListPageHeaderWithCreate, Skeleton,
 };
 use crate::food::nutrition_row::NutritionRow;
 use crate::meal::model::Meal;
@@ -34,19 +35,14 @@ pub async fn diet_add_meal(
 ) -> Result<(), ServerFnError> {
     let user = get_request_user()?;
     let pool = get_pool()?;
-
     let target_user = User::get_by_username(&pool, &username)
         .await?
         .ok_or(Error::NotFound)?;
-
     Diet::can_create(&user, user.id)?;
-
     let meal_of_day = MealOfDay::get_by_slug(&pool, &meal_of_day_slug)
         .await?
         .ok_or(Error::NotFound)?;
-
     let meal_food = MealFoodModel::all_by_meal_id(&pool, meal_id).await?;
-
     Diet::bulk_create_from_meal_food(
         &pool,
         target_user.id,
@@ -127,7 +123,32 @@ pub fn DietAddMealPage() -> impl IntoView {
         })
     };
     let subtitle = move || format!("{} - {}", date().format(DATE_FORMAT_SHORT), meal());
-
+    let sort_options = vec![
+        ("name", "Name (A-z)"),
+        ("-name", "Name (Z-a)"),
+        ("-food_count", "Food Count (High-Low)"),
+        ("food_count", "Food Count (Low-High)"),
+        ("-energy", "Calories (High-Low)"),
+        ("energy", "Calories (Low-High)"),
+        ("-protein", "Protein (High-Low)"),
+        ("protein", "Protein (Low-High)"),
+        ("-carbohydrate", "Carbs (High-Low)"),
+        ("carbohydrate", "Carbs (Low-High)"),
+        ("-fat", "Fat (High-Low)"),
+        ("fat", "Fat (Low-High)"),
+        ("-saturates", "Saturates (High-Low)"),
+        ("saturates", "Saturates (Low-High)"),
+        ("-sugars", "Sugars (High-Low)"),
+        ("sugars", "Sugars (Low-High)"),
+        ("-fibre", "Fibre (High-Low)"),
+        ("fibre", "Fibre (Low-High)"),
+        ("-salt", "Salt (High-Low)"),
+        ("salt", "Salt (Low-High)"),
+        ("-created_at", "Created (Desc)"),
+        ("created_at", "Created (Asc)"),
+        ("-updated_at", "Updated (Desc)"),
+        ("updated_at", "Updated (Asc)"),
+    ];
     view! {
         <Title text="Add Meal to Diet"/>
         <main class="p-4 space-y-4 bg-white border md:m-4">
@@ -138,14 +159,14 @@ pub fn DietAddMealPage() -> impl IntoView {
             >
                 <Transition>{count}</Transition>
             </ListPageHeaderWithCreate>
+
             <section class="flex flex-wrap gap-2 mb-4 lg:mb-2">
-                <SearchForm
-                    search=Signal::derive(search)
-                    order=Signal::derive(order)
-                    page=1
-                    size=Signal::derive(size)
-                    options=&MEAL_SORT_OPTIONS
-                />
+                <Form method="GET" action="" class="contents">
+                    <input type="hidden" name="size" value=size/>
+                    <input type="hidden" name="page" value=1/>
+                    <FilterInput name="search" value=Signal::derive(search)/>
+                    <FilterSelect name="order" value=Signal::derive(order) options=sort_options/>
+                </Form>
             </section>
             <section class="grid grid-cols-4 mb-4 lg:grid-cols-input-12">
                 <AddFoodListHeader title="Food" subtitle="Quantity"/>
@@ -178,7 +199,7 @@ fn DietAddMealListItem(
     data: Meal,
     action: Action<DietAddMeal, Result<(), ServerFnError>>,
 ) -> impl IntoView {
-    let detail_href = format!("/meals/{}", data.id);
+    let detail_href = data.get_detail_href();
     let nutrition = data.nutrition.clone();
     view! {
         <ActionForm action class="contents group">

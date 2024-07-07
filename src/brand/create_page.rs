@@ -3,7 +3,7 @@ use leptos::*;
 use leptos_router::*;
 
 use crate::component::button::SubmitButton;
-use crate::component::input::TextInputImproved;
+use crate::component::input::TextInput;
 use crate::component::template::DetailPageTemplate;
 use crate::util::validation_error::{extract_other_errors, get_non_field_errors};
 
@@ -26,7 +26,7 @@ pub fn BrandCreatePage() -> impl IntoView {
     let action = Action::<BrandCreate, _>::server();
     let action_loading = action.pending();
     let action_value = action.value();
-    let action_error = move || extract_other_errors(action_value, &["name"]);
+    let action_error = move || extract_other_errors(action_value, &["non_field_errors", "name"]);
     let non_field_errors = move || get_non_field_errors(action_value);
 
     view! {
@@ -34,7 +34,7 @@ pub fn BrandCreatePage() -> impl IntoView {
             <div class="mb-4 text-red-500 font-bold">{action_error}</div>
             <div class="mb-4 text-red-500 font-bold">{non_field_errors}</div>
             <ActionForm action>
-                <TextInputImproved action_value name="name" placeholder="Enter brand name"/>
+                <TextInput action_value name="name" placeholder="Enter brand name"/>
                 <SubmitButton loading=action_loading label="Create Brand"/>
             </ActionForm>
         </DetailPageTemplate>

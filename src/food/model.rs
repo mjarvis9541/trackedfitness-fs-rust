@@ -96,6 +96,37 @@ pub struct NutritionPerKg {
 }
 
 impl Food {
+    pub fn get_title(&self) -> String {
+        format!(
+            "{}, {:.0}{}",
+            self.name, self.data_value, self.data_measurement
+        )
+    }
+    pub fn get_value_display(&self) -> String {
+        match self.data_measurement {
+            DataMeasurement::Servings => format!("Per {} Serving", self.data_value),
+            _ => format!("Per {}{}", self.data_value, self.data_measurement),
+        }
+    }
+    pub fn get_brand_url(&self) -> String {
+        format!("/food/brands/{}", self.brand_slug)
+    }
+    pub fn format(&self) -> FormattedFoodData {
+        FormattedFoodData {
+            energy: format!("{:.0}kcal", self.energy),
+            fat: format!("{:.1}g", self.fat),
+            saturates: format!("{:.1}g", self.saturates),
+            carbohydrate: format!("{:.1}g", self.carbohydrate),
+            sugars: format!("{:.1}g", self.sugars),
+            fibre: format!("{:.1}g", self.fibre),
+            protein: format!("{:.1}g", self.protein),
+            salt: format!("{:.2}g", self.salt),
+            protein_pct: format!("{:.2}%", self.protein_pct),
+            carbohydrate_pct: format!("{:.2}%", self.carbohydrate_pct),
+            fat_pct: format!("{:.2}%", self.fat_pct),
+        }
+    }
+
     pub fn get_last_added_data_value(&self) -> Decimal {
         // self.last_added_quantity.map_or_else(
         //     || Decimal::from(self.data_value),

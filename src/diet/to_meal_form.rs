@@ -5,7 +5,7 @@ use leptos_router::*;
 
 use crate::component::button::Button;
 use crate::component::icon::IconFilePlus;
-use crate::component::input::TextInputImproved;
+use crate::component::input::TextInput;
 use crate::util::param::get_username;
 use crate::util::validation_error::{extract_other_errors, get_non_field_errors};
 
@@ -74,7 +74,7 @@ pub fn DietToMealForm(
             <ActionForm action on:submit=handle_submit>
                 <input type="hidden" name="items" value=""/>
                 <input type="hidden" name="username" value=username/>
-                <TextInputImproved action_value name="name" placeholder="Enter meal name"/>
+                <TextInput action_value name="name" placeholder="Enter meal name"/>
                 <div class="flex justify-end">
                     <Button label="Save as Meal">
                         <IconFilePlus/>

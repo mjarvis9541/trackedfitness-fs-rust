@@ -28,4 +28,4 @@ pub mod signup_resend_page;
 #[cfg(feature = "ssr")]
 pub mod token;
 #[cfg(feature = "ssr")]
-pub mod validation;
+pub mod validate;

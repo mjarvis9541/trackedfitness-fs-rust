@@ -4,12 +4,12 @@ use leptos_router::*;
 
 use crate::component::button::{Button, SubmitButton};
 use crate::component::icon::IconUserMinus;
-use crate::component::input::ValidatedInput;
+use crate::component::input::TextInput;
 use crate::component::template::{ErrorComponent, ListLoadingComponent, ListNotFoundComponent};
-use crate::error_extract::{extract_error_message, process_non_field_errors};
 use crate::user_block::model::UserBlock;
 use crate::util::misc::ListResponse;
 use crate::util::param::{extract_page, extract_param, extract_size};
+use crate::util::validation_error::{extract_other_errors, get_non_field_errors};
 
 #[cfg(feature = "ssr")]
 use crate::{auth::model::User, auth::service::get_request_user, error::Error, setup::get_pool};
@@ -109,6 +109,10 @@ pub fn UserBlockListPage() -> impl IntoView {
         })
     };
 
+    let action_value = action_update_block.value();
+    let action_error = move || extract_other_errors(action_value, &["username"]);
+    let non_field_errors = move || get_non_field_errors(action_value);
+
     view! {
         <Title text="Blocked Users"/>
         <div class="grid grid-cols-4 gap-4 md:grid-cols-12">
@@ -122,6 +126,10 @@ pub fn UserBlockListPage() -> impl IntoView {
                             }>" (" {user_block_count} ")"</Transition>
                         </h2>
                     </header>
+                    <section>
+                        <div class="mb-4 text-red-500 font-bold">{action_error}</div>
+                        <div class="mb-4 text-red-500 font-bold">{non_field_errors}</div>
+                    </section>
                     <Transition fallback=ListLoadingComponent>
                         <ErrorBoundary fallback=|errors| {
                             view! { <ErrorComponent errors/> }
@@ -162,22 +170,18 @@ pub fn UserBlockListItem(
                 <div class="text-xs text-gray-500">{created_at}</div>
             </div>
             <div class="flex gap-2">
-                <UserBlockUpdateForm blocked_username=blocked_username action/>
+                <UserBlockUpdateButton blocked_username=blocked_username action/>
             </div>
         </div>
     }
 }
 
 #[component]
-pub fn UserBlockUpdateForm(
+pub fn UserBlockUpdateButton(
     blocked_username: String,
     action: Action<UpdateUserBlock, Result<(), ServerFnError>>,
 ) -> impl IntoView {
-    let error = move || extract_error_message(&action);
-    let non_field_errors = move || process_non_field_errors(error);
     view! {
-        <div>{error}</div>
-        <div>{non_field_errors}</div>
         <ActionForm action class="contents">
             <input type="hidden" name="username" value=blocked_username/>
             <Button label="Unblock User">
@@ -191,15 +195,22 @@ pub fn UserBlockUpdateForm(
 pub fn UserBlockCreateForm(
     action: Action<CreateUserBlock, Result<(), ServerFnError>>,
 ) -> impl IntoView {
-    let error = move || extract_error_message(&action);
-    let non_field_errors = move || process_non_field_errors(error);
-    let error = Signal::derive(error);
+    let action_loading = action.pending();
+    let action_value = action.value();
+    let action_error = move || extract_other_errors(action_value, &["username"]);
+    let non_field_errors = move || get_non_field_errors(action_value);
     view! {
-        <div>{error}</div>
-        <div>{non_field_errors}</div>
+        <div class="mb-4 text-red-500 font-bold">{action_error}</div>
+        <div class="mb-4 text-red-500 font-bold">{non_field_errors}</div>
         <ActionForm action class="contents">
-            <ValidatedInput error name="username" autocomplete="new-password" label="Username"/>
-            <SubmitButton loading=action.pending() label="Block User"/>
+            <TextInput
+                action_value
+                name="username"
+                label="Username"
+                autocomplete="new-password"
+                placeholder="Enter the username of who you wish to block"
+            />
+            <SubmitButton loading=action_loading label="Block User"/>
         </ActionForm>
     }
 }

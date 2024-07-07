@@ -4,7 +4,7 @@ pub mod day_page;
 pub mod delete_page;
 pub mod detail_page;
 pub mod exercise_set_create_page;
-pub mod from_plan_create_page;
+// pub mod from_plan_create_page;
 pub mod layout;
 pub mod model;
 pub mod multi_create;

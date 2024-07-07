@@ -9,7 +9,7 @@ use super::model::Movement;
 use crate::component::bulk_delete::BulkDeleteForm;
 use crate::component::input::FilterInput;
 use crate::component::paginator::Paginator;
-use crate::component::select::{FilterSelect, MOVEMENT_SORT_OPTIONS};
+use crate::component::select::FilterSelect;
 use crate::component::template::{
     AutoListHeader, AutoListItem, ErrorComponent, ListNotFoundComponent, ListPageHeaderWithCreate,
     Skeleton,
@@ -113,7 +113,14 @@ pub fn MovementListPage() -> impl IntoView {
                 .and_then(|data| data.as_ref().ok().map(|res| res.count))
         })
     };
-
+    let sort_options = vec![
+        ("name", "Name (A-z)"),
+        ("-name", "Name (Z-a)"),
+        ("created_at", "Created (Asc)"),
+        ("-created_at", "Created (Desc)"),
+        ("updated_at", "Updated (Asc)"),
+        ("-updated_at", "Updated (Desc)"),
+    ];
     view! {
         <Title text="Exercises"/>
         <main class="md:p-4">
@@ -124,18 +131,16 @@ pub fn MovementListPage() -> impl IntoView {
                 </ListPageHeaderWithCreate>
 
                 <section class="flex flex-wrap gap-2 mb-4 lg:mb-2">
-
                     <Form method="GET" action="" class="contents">
+                        <input type="hidden" name="size" value=size/>
+                        <input type="hidden" name="page" value=1/>
                         <FilterInput name="search" value=Signal::derive(search)/>
                         <FilterSelect
                             name="order"
                             value=Signal::derive(order)
-                            options=&MOVEMENT_SORT_OPTIONS
+                            options=sort_options
                         />
                         <MuscleGroupFilter selected=Signal::derive(muscle_group)/>
-                        <input type="hidden" name="size" value=size/>
-                        <input type="hidden" name="page" value=page/>
-
                     </Form>
                 </section>
 
