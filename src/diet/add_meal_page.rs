@@ -15,7 +15,7 @@ use crate::component::template::{
     ListPageHeaderWithCreate, Skeleton,
 };
 use crate::food::nutrition_row::NutritionRow;
-use crate::meal::model::Meal;
+use crate::meal::model::MealQuery;
 use crate::util::datetime::DATE_FORMAT_SHORT;
 use crate::util::misc::ListResponse;
 use crate::util::param::{extract_page, extract_param, extract_size, get_date, get_username};
@@ -63,11 +63,11 @@ pub async fn get_diet_add_meal_list(
     order: String,
     size: i64,
     page: i64,
-) -> Result<ListResponse<Meal>, ServerFnError> {
+) -> Result<ListResponse<MealQuery>, ServerFnError> {
     let _user = get_request_user()?;
     let pool = get_pool()?;
-    let count = Meal::count(&pool, &username, &search).await?;
-    let results = Meal::filter(&pool, &username, &search, &order, size, page).await?;
+    let count = MealQuery::count(&pool, &username, &search).await?;
+    let results = MealQuery::filter(&pool, &username, &search, &order, size, page).await?;
     Ok(ListResponse { count, results })
 }
 
@@ -196,7 +196,7 @@ fn DietAddMealListItem(
     username: String,
     date: NaiveDate,
     meal: String,
-    data: Meal,
+    data: MealQuery,
     action: Action<DietAddMeal, Result<(), ServerFnError>>,
 ) -> impl IntoView {
     let detail_href = data.get_detail_href();
@@ -207,17 +207,17 @@ fn DietAddMealListItem(
             <input type="hidden" name="date" value=date.to_string()/>
             <input type="hidden" name="meal_of_day_slug" value=meal/>
             <input type="hidden" name="meal_id" value=data.id.to_string()/>
-            <div class="flex col-span-3 items-center py-1 px-2 lg:col-span-2 group-hover:bg-gray-200 group-odd:bg-gray-50 truncate">
+            <div class="flex col-span-3 items-center py-1 px-2 lg:col-span-3 group-hover:bg-gray-200 group-odd:bg-gray-50 truncate">
                 <div>
-                    <A class="block font-bold md:font-normal hover:underline" href=detail_href>
+                    <a class="block font-bold md:font-normal hover:underline" href=detail_href>
                         {data.name}
-                    </A>
-                    <A
+                    </a>
+                    <a
                         class="block text-xs capitalize hover:underline"
                         href=format!("/users/{}", data.username)
                     >
                         {data.username}
-                    </A>
+                    </a>
                 </div>
             </div>
             <div class="flex justify-end items-center p-2 group-hover:bg-gray-200 group-odd:bg-gray-50">

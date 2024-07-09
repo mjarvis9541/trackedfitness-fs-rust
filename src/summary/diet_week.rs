@@ -1,14 +1,15 @@
 use std::collections::HashSet;
 
-use chrono::NaiveDate;
 use leptos::*;
 use leptos_router::*;
 
+use chrono::NaiveDate;
+
 use crate::component::bulk_delete_date::BulkDeleteDateRangeForm;
-use crate::component::template::{AutoListHeader, ErrorComponent, ListLoadingComponent};
+use crate::component::template::{ErrorComponent, ListLoadingComponent};
 use crate::util::param::{get_date, get_username};
 
-use super::component::DaySummaryListItem;
+use super::component::{DaySummaryListItem, SummaryListHeader};
 use super::model::UserWeekSummary;
 
 #[cfg(feature = "ssr")]
@@ -83,7 +84,7 @@ pub fn DietWeekSummaryComponent() -> impl IntoView {
             <div class="col-span-full">
                 <h2 class="text-base font-bold">"Diet Week Summary"</h2>
             </div>
-            <AutoListHeader all_items checked_items align_right=true>
+            <SummaryListHeader all_items checked_items>
                 "Date"
                 "Day"
                 "Calories"
@@ -99,7 +100,7 @@ pub fn DietWeekSummaryComponent() -> impl IntoView {
                 "Carbs/kg"
                 "Fat/kg"
                 "Weight"
-            </AutoListHeader>
+            </SummaryListHeader>
             <Transition fallback=ListLoadingComponent>
                 <ErrorBoundary fallback=|errors| {
                     view! { <ErrorComponent errors/> }

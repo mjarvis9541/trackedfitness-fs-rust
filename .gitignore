@@ -2,9 +2,14 @@
 .env
 .local/
 .vscode/
+blob-report/
 build/
 Cargo.lock
-end2end/node_modules/
-public/images/brand/*
-public/images/profile/*
+docs/other/
+node_modules/
+playwright-report/
+playwright/.cache/
+public/images/brands/
 target/
+test-results/
+trackedfitness/

@@ -9,32 +9,32 @@ use crate::component::template::{
 use crate::util::param::{get_date, get_username};
 
 use super::detail_table::ProgressDetailTable;
-use super::model::Progress;
+use super::model::ProgressQuery;
 
 #[cfg(feature = "ssr")]
 use crate::{auth::model::User, auth::service::get_request_user, error::Error, setup::get_pool};
 
-#[server]
+#[server(endpoint = "progress-detail-latest")]
 pub async fn get_progress_detail_latest(
     username: String,
     date: NaiveDate,
-) -> Result<Option<Progress>, ServerFnError> {
+) -> Result<Option<ProgressQuery>, ServerFnError> {
     let user = get_request_user()?;
     let pool = get_pool()?;
     User::check_view_permission(&pool, &user, &username).await?;
-    let query = Progress::get_latest_by_username_date(&pool, &username, date).await?;
+    let query = ProgressQuery::get_latest_by_username_date(&pool, &username, date).await?;
     Ok(query)
 }
 
-#[server]
+#[server(endpoint = "progress-detail")]
 pub async fn get_progress_detail(
     username: String,
     date: NaiveDate,
-) -> Result<Progress, ServerFnError> {
+) -> Result<ProgressQuery, ServerFnError> {
     let user = get_request_user()?;
     let pool = get_pool()?;
     User::check_view_permission(&pool, &user, &username).await?;
-    let query = Progress::get_by_username_date(&pool, &username, date)
+    let query = ProgressQuery::get_by_username_date(&pool, &username, date)
         .await?
         .ok_or(Error::NotFound)?;
     Ok(query)

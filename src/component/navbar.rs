@@ -8,8 +8,7 @@ use crate::component::template::Backdrop;
 
 #[component]
 pub fn Navbar(username: String) -> impl IntoView {
-    let initial = username.chars().next().unwrap();
-
+    let initial = username.chars().next().unwrap_or_default();
     let top_nav = vec![
         (format!("/users/{}/diet", username), "Diet"),
         (format!("/users/{}/workouts", username), "Workouts"),
@@ -59,7 +58,11 @@ pub fn Navbar(username: String) -> impl IntoView {
 
         <nav class="flex overflow-hidden sticky top-0 z-10 justify-between p-2 bg-zinc-900 text-zinc-100">
             <section class="flex bg-zinc-800">
-                <button class="p-2 hover:bg-zinc-600" on:click=toggle_menu>
+                <button
+                    id="btn-top-nav-side-menu"
+                    class="p-2 hover:bg-zinc-600"
+                    on:click=toggle_menu
+                >
                     <IconMenu/>
                 </button>
                 <A class="flex items-center px-4 font-bold hover:bg-zinc-600" href="/">

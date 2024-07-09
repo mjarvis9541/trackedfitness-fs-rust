@@ -59,11 +59,9 @@ pub fn LoginPage(login: Action<Login, Result<(), ServerFnError>>) -> impl IntoVi
                     <TextInput
                         name="email"
                         input_type="email"
-                        label="Email address"
                         placeholder="Enter your email address"
                         action_value
                     />
-
                     <TextInput
                         name="password"
                         input_type="password"

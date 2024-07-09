@@ -3,8 +3,10 @@ use rust_decimal::Decimal;
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 
-#[derive(Debug, Deserialize, Serialize, Clone)]
-pub struct MovementBase {
+#[cfg(feature = "ssr")]
+#[allow(dead_code)]
+#[derive(Debug)]
+pub struct Movement {
     pub id: Uuid,
     pub name: String,
     pub slug: String,
@@ -15,8 +17,9 @@ pub struct MovementBase {
     pub updated_by_id: Option<Uuid>,
 }
 
+#[cfg_attr(feature = "ssr", derive(sqlx::FromRow))]
 #[derive(Debug, Deserialize, Serialize, Clone)]
-pub struct Movement {
+pub struct MovementQuery {
     pub id: Uuid,
     pub name: String,
     pub slug: String,
@@ -31,6 +34,7 @@ pub struct Movement {
     pub updated_by: Option<String>,
 }
 
+#[cfg_attr(feature = "ssr", derive(sqlx::FromRow))]
 #[derive(Debug, Deserialize, Serialize, Clone)]
 pub struct MovementWithLatestWeight {
     pub movement_id: Uuid,
@@ -42,4 +46,10 @@ pub struct MovementWithLatestWeight {
     pub latest_exercise_weight: Decimal,
     pub latest_exercise_sets: i64,
     pub latest_exercise_reps: i64,
+}
+
+impl MovementQuery {
+    pub fn get_muscle_group_href(&self) -> String {
+        format!("/exercises/muscle-groups/{}", self.muscle_group_slug)
+    }
 }

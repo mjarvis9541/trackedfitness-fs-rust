@@ -12,7 +12,7 @@ use crate::util::validation_error::{extract_other_errors, get_non_field_errors};
 #[cfg(feature = "ssr")]
 use crate::{
     auth::model::User, auth::service::get_request_user, diet::model::Diet, error::Error,
-    meal::model::MealBase, meal_food::model::MealFoodModel, setup::get_pool,
+    meal::model::Meal, meal_food::model::MealFoodModel, setup::get_pool,
     util::server::parse_uuids_from_strings,
 };
 
@@ -32,15 +32,15 @@ pub async fn save_to_meal(
     let target_user = User::get_by_username(&pool, &username)
         .await?
         .ok_or(Error::NotFound)?;
-    MealBase::can_create(&target_user.clone().into()).await?;
+    Meal::can_create(&target_user.clone().into()).await?;
     let diet_uuids = parse_uuids_from_strings(&items)?;
-    MealBase::validate(&meal_name)?;
+    Meal::validate(&meal_name)?;
     let diet_food = Diet::all_by_ids(&pool, &diet_uuids).await?;
     diet_food
         .is_empty()
         .then(|| ())
         .ok_or(ServerFnError::new("No diet logs found."))?;
-    let meal = MealBase::create(&pool, target_user.id, &meal_name, user.id).await?;
+    let meal = Meal::create(&pool, target_user.id, &meal_name, user.id).await?;
     MealFoodModel::bulk_create_from_diet(&pool, meal.id, &diet_food, user.id).await?;
     leptos_axum::redirect(&format!("/food/meals/{}", meal.id));
     Ok(())

@@ -4,7 +4,7 @@ use leptos_router::*;
 use rust_decimal::Decimal;
 
 use super::data_measurement::DataMeasurement;
-use super::model::Food;
+use super::model::FoodQuery;
 
 use crate::component::template::FoodListItemMacroHeader;
 
@@ -78,7 +78,7 @@ pub fn QuantityInput(
 
 #[component]
 pub fn FoodNutritionCalculationRow(
-    data: Food,
+    data: FoodQuery,
     data_value_decimal: Decimal,
     quantity: RwSignal<Decimal>,
 ) -> impl IntoView {

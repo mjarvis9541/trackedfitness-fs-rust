@@ -7,20 +7,22 @@ use crate::component::select::{SelectSlugName, SelectUuidName};
 use crate::component::template::{OptionError, OptionLoading};
 
 #[cfg(feature = "ssr")]
-use crate::{auth::service::get_request_user, muscle_group::model::MuscleGroup, setup::get_pool};
+use crate::{
+    auth::service::get_request_user, muscle_group::model::MuscleGroupQuery, setup::get_pool,
+};
 
 #[server(endpoint = "muscle-group-select-slug", input = GetUrl)]
 pub async fn get_muscle_group_filter() -> Result<Vec<SelectSlugName>, ServerFnError> {
     let _user = get_request_user()?;
     let pool = get_pool()?;
-    Ok(MuscleGroup::option_list_slug(&pool).await?)
+    Ok(MuscleGroupQuery::option_list_slug(&pool).await?)
 }
 
 #[server(endpoint = "muscle-group-select-id", input = GetUrl)]
 pub async fn get_muscle_group_form_select() -> Result<Vec<SelectUuidName>, ServerFnError> {
     let _user = get_request_user()?;
     let pool = get_pool()?;
-    Ok(MuscleGroup::option_list_id(&pool).await?)
+    Ok(MuscleGroupQuery::option_list_id(&pool).await?)
 }
 
 #[component]

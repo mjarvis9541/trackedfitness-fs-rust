@@ -3,16 +3,16 @@ use sqlx::{FromRow, PgPool, Row};
 
 use uuid::Uuid;
 
-use super::model::Meal;
+use super::model::MealQuery;
 use crate::component::select::SelectUuidName;
 use crate::error::{handle_sqlx_contraint_error, Result};
 use crate::food::model::Nutrition;
 use crate::util::database::Filter;
 use crate::util::server::normalize_whitespace;
 
-use super::model::MealBase;
+use super::model::Meal;
 
-impl FromRow<'_, PgRow> for Meal {
+impl FromRow<'_, PgRow> for MealQuery {
     fn from_row(row: &PgRow) -> sqlx::Result<Self> {
         Ok(Self {
             id: row.try_get("id")?,
@@ -29,7 +29,7 @@ impl FromRow<'_, PgRow> for Meal {
     }
 }
 
-impl MealBase {
+impl Meal {
     const BASE_NAME: &'static str = "Meal";
 
     pub async fn get_by_id(pool: &PgPool, id: Uuid) -> Result<Option<Self>> {
@@ -67,14 +67,17 @@ impl MealBase {
     pub async fn update(pool: &PgPool, id: Uuid, name: &str, updated_by_id: Uuid) -> Result<Self> {
         let query = sqlx::query_as!(
             Self,
-            "UPDATE meal
+            "
+            UPDATE meal
             SET
                 name = $1,
                 updated_at = NOW(),
                 updated_by_id = $2
             WHERE
                 id = $3
-            RETURNING *",
+            RETURNING
+                *
+            ",
             name,
             updated_by_id,
             id
@@ -91,7 +94,7 @@ impl MealBase {
         Ok(query)
     }
 }
-impl Meal {
+impl MealQuery {
     pub async fn get_by_id(pool: &PgPool, meal_id: Uuid) -> Result<Option<Self>> {
         let query = sqlx::query_as(
             "
@@ -168,6 +171,33 @@ impl Meal {
         size: i64,
         page: i64,
     ) -> Result<Vec<Self>> {
+        let order_by_column = match order {
+            "name" => "name",
+            "-name" => "name DESC",
+            "food_count" => "food_count",
+            "-food_count" => "food_count DESC",
+            "energy" => "energy",
+            "-energy" => "energy DESC",
+            "protein" => "protein",
+            "-protein" => "protein DESC",
+            "carbohydrate" => "carbohydrate",
+            "-carbohydrate" => "carbohydrate DESC",
+            "fat" => "fat",
+            "-fat" => "fat DESC",
+            "saturates" => "saturates",
+            "-saturates" => "saturates DESC",
+            "sugars" => "sugars",
+            "-sugars" => "sugars DESC",
+            "fibre" => "fibre",
+            "-fibre" => "fibre DESC",
+            "salt" => "salt",
+            "-salt" => "salt DESC",
+            "created_at" => "created_at",
+            "-created_at" => "created_at DESC",
+            "updated_at" => "updated_at",
+            "-updated_at" => "updated_at DESC",
+            _ => "name",
+        };
         let mut qb = sqlx::QueryBuilder::new(
                 "
                 WITH cte_meal_total AS (
@@ -222,7 +252,10 @@ impl Meal {
             );
         qb.filter("users_user.username", "ilike", username);
         qb.filter("meal.name", "ilike", search);
-        qb.order("meal.name", order);
+
+        qb.push(" ORDER BY ");
+        qb.push(order_by_column);
+
         qb.paginate(size, page);
         let query = qb.build_query_as().fetch_all(pool).await?;
         Ok(query)

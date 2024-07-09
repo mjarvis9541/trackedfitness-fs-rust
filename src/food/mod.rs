@@ -11,7 +11,7 @@ pub mod nutrition_row_calc;
 #[cfg(feature = "ssr")]
 pub mod permission;
 #[cfg(feature = "ssr")]
-pub mod query;
+pub mod repository_impl;
 pub mod router;
 pub mod to_diet_form;
 pub mod to_meal_form;

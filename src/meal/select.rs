@@ -6,13 +6,13 @@ use crate::component::select::SelectUuidName;
 use crate::component::template::{OptionError, OptionLoading};
 
 #[cfg(feature = "ssr")]
-use crate::{auth::service::get_request_user, meal::model::Meal};
+use crate::{auth::service::get_request_user, meal::model::MealQuery};
 
 #[server(endpoint = "meal-select")]
 pub async fn get_meal_select() -> Result<Vec<SelectUuidName>, ServerFnError> {
     get_request_user()?;
     let pool = expect_context::<sqlx::PgPool>();
-    Ok(Meal::option_list_id(&pool).await?)
+    Ok(MealQuery::option_list_id(&pool).await?)
 }
 
 #[component]

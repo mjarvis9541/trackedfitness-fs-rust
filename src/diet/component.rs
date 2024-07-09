@@ -8,7 +8,6 @@ use super::model::{DietFoodQuery, FormattedFoodData};
 #[component]
 pub fn NutritionInformation(data: DietFoodQuery) -> impl IntoView {
     let formatted = data.format();
-
     view! {
         <h3 class="mb-2 font-bold">"Nutrition Information"</h3>
         <table class="mb-4 w-full border-collapse">

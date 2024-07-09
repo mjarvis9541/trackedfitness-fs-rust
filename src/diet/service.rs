@@ -5,7 +5,7 @@ use rust_decimal::Decimal;
 use sqlx::PgPool;
 use uuid::Uuid;
 
-use crate::diet_target::model::DietTarget;
+use crate::diet_target::model::DietTargetQuery;
 use crate::error::Result;
 use crate::food::model::Nutrition;
 use crate::meal_of_day::model::MealOfDay;
@@ -86,7 +86,8 @@ impl DietService {
         date: NaiveDate,
     ) -> Result<DietDayResponse> {
         let meal_of_day = MealOfDay::all(pool).await?;
-        let diet_target = DietTarget::get_latest_by_username_date(pool, username, date).await?;
+        let diet_target =
+            DietTargetQuery::get_latest_by_username_date(pool, username, date).await?;
         let diet_food = DietFoodQuery::all_by_username_date(pool, username, date).await?;
 
         let mut diet_day = DietDayDTO {
@@ -95,13 +96,14 @@ impl DietService {
             ..Default::default()
         };
 
-        let mut grouped_diet_food: BTreeMap<Uuid, Vec<DietFoodQuery>> = BTreeMap::new();
-        for food in diet_food {
-            grouped_diet_food
-                .entry(food.meal_of_day_id)
-                .or_insert_with(Vec::new)
-                .push(food);
-        }
+        let mut grouped_diet_food = Self::group_diet_food_by_meal_of_day(diet_food);
+        // let mut grouped_diet_food: BTreeMap<Uuid, Vec<DietFoodQuery>> = BTreeMap::new();
+        // for food in diet_food {
+        //     grouped_diet_food
+        //         .entry(food.meal_of_day_id)
+        //         .or_insert_with(Vec::new)
+        //         .push(food);
+        // }
         let meal_dto_list: Vec<DietMealDTO> = meal_of_day
             .into_iter()
             .map(|meal| {

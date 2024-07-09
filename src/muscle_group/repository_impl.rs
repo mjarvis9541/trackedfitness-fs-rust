@@ -1,4 +1,4 @@
-use super::model::{MuscleGroup, MuscleGroupBase};
+use super::model::{MuscleGroup, MuscleGroupQuery};
 use crate::component::select::{SelectSlugName, SelectUuidName};
 use crate::error::{handle_sqlx_contraint_error, Result};
 use crate::util::database::Filter;
@@ -6,7 +6,7 @@ use crate::util::server::{normalize_whitespace, slugify};
 use sqlx::PgPool;
 use uuid::Uuid;
 
-impl MuscleGroupBase {
+impl MuscleGroup {
     const BASE_NAME: &'static str = "Muscle group";
 
     pub async fn get_by_id(pool: &PgPool, id: Uuid) -> Result<Option<Self>> {
@@ -21,8 +21,14 @@ impl MuscleGroupBase {
         let slug = slugify(name);
         let query = sqlx::query_as!(
             Self,
-            "INSERT INTO muscle_group (name, slug, created_by_id)
-            VALUES ($1, $2, $3) RETURNING *",
+            "
+            INSERT INTO
+                muscle_group (name, slug, created_by_id)
+            VALUES
+                ($1, $2, $3)
+            RETURNING
+                *
+            ",
             normalized_name,
             slug,
             created_by_id
@@ -40,8 +46,18 @@ impl MuscleGroupBase {
         let slug = slugify(name);
         let query = sqlx::query_as!(
             Self,
-            "UPDATE muscle_group SET name = COALESCE($1, name), slug = COALESCE($2, slug),
-            updated_by_id = $3, updated_at = NOW() WHERE id = $4 RETURNING *",
+            "
+            UPDATE muscle_group
+            SET
+                name = COALESCE($1, name),
+                slug = COALESCE($2, slug),
+                updated_by_id = $3,
+                updated_at = NOW()
+            WHERE
+                id = $4
+            RETURNING
+                *
+            ",
             normalized_name,
             slug,
             updated_by_id,
@@ -67,7 +83,7 @@ impl MuscleGroupBase {
     }
 }
 
-impl MuscleGroup {
+impl MuscleGroupQuery {
     pub async fn get_by_slug(pool: &PgPool, slug: &str) -> Result<Option<Self>> {
         let query = sqlx::query_as!(
             Self,
@@ -106,6 +122,16 @@ impl MuscleGroup {
         size: i64,
         page: i64,
     ) -> Result<Vec<Self>> {
+        let order_by_column = match order {
+            "name" => "t1.name",
+            "-name" => "t1.name DESC",
+            "created_at" => "t1.created_at",
+            "-created_at" => "t1.created_at DESC",
+            "updated_at" => "t1.updated_at",
+            "-updated_at" => "t1.updated_at DESC",
+            _ => "t1.name",
+        };
+
         let mut qb = sqlx::QueryBuilder::new(
             r#"
             SELECT
@@ -123,7 +149,10 @@ impl MuscleGroup {
             "#,
         );
         qb.filter("t1.name", "ilike", search);
-        qb.order("t1.name", order);
+
+        qb.push(" ORDER BY ");
+        qb.push(order_by_column);
+
         qb.paginate(size, page);
         let query = qb.build_query_as().fetch_all(pool).await?;
         Ok(query)
@@ -133,11 +162,18 @@ impl MuscleGroup {
         let query = sqlx::query_as!(
             SelectUuidName,
             r#"
-            SELECT t1.id, CONCAT(t1.name, ' (', COUNT(t2.*), ')') AS "name!"
-            FROM muscle_group t1 
-            LEFT JOIN movement t2 ON t1.id = t2.muscle_group_id
-            GROUP BY t1.id 
-            ORDER BY t1.name LIMIT 1000
+            SELECT
+                t1.id,
+                CONCAT(t1.name, ' (', COUNT(t2.*), ')') AS "name!"
+            FROM
+                muscle_group t1
+                LEFT JOIN movement t2 ON t1.id = t2.muscle_group_id
+            GROUP BY
+                t1.id
+            ORDER BY
+                t1.name
+            LIMIT
+                1000
             "#,
         )
         .fetch_all(pool)
@@ -149,11 +185,18 @@ impl MuscleGroup {
         let query = sqlx::query_as!(
             SelectSlugName,
             r#"
-            SELECT t1.slug, CONCAT(t1.name, ' (', COUNT(t2.*), ')') AS "name!"
-            FROM muscle_group t1 
-            LEFT JOIN movement t2 ON t1.id = t2.muscle_group_id
-            GROUP BY t1.id 
-            ORDER BY t1.name LIMIT 1000
+            SELECT
+                t1.slug,
+                CONCAT(t1.name, ' (', COUNT(t2.*), ')') AS "name!"
+            FROM
+                muscle_group t1
+                LEFT JOIN movement t2 ON t1.id = t2.muscle_group_id
+            GROUP BY
+                t1.id
+            ORDER BY
+                t1.name
+            LIMIT
+                1000
             "#
         )
         .fetch_all(pool)

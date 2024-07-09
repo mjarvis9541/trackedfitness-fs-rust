@@ -4,7 +4,6 @@ use leptos_router::*;
 use crate::component::calendar::Calendar;
 use crate::component::dropdown::Dropdown;
 use crate::component::icon::{ChevronLeft, ChevronRight, IconCalendar};
-use crate::component::link::Link;
 use crate::util::datetime::{Resolution, DATE_FORMAT_LONG, DATE_FORMAT_SHORT};
 use crate::util::param::{
     get_current_date_url, get_date, get_next_date_url, get_previous_date_url,
@@ -26,27 +25,27 @@ pub fn DateNavigation(#[prop(default = Resolution::Day)] resolution: Resolution)
     let title_sm = move || date().format(DATE_FORMAT_SHORT).to_string();
 
     view! {
-        <nav class="flex flex-wrap gap-2 justify-between">
+        <nav class="flex flex-wrap gap-2 justify-between bg-gray-200">
             <section class="flex items-center">
                 <Dropdown icon=|| view! { <IconCalendar/> }>
                     <Calendar/>
                 </Dropdown>
-                <h2 class="px-4 text-base font-bold whitespace-nowrap">
+                <h2 class="px-2 text-base font-bold whitespace-nowrap">
                     <span class="hidden lg:inline">{title}</span>
                     <span class="lg:hidden">{title_sm}</span>
                 </h2>
             </section>
 
             <section class="flex">
-                <A href=today class="flex items-center px-4 bg-gray-100 hover:bg-amber-200">
+                <A href=today class="flex items-center px-4 hover:bg-amber-200">
                     "Today"
                 </A>
-                <Link href=prev>
+                <a href=prev class="flex p-2 hover:bg-amber-200">
                     <ChevronLeft/>
-                </Link>
-                <Link href=next>
+                </a>
+                <a href=next class="flex p-2 hover:bg-amber-200">
                     <ChevronRight/>
-                </Link>
+                </a>
             </section>
         </nav>
     }

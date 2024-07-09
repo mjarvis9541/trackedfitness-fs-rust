@@ -18,10 +18,13 @@ use crate::{auth::service::get_request_user, brand::model::Brand, error::Error, 
 pub async fn brand_update(id: Uuid, name: String) -> Result<(), ServerFnError> {
     let user = get_request_user()?;
     let pool = get_pool()?;
+
     let object = Brand::get_by_id(&pool, id).await?.ok_or(Error::NotFound)?;
-    object.can_view(&user)?;
+    object.can_update(&user).await?;
     Brand::validate(&name)?;
+
     let updated = Brand::update(&pool, object.id, &name, user.id).await?;
+
     leptos_axum::redirect(&format!("/food/brands/{}", updated.slug));
     Ok(())
 }

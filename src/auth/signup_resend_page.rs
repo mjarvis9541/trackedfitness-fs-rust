@@ -38,14 +38,13 @@ pub fn SignupResendPage() -> impl IntoView {
             <div class="p-4 mx-auto max-w-md bg-white border shadow-md">
                 <h1 class="mb-4 text-xl font-bold">"Resend Activation Email"</h1>
                 <p class="mb-4">
-                    "If you've not received an activation code via email, enter your email address and we'll send you a new one."
+                    "If you've not received an activation code via email, enter your email address below and we'll send you a new one."
                 </p>
                 <div class="mb-4 text-red-500 font-bold">{action_error}</div>
                 <div class="mb-4 text-red-500 font-bold">{non_field_errors}</div>
                 <ActionForm action>
                     <TextInput
                         name="email"
-                        label="Email address"
                         placeholder="Enter your email address"
                         input_type="email"
                         action_value

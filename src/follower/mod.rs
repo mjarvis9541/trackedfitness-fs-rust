@@ -3,9 +3,9 @@ pub mod follower_list_page;
 pub mod following_list_page;
 pub mod form;
 pub mod model;
-#[cfg(feature = "ssr")]
-pub mod query;
 pub mod received_request_list;
+#[cfg(feature = "ssr")]
+pub mod repository_impl;
 pub mod sent_request_list;
 pub mod status;
 pub mod user_follower_list;

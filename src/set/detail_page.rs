@@ -12,7 +12,7 @@ use crate::workout::router::SetDetailParam;
 
 #[cfg(feature = "ssr")]
 use crate::{
-    auth::service::get_request_user, error::Error, exercise::model::ExerciseModel, setup::get_pool,
+    auth::service::get_request_user, error::Error, exercise::model::ExerciseBase, setup::get_pool,
     workout::model::WorkoutBase,
 };
 
@@ -24,7 +24,7 @@ pub async fn get_set_detail(set_id: Uuid) -> Result<SetModel, ServerFnError> {
     let set = SetModel::get_by_id(&pool, set_id)
         .await?
         .ok_or(Error::NotFound)?;
-    let exercise = ExerciseModel::get_by_id(&pool, set.exercise_id)
+    let exercise = ExerciseBase::get_by_id(&pool, set.exercise_id)
         .await?
         .ok_or(Error::NotFound)?;
     let workout = WorkoutBase::get_by_id(&pool, exercise.workout_id)

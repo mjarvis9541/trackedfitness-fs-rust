@@ -12,7 +12,7 @@ use crate::workout::router::ExerciseDetailParam;
 
 #[cfg(feature = "ssr")]
 use crate::{
-    auth::service::get_request_user, error::Error, exercise::model::ExerciseModel, setup::get_pool,
+    auth::service::get_request_user, error::Error, exercise::model::ExerciseBase, setup::get_pool,
     workout::model::WorkoutBase,
 };
 
@@ -24,7 +24,7 @@ pub async fn exercise_delete(
     let user = get_request_user()?;
     let pool = get_pool()?;
 
-    let exercise = ExerciseModel::get_by_id(&pool, exercise_id)
+    let exercise = ExerciseBase::get_by_id(&pool, exercise_id)
         .await?
         .ok_or(Error::NotFound)?;
     let workout = WorkoutBase::get_by_id(&pool, exercise.workout_id)
@@ -32,7 +32,7 @@ pub async fn exercise_delete(
         .ok_or(Error::NotFound)?;
     workout.can_delete(&user).await?;
 
-    ExerciseModel::delete(&pool, exercise.id).await?;
+    ExerciseBase::delete(&pool, exercise.id).await?;
     if let Some(redirect_to) = redirect_to {
         leptos_axum::redirect(&redirect_to);
     }

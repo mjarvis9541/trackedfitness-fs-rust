@@ -5,9 +5,9 @@ use uuid::Uuid;
 
 use crate::error::Result;
 
-use super::model::{Profile, ProfileBase, ProfileImage};
+use super::model::{Profile, ProfileImage, ProfileQuery};
 
-impl ProfileBase {
+impl Profile {
     pub async fn get_by_username(pool: &PgPool, username: &str) -> Result<Option<Self>> {
         let query = sqlx::query_as!(Self,
              "SELECT t1.* FROM user_profile t1 LEFT JOIN users_user t2 ON t2.id = t1.user_id WHERE t2.username = $1", username).fetch_optional(pool).await?;
@@ -102,7 +102,7 @@ impl ProfileBase {
     }
 }
 
-impl Profile {
+impl ProfileQuery {
     pub fn remove_sensitive_info(mut self) -> Self {
         self.date_of_birth = NaiveDate::default();
         self

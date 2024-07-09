@@ -5,7 +5,7 @@ use leptos::*;
 use leptos_meta::*;
 use leptos_router::*;
 
-use super::model::Movement;
+use super::model::MovementQuery;
 use crate::component::bulk_delete::BulkDeleteForm;
 use crate::component::input::FilterInput;
 use crate::component::paginator::Paginator;
@@ -29,11 +29,11 @@ pub async fn get_movement_list(
     order: String,
     size: i64,
     page: i64,
-) -> Result<ListResponse<Movement>, ServerFnError> {
+) -> Result<ListResponse<MovementQuery>, ServerFnError> {
     get_request_user()?;
     let pool = expect_context::<sqlx::PgPool>();
-    let count = Movement::count(&pool, &search, &muscle_group).await?;
-    let results = Movement::filter(&pool, &search, &muscle_group, &order, size, page).await?;
+    let count = MovementQuery::count(&pool, &search, &muscle_group).await?;
+    let results = MovementQuery::filter(&pool, &search, &muscle_group, &order, size, page).await?;
     Ok(ListResponse { count, results })
 }
 
@@ -84,9 +84,10 @@ pub fn MovementListPage() -> impl IntoView {
                         let id = data.id.to_string();
                         let slug = data.slug.clone();
                         let name = data.name.clone();
-                        let muscle_group_href =
-                            format!("/exercises/muscle-groups/{}", data.muscle_group_slug);
+                        let muscle_group_href = data.get_muscle_group_href();
+
                         let muscle_group_name = data.muscle_group_name.clone();
+
                         let created = format_datetime(&Some(data.created_at));
                         let updated = format_datetime(&data.updated_at);
                         view! {

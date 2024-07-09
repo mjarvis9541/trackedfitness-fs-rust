@@ -1,10 +1,10 @@
 use crate::auth::model::RequestUser;
 use crate::error::{Error, Result};
 
-use super::model::{Meal, MealBase};
+use super::model::{Meal, MealQuery};
 
-impl MealBase {
-    pub fn can_view(&self, user: &RequestUser) -> Result<()> {
+impl Meal {
+    pub async fn can_view(&self, user: &RequestUser) -> Result<()> {
         if user.is_active {
             Ok(())
         } else {
@@ -24,7 +24,7 @@ impl MealBase {
         if self.user_id == request_user.id || request_user.is_superuser {
             Ok(())
         } else {
-            Err(Error::Unauthorized)
+            Err(Error::Forbidden)
         }
     }
 
@@ -32,13 +32,13 @@ impl MealBase {
         if self.user_id == request_user.id || request_user.is_superuser {
             Ok(())
         } else {
-            Err(Error::Unauthorized)
+            Err(Error::Forbidden)
         }
     }
 }
 
-impl Meal {
-    pub fn can_view(&self, user: &RequestUser) -> Result<()> {
+impl MealQuery {
+    pub async fn can_view(&self, user: &RequestUser) -> Result<()> {
         if user.is_active {
             Ok(())
         } else {

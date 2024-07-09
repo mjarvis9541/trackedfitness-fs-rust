@@ -3,8 +3,10 @@ use rust_decimal::Decimal;
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 
-#[derive(Debug, Deserialize, Serialize, Clone)]
-pub struct ProgressBase {
+#[cfg(feature = "ssr")]
+#[allow(dead_code)]
+#[derive(Debug)]
+pub struct Progress {
     pub id: Uuid,
     pub user_id: Uuid,
     pub date: NaiveDate,
@@ -17,8 +19,9 @@ pub struct ProgressBase {
     pub updated_by_id: Option<Uuid>,
 }
 
+#[cfg_attr(feature = "ssr", derive(sqlx::FromRow))]
 #[derive(Debug, Deserialize, Serialize, Clone)]
-pub struct Progress {
+pub struct ProgressQuery {
     pub id: Uuid,
     pub user_id: Uuid,
     pub date: NaiveDate,

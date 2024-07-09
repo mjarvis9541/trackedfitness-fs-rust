@@ -1,5 +1,4 @@
-use sqlx::postgres::PgRow;
-use sqlx::{FromRow, PgPool, Row};
+use sqlx::PgPool;
 use uuid::Uuid;
 
 use crate::component::select::SelectUuidName;
@@ -7,45 +6,10 @@ use crate::error::{handle_sqlx_contraint_error, Result};
 use crate::util::database::Filter;
 use crate::util::server::{normalize_whitespace, slugify};
 
-use super::model::{Movement, MovementBase, MovementWithLatestWeight};
+use super::model::{Movement, MovementQuery, MovementWithLatestWeight};
 
-impl FromRow<'_, PgRow> for Movement {
-    fn from_row(row: &PgRow) -> sqlx::Result<Self> {
-        Ok(Self {
-            id: row.try_get("id")?,
-            name: row.try_get("name")?,
-            slug: row.try_get("slug")?,
-            created_at: row.try_get("created_at")?,
-            updated_at: row.try_get("updated_at")?,
-            created_by_id: row.try_get("created_by_id")?,
-            updated_by_id: row.try_get("updated_by_id")?,
-            muscle_group_id: row.try_get("muscle_group_id")?,
-            muscle_group_name: row.try_get("muscle_group_name")?,
-            muscle_group_slug: row.try_get("muscle_group_slug")?,
-            created_by: row.try_get("created_by")?,
-            updated_by: row.try_get("updated_by")?,
-        })
-    }
-}
-
-impl FromRow<'_, PgRow> for MovementWithLatestWeight {
-    fn from_row(row: &PgRow) -> sqlx::Result<Self> {
-        Ok(Self {
-            movement_id: row.try_get("movement_id")?,
-            movement_name: row.try_get("movement_name")?,
-            movement_slug: row.try_get("movement_slug")?,
-            muscle_group_name: row.try_get("muscle_group_name")?,
-            muscle_group_slug: row.try_get("muscle_group_slug")?,
-            latest_workout_date: row.try_get("latest_workout_date")?,
-            latest_exercise_weight: row.try_get("latest_exercise_weight")?,
-            latest_exercise_sets: row.try_get("latest_exercise_sets")?,
-            latest_exercise_reps: row.try_get("latest_exercise_reps")?,
-        })
-    }
-}
-
-impl MovementBase {
-    const OBJECT_NAME: &'static str = "Exercise";
+impl Movement {
+    const BASE_NAME: &'static str = "Exercise";
 
     pub async fn get_by_id(pool: &PgPool, id: Uuid) -> Result<Option<Self>> {
         let query = sqlx::query_as!(Self, "SELECT * FROM movement WHERE id = $1", id)
@@ -64,8 +28,14 @@ impl MovementBase {
         let slug = slugify(name);
         let query = sqlx::query_as!(
             Self,
-            "INSERT INTO movement (name, slug, muscle_group_id, created_by_id)
-            VALUES ($1, $2, $3, $4) RETURNING *",
+            "
+            INSERT INTO
+                movement (name, slug, muscle_group_id, created_by_id)
+            VALUES
+                ($1, $2, $3, $4)
+            RETURNING
+                *
+            ",
             normalized_name,
             slug,
             muscle_group_id,
@@ -74,7 +44,7 @@ impl MovementBase {
         .fetch_one(pool)
         .await
         .map_err(|err| {
-            handle_sqlx_contraint_error(err, Self::OBJECT_NAME, "name", &["slug_key", "name_key"])
+            handle_sqlx_contraint_error(err, Self::BASE_NAME, "name", &["slug_key", "name_key"])
         })?;
         Ok(query)
     }
@@ -90,7 +60,8 @@ impl MovementBase {
         let slug = slugify(name);
         let query = sqlx::query_as!(
             Self,
-            r#"UPDATE movement
+            r#"
+            UPDATE movement
             SET
                 name = $1,
                 slug = $2,
@@ -100,7 +71,7 @@ impl MovementBase {
             WHERE
                 id = $5
             RETURNING
-                * 
+                *
             "#,
             normalized_name,
             slug,
@@ -111,7 +82,7 @@ impl MovementBase {
         .fetch_one(pool)
         .await
         .map_err(|err| {
-            handle_sqlx_contraint_error(err, Self::OBJECT_NAME, "name", &["slug_key", "name_key"])
+            handle_sqlx_contraint_error(err, Self::BASE_NAME, "name", &["slug_key", "name_key"])
         })?;
         Ok(query)
     }
@@ -124,7 +95,7 @@ impl MovementBase {
     }
 }
 
-impl Movement {
+impl MovementQuery {
     pub async fn get_by_slug(pool: &PgPool, slug: &str) -> Result<Option<Self>> {
         let query = sqlx::query_as!(
             Self,
@@ -153,11 +124,13 @@ impl Movement {
     pub async fn count(pool: &PgPool, search: &str, muscle_group_slug: &str) -> Result<i64> {
         let mut qb = sqlx::QueryBuilder::new(
             "
-            SELECT COUNT(t1.*)
+            SELECT
+                COUNT(t1.*)
             FROM
                 movement t1
                 LEFT JOIN muscle_group t2 ON t2.id = t1.muscle_group_id
-            WHERE TRUE
+            WHERE
+                TRUE
             ",
         );
         qb.filter("t1.name", "ilike", search);
@@ -173,12 +146,20 @@ impl Movement {
         size: i64,
         page: i64,
     ) -> Result<Vec<Self>> {
-        // let offset = size * (page - 1);
+        let order_by_column = match order {
+            "name" => "t1.name",
+            "-name" => "t1.name DESC",
+            "created_at" => "t1.created_at",
+            "-created_at" => "t1.created_at DESC",
+            "updated_at" => "t1.updated_at",
+            "-updated_at" => "t1.updated_at DESC",
+            _ => "t1.name",
+        };
+
         let mut qb = sqlx::QueryBuilder::new(
             "
             SELECT
                 t1.*,
-                -- muscle group
                 t4.name as muscle_group_name,
                 t4.slug as muscle_group_slug,
                 t2.username as created_by,
@@ -190,11 +171,14 @@ impl Movement {
                 LEFT JOIN muscle_group t4 ON t1.muscle_group_id = t4.id
             WHERE
                 TRUE
-                ",
+            ",
         );
         qb.filter("t1.name", "ilike", search);
         qb.filter("t4.slug", "=", muscle_group_slug);
-        qb.order("t1.name", order);
+
+        qb.push(" ORDER BY ");
+        qb.push(order_by_column);
+
         qb.paginate(size, page);
         Ok(qb.build_query_as().fetch_all(pool).await?)
     }
@@ -220,6 +204,18 @@ impl MovementWithLatestWeight {
         size: i64,
         page: i64,
     ) -> Result<Vec<Self>> {
+        let order_by_column = match order {
+            "movement_name" => "movement_name",
+            "-movement_name" => "movement_name DESC",
+            "muscle_group_name" => "muscle_group_name",
+            "-muscle_group_name" => "muscle_group_name DESC",
+            "created_at" => "created_at",
+            "-created_at" => "created_at DESC",
+            "updated_at" => "updated_at",
+            "-updated_at" => "updated_at DESC",
+            _ => "movement_name",
+        };
+
         let mut qb = sqlx::QueryBuilder::new(&format!(
             "
             WITH
@@ -260,15 +256,19 @@ impl MovementWithLatestWeight {
                 COALESCE(um.reps, 0)::int8 AS latest_exercise_reps
             FROM
                 movement m
-                LEFT JOIN user_movements um ON m.id = um.movement_id AND um.rn = 1
+                LEFT JOIN user_movements um ON m.id = um.movement_id
+                AND um.rn = 1
                 LEFT JOIN muscle_group mg ON mg.id = m.muscle_group_id
             WHERE
-                TRUE  
+                TRUE 
             ",
         ));
         qb.filter("m.name", "ilike", search);
         qb.filter("mg.slug", "=", muscle_group_slug);
-        qb.order("m.name", order);
+
+        qb.push(" ORDER BY ");
+        qb.push(order_by_column);
+
         qb.paginate(size, page);
 
         let results = qb.build_query_as().fetch_all(pool).await?;

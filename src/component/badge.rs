@@ -4,7 +4,6 @@ use rust_decimal::Decimal;
 #[derive(Debug)]
 pub enum BadgeVariant {
     Primary,
-    // Tertiary,
 }
 
 impl BadgeVariant {
@@ -12,7 +11,7 @@ impl BadgeVariant {
         match self {
             Self::Primary => {
                 "select-none whitespace-nowrap rounded bg-gray-700 px-2 py-1 text-xs text-gray-200"
-            } // Self::Tertiary => "text-xs",
+            }
         }
     }
 }
@@ -27,26 +26,7 @@ pub fn Badge(
 }
 
 #[component]
-pub fn Badged(
-    title: &'static str,
-    label: &'static str,
-    value: Decimal,
-    scale: usize,
-) -> impl IntoView {
-    let has_value = value > Decimal::from(0);
-    view! {
-        <div class="flex-1 text-end">
-            <div class=(
-                "font-bold",
-                move || has_value,
-            )>{format!("{:.*}", scale, value)} {label}</div>
-            <div class="text-xs text-gray-500">{title}</div>
-        </div>
-    }
-}
-
-#[component]
-pub fn BadgeWO(title: &'static str, value: i64) -> impl IntoView {
+pub fn Badgei64(title: &'static str, value: i64) -> impl IntoView {
     let has_value = value > 0;
     view! {
         <div class="flex-1 text-end">
@@ -57,20 +37,49 @@ pub fn BadgeWO(title: &'static str, value: i64) -> impl IntoView {
 }
 
 #[component]
-pub fn BadgePRO(
+pub fn BadgeDiet(
     title: &'static str,
     label: &'static str,
     value: Decimal,
     scale: usize,
 ) -> impl IntoView {
-    let has_value = value > Decimal::from(0);
+    let has_value = move || value > Decimal::from(0);
+    view! {
+        <div class="flex-1 text-end">
+            <div class=("font-bold", has_value)>{format!("{:.*}", scale, value)} {label}</div>
+            <div class="text-xs text-gray-500">{title}</div>
+        </div>
+    }
+}
+
+#[component]
+pub fn BadgeProgress(
+    title: &'static str,
+    label: &'static str,
+    value: Decimal,
+    scale: usize,
+) -> impl IntoView {
+    let has_value = move || value > Decimal::from(0);
     view! {
         <div class="flex flex-1 justify-between items-center">
             <div class="text-xs text-gray-500">{title}</div>
-            <div class=(
-                "font-bold",
-                move || has_value,
-            )>{format!("{:.*}", scale, value)} {label}</div>
+            <div class=("font-bold", has_value)>{format!("{:.*}", scale, value)} {label}</div>
+        </div>
+    }
+}
+
+#[component]
+pub fn MonthSummaryMetic(
+    #[prop(optional, into)] title: &'static str,
+    #[prop(optional, into)] label: &'static str,
+    #[prop(optional, into)] value: Decimal,
+    #[prop(optional, into)] scale: usize,
+) -> impl IntoView {
+    let has_value = move || value > Decimal::from(0);
+    view! {
+        <div class="flex flex-1 justify-between items-center">
+            <div class="text-xs text-gray-500">{title}</div>
+            <div class=("font-bold", has_value)>{format!("{:.*}", scale, value)} {label}</div>
         </div>
     }
 }

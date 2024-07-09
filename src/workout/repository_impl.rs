@@ -9,8 +9,8 @@ use crate::set::model::SetQuery;
 use crate::util::datetime::{get_week_end, get_week_start};
 
 use super::model::{
-    ExerciseQueryWithPrevious, SetQueryWithPrevious, WorkoutBase, WorkoutQuery,
-    WorkoutQueryWithPrevious, WorkoutWeek,
+    WorkoutBase, WorkoutDayExerciseQuery, WorkoutDayQuery, WorkoutDaySetQuery, WorkoutDaySummary,
+    WorkoutQuery, WorkoutWeek,
 };
 
 impl WorkoutBase {
@@ -64,42 +64,12 @@ impl WorkoutBase {
     }
 }
 
-impl WorkoutQueryWithPrevious {
-    pub async fn get_all_by_username(pool: &PgPool, username: &str) -> Result<Vec<Self>> {
-        let query = sqlx::query_as(
-            "
-            SELECT
-                t1.user_id,
-                t1.id AS workout_id,
-                t1.date AS workout_date,
-                t1.created_at AS workout_created_at,
-                --
-                t4.username,
-                --
-                COUNT(DISTINCT t2.id) AS workout_exercise_count,
-                COUNT(t3.id) AS workout_set_count,
-                COALESCE(SUM(t3.reps), 0) AS workout_rep_count
-            FROM
-                workout t1
-                LEFT JOIN exercise t2 ON t1.id = t2.workout_id
-                LEFT JOIN tracked_set t3 ON t2.id = t3.exercise_id
-                LEFT JOIN users_user t4 ON t4.id = t1.user_id
-            WHERE
-                t4.username = $1
-                GROUP BY
-                t1.id,
-                t4.id
-            ORDER BY
-                t1.date DESC
-            ",
-        )
-        .bind(username)
-        .fetch_all(pool)
-        .await?;
-        Ok(query)
-    }
-
-    pub async fn get(pool: &PgPool, username: &str, date: NaiveDate) -> Result<Vec<Self>> {
+impl WorkoutDayQuery {
+    pub async fn all_by_username_date(
+        pool: &PgPool,
+        username: &str,
+        date: NaiveDate,
+    ) -> Result<Vec<Self>> {
         let rows = sqlx::query(
             "
             WITH
@@ -200,8 +170,12 @@ impl WorkoutQueryWithPrevious {
             FROM
                 numbered_exercise ne
                 LEFT JOIN numbered_set ns ON ne.exercise_id = ns.exercise_id
-                LEFT JOIN numbered_exercise prev_ne ON prev_ne.user_id = ne.user_id AND prev_ne.movement_id = ne.movement_id AND prev_ne.exercise_rank = ne.exercise_rank - 1
-                LEFT JOIN numbered_set prev_ns ON prev_ns.exercise_id = prev_ne.exercise_id AND prev_ns.set_rank = ns.set_rank LEFT JOIN movement m ON m.id = ne.movement_id
+                LEFT JOIN numbered_exercise prev_ne ON prev_ne.user_id = ne.user_id 
+                    AND prev_ne.movement_id = ne.movement_id 
+                    AND prev_ne.exercise_rank = ne.exercise_rank - 1
+                LEFT JOIN numbered_set prev_ns ON prev_ns.exercise_id = prev_ne.exercise_id 
+                    AND prev_ns.set_rank = ns.set_rank 
+                LEFT JOIN movement m ON m.id = ne.movement_id
                 LEFT JOIN muscle_group mg ON mg.id = m.muscle_group_id
                 LEFT JOIN users_user uu ON uu.id = ne.user_id
                 LEFT JOIN workout_aggregates wa ON wa.workout_id = ne.workout_id
@@ -210,7 +184,6 @@ impl WorkoutQueryWithPrevious {
                 uu.username = $1
                 AND ne.workout_date = $2
             ORDER BY
-                ne.workout_date,
                 ne.workout_created_at,
                 ne.exercise_order,
                 ne.exercise_created_at,
@@ -222,7 +195,7 @@ impl WorkoutQueryWithPrevious {
         .fetch_all(pool)
         .await?;
 
-        let mut workouts = Vec::<WorkoutQueryWithPrevious>::new();
+        let mut workouts = Vec::<WorkoutDayQuery>::new();
 
         for row in rows {
             let workout_id: Uuid = row.try_get("workout_id")?;
@@ -230,7 +203,7 @@ impl WorkoutQueryWithPrevious {
                 .iter()
                 .position(|workout| workout.workout_id == workout_id)
                 .unwrap_or_else(|| {
-                    let workout = WorkoutQueryWithPrevious::from_row(&row).unwrap_or_default();
+                    let workout = WorkoutDayQuery::from_row(&row).unwrap_or_default();
                     workouts.push(workout);
                     workouts.len() - 1
                 });
@@ -241,14 +214,13 @@ impl WorkoutQueryWithPrevious {
                     .iter()
                     .position(|exercise| exercise.exercise_id == exercise_id)
                     .unwrap_or_else(|| {
-                        let exercise =
-                            ExerciseQueryWithPrevious::from_row(&row).unwrap_or_default();
+                        let exercise = WorkoutDayExerciseQuery::from_row(&row).unwrap_or_default();
                         workouts[workout_index].exercises.push(exercise);
                         workouts[workout_index].exercises.len() - 1
                     });
 
                 if let Some(_set_id) = row.get::<Option<Uuid>, _>("set_id") {
-                    let set = SetQueryWithPrevious::from_row(&row).unwrap_or_default();
+                    let set = WorkoutDaySetQuery::from_row(&row).unwrap_or_default();
                     workouts[workout_index].exercises[exercise_index]
                         .sets
                         .push(set);
@@ -311,7 +283,7 @@ impl WorkoutWeek {
             t4.order
         ",
         )
-        .bind(&username)
+        .bind(username)
         .bind(start)
         .bind(end)
         .fetch_all(pool)
@@ -400,7 +372,7 @@ impl FromRow<'_, PgRow> for WorkoutQuery {
     }
 }
 
-impl FromRow<'_, PgRow> for WorkoutQueryWithPrevious {
+impl FromRow<'_, PgRow> for WorkoutDayQuery {
     fn from_row(row: &PgRow) -> sqlx::Result<Self> {
         Ok(Self {
             user_id: row.try_get("user_id")?,
@@ -416,7 +388,7 @@ impl FromRow<'_, PgRow> for WorkoutQueryWithPrevious {
     }
 }
 
-impl FromRow<'_, PgRow> for SetQueryWithPrevious {
+impl FromRow<'_, PgRow> for WorkoutDaySetQuery {
     fn from_row(row: &PgRow) -> sqlx::Result<Self> {
         Ok(Self {
             set_id: row.try_get("set_id")?,
@@ -433,7 +405,7 @@ impl FromRow<'_, PgRow> for SetQueryWithPrevious {
     }
 }
 
-impl FromRow<'_, PgRow> for ExerciseQueryWithPrevious {
+impl FromRow<'_, PgRow> for WorkoutDayExerciseQuery {
     fn from_row(row: &PgRow) -> sqlx::Result<Self> {
         Ok(Self {
             exercise_id: row.try_get("exercise_id")?,
@@ -444,5 +416,25 @@ impl FromRow<'_, PgRow> for ExerciseQueryWithPrevious {
             rep_count: row.try_get("exercise_rep_count").unwrap_or(0),
             sets: Vec::new(),
         })
+    }
+}
+
+impl WorkoutDaySummary {
+    pub async fn get_range_by_username_start_end(
+        pool: &PgPool,
+        username: &str,
+        start: NaiveDate,
+        end: NaiveDate,
+    ) -> Result<Vec<Self>> {
+        let query = sqlx::query_file_as!(
+            Self,
+            "sql/workout_summary_date_series.sql",
+            username,
+            start,
+            end
+        )
+        .fetch_all(pool)
+        .await?;
+        Ok(query)
     }
 }

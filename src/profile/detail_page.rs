@@ -12,7 +12,7 @@ use crate::util::param::{get_date, get_username};
 
 #[cfg(feature = "ssr")]
 use crate::{
-    auth::model::User, auth::service::get_request_user, error::Error, profile::model::Profile,
+    auth::model::User, auth::service::get_request_user, error::Error, profile::model::ProfileQuery,
     setup::get_pool,
 };
 
@@ -25,7 +25,7 @@ pub async fn get_profile_detail_latest(
     let pool = get_pool()?;
     User::check_view_permission(&pool, &user, &username).await?;
 
-    let object = Profile::get_latest_by_username(&pool, &username, date)
+    let object = ProfileQuery::get_latest_by_username(&pool, &username, date)
         .await?
         .map(|profile| ProfileMetric::from(profile));
 
@@ -41,7 +41,7 @@ pub async fn get_profile_detail(
     let pool = get_pool()?;
     User::check_view_permission(&pool, &user, &username).await?;
 
-    let object = Profile::get_latest_by_username(&pool, &username, date)
+    let object = ProfileQuery::get_latest_by_username(&pool, &username, date)
         .await?
         .map(|profile| ProfileMetric::from(profile))
         .ok_or(Error::NotFound)?;

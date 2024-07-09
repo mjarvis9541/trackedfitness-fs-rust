@@ -5,10 +5,10 @@ use crate::util::validation_error::ValidationError;
 
 use super::activity_level::ActivityLevel;
 use super::fitness_goal::FitnessGoal;
-use super::model::Profile;
+use super::model::ProfileQuery;
 use super::sex::Sex;
 
-impl Profile {
+impl ProfileQuery {
     pub fn validate(
         sex: &str,
         activity_level: &str,

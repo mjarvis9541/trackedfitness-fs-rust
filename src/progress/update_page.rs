@@ -14,32 +14,28 @@ use super::detail_page::get_progress_detail;
 
 #[cfg(feature = "ssr")]
 use crate::{
-    auth::service::get_request_user,
-    error::Error,
-    progress::model::{Progress, ProgressBase},
-    setup::get_pool,
+    auth::service::get_request_user, error::Error, progress::model::Progress, setup::get_pool,
 };
 
-#[server]
+#[server(endpoint = "progress-update")]
 pub async fn progress_update(
     username: String,
     date: NaiveDate,
     weight_kg: Option<Decimal>,
     energy_burnt: Option<i32>,
     notes: Option<String>,
-    redirect_to: Option<String>,
 ) -> Result<(), ServerFnError> {
     let user = get_request_user()?;
     let pool = get_pool()?;
 
-    let object = ProgressBase::get_by_username_date(&pool, &username, date)
+    let object = Progress::get_by_username_date(&pool, &username, date)
         .await?
         .ok_or(Error::NotFound)?;
     object.can_update(&user).await?;
 
     Progress::validate(date, weight_kg, energy_burnt, notes.clone())?;
 
-    ProgressBase::update(
+    Progress::update(
         &pool,
         object.id,
         date,
@@ -49,9 +45,8 @@ pub async fn progress_update(
         user.id,
     )
     .await?;
-    if redirect_to.is_some() {
-        leptos_axum::redirect(&format!("/users/{username}/{date}"));
-    }
+
+    leptos_axum::redirect(&format!("/users/{}/{}", username, date));
     Ok(())
 }
 
@@ -87,7 +82,6 @@ pub fn ProgressUpdatePage() -> impl IntoView {
             view! {
                 <ActionForm action>
                     <input type="hidden" name="username" value=username/>
-                    <input type="hidden" name="redirect_to" value="somewhere"/>
                     <TextInput action_value name="date" input_type="date" value=date/>
                     <NumberInput
                         action_value
@@ -108,7 +102,7 @@ pub fn ProgressUpdatePage() -> impl IntoView {
                         action_value
                         name="notes"
                         value=notes
-                        placeholder="Enter any relevant notes"
+                        placeholder="Enter any relevant notes for the day"
                     />
                     <SubmitButton loading=action_loading label="Update Progress"/>
                 </ActionForm>

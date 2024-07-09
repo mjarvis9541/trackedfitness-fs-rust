@@ -29,7 +29,7 @@ use crate::meal_of_day::update_page::MealOfDayUpdatePage;
 use crate::movement::router::MovementRouter;
 // use crate::training_plan::router::TrainingPlanRouter;
 use crate::user::router::UserRouter;
-use crate::user_setting::settings_router::UserSettingsRouter;
+use crate::user_setting::router::UserSettingsRouter;
 // use crate::util::use_interval::use_interval;
 use crate::web::help_page::HelpPage;
 use crate::web::landing_page::LandingPage;

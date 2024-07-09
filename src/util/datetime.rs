@@ -127,13 +127,13 @@ pub fn get_month_end_comprehensive(date: NaiveDate) -> NaiveDate {
 //     DateRange(start, end).map(|date| date.to_string()).collect()
 // }
 
-pub fn generate_month_range(date: NaiveDate) -> Vec<String> {
-    let start = get_month_start(date);
-    let end = get_month_end(date);
-    DateRange(start, end)
-        .map(|d| d.format("%d").to_string())
-        .collect()
-}
+// pub fn generate_month_range(date: NaiveDate) -> Vec<String> {
+//     let start = get_month_start(date);
+//     let end = get_month_end(date);
+//     DateRange(start, end)
+//         .map(|d| d.format("%d").to_string())
+//         .collect()
+// }
 
 // pub fn generate_month_range_comprehensive(date: NaiveDate) -> Vec<NaiveDate> {
 //     let start = get_month_start_comprehensive(date);
@@ -311,13 +311,13 @@ mod tests {
     //     assert_eq!(week_range, expected_dates);
     // }
 
-    #[test]
-    fn test_generate_month_range() {
-        let date = NaiveDate::from_ymd_opt(2024, 6, 29).unwrap();
-        let month_range = generate_month_range(date);
-        let expected_dates: Vec<String> = (1..=30).map(|d| format!("{:02}", d)).collect();
-        assert_eq!(month_range, expected_dates);
-    }
+    // #[test]
+    // fn test_generate_month_range() {
+    //     let date = NaiveDate::from_ymd_opt(2024, 6, 29).unwrap();
+    //     let month_range = generate_month_range(date);
+    //     let expected_dates: Vec<String> = (1..=30).map(|d| format!("{:02}", d)).collect();
+    //     assert_eq!(month_range, expected_dates);
+    // }
 
     #[test]
     fn test_format_datetime() {

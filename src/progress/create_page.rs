@@ -11,21 +11,17 @@ use crate::util::validation_error::{extract_other_errors, get_non_field_errors};
 
 #[cfg(feature = "ssr")]
 use crate::{
-    auth::model::User,
-    auth::service::get_request_user,
-    error::Error,
-    progress::model::{Progress, ProgressBase},
+    auth::model::User, auth::service::get_request_user, error::Error, progress::model::Progress,
     setup::get_pool,
 };
 
-#[server]
+#[server(endpoint = "progress-create")]
 pub async fn progress_create(
     username: String,
     date: NaiveDate,
     weight_kg: Option<Decimal>,
     energy_burnt: Option<i32>,
     notes: Option<String>,
-    redirect_to: Option<String>,
 ) -> Result<(), ServerFnError> {
     let user = get_request_user()?;
     let pool = get_pool()?;
@@ -34,10 +30,10 @@ pub async fn progress_create(
         .await?
         .ok_or(Error::NotFound)?;
 
-    ProgressBase::can_create(&user, target_user.id).await?;
+    Progress::can_create(&user, target_user.id).await?;
     Progress::validate(date, weight_kg, energy_burnt, notes.clone())?;
 
-    ProgressBase::create(
+    Progress::create(
         &pool,
         target_user.id,
         date,
@@ -48,9 +44,7 @@ pub async fn progress_create(
     )
     .await?;
 
-    if redirect_to.is_some() {
-        leptos_axum::redirect(&format!("/users/{}/{}", user.username, date));
-    }
+    leptos_axum::redirect(&format!("/users/{}/{}", target_user.username, date));
     Ok(())
 }
 
@@ -82,19 +76,31 @@ pub fn ProgressCreatePage() -> impl IntoView {
 
     view! {
         <DetailPageTemplate title="Log Progress">
+
             <div class="mb-4 text-red-500 font-bold">{action_error}</div>
+
             <div class="mb-4 text-red-500 font-bold">{non_field_errors}</div>
             <ActionForm action>
                 <input type="hidden" name="username" value=username/>
+                <TextInput action_value input_type="date" name="date" value=create_for_date()/>
+                <NumberInput
+                    action_value
+                    name="weight_kg"
+                    step="0.01"
+                    label="Weight (kg)"
+                    placeholder="Enter your weight in kg"
+                />
+                <NumberInput
+                    action_value
+                    name="energy_burnt"
+                    label="Energy Burnt (kcal)"
+                    placeholder="Enter energy burnt in kcal"
+                />
                 <TextInput
                     action_value
-                    input_type="date"
-                    name="date"
-                    value=create_for_date()
+                    name="notes"
+                    placeholder="Enter any relevant notes for the day"
                 />
-                <NumberInput action_value name="weight_kg" step="0.01" label="Weight (kg)"/>
-                <NumberInput action_value name="energy_burnt" label="Energy Burnt (kcal)"/>
-                <TextInput action_value name="notes"/>
 
                 <SubmitButton loading=action_loading label="Log Progress"/>
             </ActionForm>

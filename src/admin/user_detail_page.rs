@@ -68,12 +68,13 @@ pub async fn admin_user_password_change(
 
 #[component]
 pub fn AdminUserDetailPage() -> impl IntoView {
-    let action_password_change = Action::<AdminUserPasswordChange, _>::server();
-    let action = Action::<AdminUserUpdate, _>::server();
-
     let params = use_params::<UuidParam>();
     let id = move || params.with(|p| p.as_ref().map(|p| p.id).unwrap_or_default());
 
+    let action_password_change = Action::<AdminUserPasswordChange, _>::server();
+    let action = Action::<AdminUserUpdate, _>::server();
+
+    let username = RwSignal::new(String::new());
     let resource = Resource::new(
         move || {
             (
@@ -84,30 +85,40 @@ pub fn AdminUserDetailPage() -> impl IntoView {
         },
         |(id, ..)| get_admin_user_detail(id),
     );
-    let response =
-        move || resource.and_then(|data| view! { <UserDetailComponent data=data.clone()/> });
+    let response = move || {
+        resource.and_then(|data| {
+            username.update(|v| *v = data.username.clone());
+            view! { <UserDetailComponent data=data.clone()/> }
+        })
+    };
     let form_response =
         move || resource.and_then(|data| view! { <AdminUserUpdateForm data=data.clone() action/> });
     let password_form_response = move || {
         resource.and_then(|data| view! { <AdminUserPasswordChangeForm id=data.id.clone() action=action_password_change/> })
     };
-
+    let view_on_site_url = move || username.with(|username| format!("/users/{}", username));
     view! {
         <Title text="Admin User Detail"/>
         <main class="p-4">
             <div class="grid grid-cols-4 gap-4 md:grid-cols-8 lg:grid-cols-12">
                 <div class="col-span-4">
-                    <div class="p-4 mb-4 bg-white">
+                    <div class="p-4 mb-4 bg-white border shadow-sm">
                         <Transition fallback=LoadingComponent>
+                            <h2 class="mb-4 text-xl font-bold">"User Detail"</h2>
                             <ErrorBoundary fallback=|errors| {
                                 view! { <ErrorComponent errors/> }
                             }>{response}</ErrorBoundary>
                         </Transition>
+
+                        <a href=view_on_site_url class="block mt-4 text-blue-500 hover:underline">
+                            "View on Site"
+                        </a>
+
                     </div>
                 </div>
                 <div class="col-span-4">
-                    <div class="p-4 bg-white border">
-                        <h2 class="mb-4 text-base font-bold">"User Update"</h2>
+                    <div class="p-4 mb-4 bg-white border shadow-sm">
+                        <h2 class="mb-4 text-xl font-bold">"User Update"</h2>
                         <Transition fallback=LoadingComponent>
                             <ErrorBoundary fallback=|errors| {
                                 view! { <ErrorComponent errors/> }
@@ -116,8 +127,8 @@ pub fn AdminUserDetailPage() -> impl IntoView {
                     </div>
                 </div>
                 <div class="col-span-4">
-                    <div class="p-4 bg-white border">
-                        <h2 class="mb-4 text-base font-bold">"Change Password"</h2>
+                    <div class="p-4 mb-4 bg-white border shadow-sm">
+                        <h2 class="mb-4 text-xl font-bold">"Change Password"</h2>
                         <Transition fallback=LoadingComponent>
                             <ErrorBoundary fallback=|errors| {
                                 view! { <ErrorComponent errors/> }
@@ -201,7 +212,6 @@ pub fn UserDetailComponent(data: User) -> impl IntoView {
     let updated_at = format_datetime(&data.updated_at);
     let last_login = format_datetime(&data.last_login);
     view! {
-        <h2 class="mb-4 text-base font-bold">"User Detail"</h2>
         <table class="overflow-hidden w-full border-collapse">
             <tbody>
                 <tr>

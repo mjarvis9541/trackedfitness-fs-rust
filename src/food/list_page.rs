@@ -4,7 +4,6 @@ use leptos_router::*;
 use rust_decimal::Decimal;
 use std::collections::HashSet;
 
-use super::model::Food;
 use crate::brand::select::BrandFilter;
 use crate::component::bulk_delete::BulkDeleteForm;
 use crate::component::checkbox::CheckboxListItem;
@@ -15,10 +14,12 @@ use crate::component::template::{
     AutoListHeader, ErrorComponent, ListLoadingComponent, ListNotFoundComponent,
     ListPageHeaderWithCreate,
 };
-
-use crate::food::nutrition_row_calc::FoodNutritionCalculationRow;
 use crate::util::misc::ListResponse;
 use crate::util::param::{extract_page, extract_param, extract_size};
+
+use super::data_measurement::DataMeasurement;
+use super::model::FoodQuery;
+use super::nutrition_row_calc::FoodNutritionCalculationRow;
 
 #[cfg(feature = "ssr")]
 use crate::{auth::service::get_request_user, setup::get_pool};
@@ -31,11 +32,11 @@ pub async fn get_food_list(
     order: String,
     size: i64,
     page: i64,
-) -> Result<ListResponse<Food>, ServerFnError> {
+) -> Result<ListResponse<FoodQuery>, ServerFnError> {
     let user = get_request_user()?;
     let pool = get_pool()?;
-    let count = Food::count(&pool, &search, &brand, &serving).await?;
-    let results = Food::filter(
+    let count = FoodQuery::count(&pool, &search, &brand, &serving).await?;
+    let results = FoodQuery::filter(
         &pool,
         &search,
         &brand,
@@ -104,38 +105,9 @@ pub fn FoodListPage() -> impl IntoView {
                 .and_then(|data| data.as_ref().ok().map(|res| res.count))
         })
     };
-    let serving_options = vec![
-        ("", "All"),
-        ("g", "100g"),
-        ("ml", "100ml"),
-        ("srv", "1 Serving"),
-    ];
-    let sort_options = vec![
-        ("name", "Food (A-z)"),
-        ("-name", "Food (Z-a)"),
-        ("brand_name", "Brand (A-z)"),
-        ("-brand_name", "Brand (Z-a)"),
-        ("-energy", "Calories (High-Low)"),
-        ("energy", "Calories (Low-High)"),
-        ("-protein", "Protein (High-Low)"),
-        ("protein", "Protein (Low-High)"),
-        ("-carbohydrate", "Carbs (High-Low)"),
-        ("carbohydrate", "Carbs (Low-High)"),
-        ("-fat", "Fat (High-Low)"),
-        ("fat", "Fat (Low-High)"),
-        ("-saturates", "Saturates (High-Low)"),
-        ("saturates", "Saturates (Low-High)"),
-        ("-sugars", "Sugars (High-Low)"),
-        ("sugars", "Sugars (Low-High)"),
-        ("-fibre", "Fibre (High-Low)"),
-        ("fibre", "Fibre (Low-High)"),
-        ("-salt", "Salt (High-Low)"),
-        ("salt", "Salt (Low-High)"),
-        ("-created_at", "Created (Desc)"),
-        ("created_at", "Created (Asc)"),
-        ("-updated_at", "Updated (Desc)"),
-        ("updated_at", "Updated (Asc)"),
-    ];
+    let serving_options = DataMeasurement::to_filter_options();
+    let sort_options = FoodQuery::to_filter_options();
+
     view! {
         <Title text="Food"/>
         <main class="p-4 bg-white border md:m-4">
@@ -202,7 +174,7 @@ pub fn FoodListPage() -> impl IntoView {
 }
 
 #[component]
-pub fn FoodListItem(data: Food, checked_items: RwSignal<HashSet<String>>) -> impl IntoView {
+pub fn FoodListItem(data: FoodQuery, checked_items: RwSignal<HashSet<String>>) -> impl IntoView {
     let data_value_decimal = Decimal::from(data.data_value);
     let quantity: RwSignal<Decimal> = RwSignal::new(data_value_decimal);
     view! {

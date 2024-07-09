@@ -17,9 +17,12 @@ use crate::{auth::service::get_request_user, brand::model::Brand, error::Error, 
 pub async fn brand_delete(id: Uuid) -> Result<(), ServerFnError> {
     let user = get_request_user()?;
     let pool = get_pool()?;
+
     let object = Brand::get_by_id(&pool, id).await?.ok_or(Error::NotFound)?;
     object.can_delete(&user).await?;
+
     Brand::delete(&pool, object.id).await?;
+
     leptos_axum::redirect("/food/brands");
     Ok(())
 }

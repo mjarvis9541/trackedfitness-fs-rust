@@ -9,7 +9,7 @@ use crate::component::icon::IconFilePlus;
 
 #[cfg(feature = "ssr")]
 use crate::{
-    auth::service::get_request_user, error::Error, exercise::model::ExerciseModel,
+    auth::service::get_request_user, error::Error, exercise::model::ExerciseBase,
     set::model::SetModel, setup::get_pool, workout::model::WorkoutBase,
 };
 
@@ -24,7 +24,7 @@ pub async fn set_create(
     let user = get_request_user()?;
     let pool = get_pool()?;
 
-    let exercise = ExerciseModel::get_by_id(&pool, exercise_id)
+    let exercise = ExerciseBase::get_by_id(&pool, exercise_id)
         .await?
         .ok_or(Error::NotFound)?;
     let workout = WorkoutBase::get_by_id(&pool, exercise.workout_id)

@@ -17,7 +17,7 @@ pub fn Dropdown(
     view! {
         <Backdrop show_menu/>
         <div class="relative">
-            <button class="p-2 bg-gray-100 hover:bg-amber-200" on:click=toggle_menu>
+            <button class="p-2 hover:bg-amber-200" on:click=toggle_menu>
                 {icon_view()}
             </button>
             <div

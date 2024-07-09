@@ -4,7 +4,7 @@ use leptos_router::*;
 use chrono::prelude::*;
 
 use super::detail_table::DietTargetDetailTable;
-use super::model::DietTarget;
+use super::model::DietTargetQuery;
 use crate::component::template::{
     DetailPageTemplate, ErrorComponent, LoadingComponent, UpdateDeleteButtonRow,
 };
@@ -17,11 +17,11 @@ use crate::{auth::model::User, auth::service::get_request_user, error::Error, se
 pub async fn get_diet_target_detail_latest(
     username: String,
     date: NaiveDate,
-) -> Result<Option<DietTarget>, ServerFnError> {
+) -> Result<Option<DietTargetQuery>, ServerFnError> {
     let user = get_request_user()?;
     let pool = get_pool()?;
     User::check_view_permission(&pool, &user, &username).await?;
-    let object = DietTarget::get_latest_by_username_date(&pool, &username, date).await?;
+    let object = DietTargetQuery::get_latest_by_username_date(&pool, &username, date).await?;
     Ok(object)
 }
 
@@ -29,11 +29,11 @@ pub async fn get_diet_target_detail_latest(
 pub async fn get_diet_target_detail(
     username: String,
     date: NaiveDate,
-) -> Result<DietTarget, ServerFnError> {
+) -> Result<DietTargetQuery, ServerFnError> {
     let user = get_request_user()?;
     let pool = get_pool()?;
     User::check_view_permission(&pool, &user, &username).await?;
-    let object = DietTarget::get_by_username_date(&pool, &username, date)
+    let object = DietTargetQuery::get_by_username_date(&pool, &username, date)
         .await?
         .ok_or(Error::NotFound)?;
     Ok(object)

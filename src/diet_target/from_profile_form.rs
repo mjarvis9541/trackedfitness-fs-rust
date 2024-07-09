@@ -12,10 +12,10 @@ use crate::{
     auth::model::User,
     auth::service::get_request_user,
     diet_target::model::DietTargetInput,
-    diet_target::model::{DietTarget, DietTargetBase},
+    diet_target::model::{DietTarget, DietTargetQuery},
     error::Error,
     profile::fitness_goal::{FitnessGoal, TargetModifier},
-    profile::model::Profile,
+    profile::model::ProfileQuery,
     setup::get_pool,
 };
 
@@ -31,10 +31,10 @@ pub async fn target_from_profile_create(
         .await?
         .ok_or(Error::NotFound)?;
 
-    DietTarget::can_create(&user, target_user.id).await?;
-    DietTarget::validate_date(date)?;
+    DietTargetQuery::can_create(&user, target_user.id).await?;
+    DietTargetQuery::validate_date(date)?;
 
-    let profile = Profile::get_latest_by_username(&pool, &user.username, date)
+    let profile = ProfileQuery::get_latest_by_username(&pool, &user.username, date)
         .await?
         .ok_or(Error::NotFound)?;
 
@@ -54,7 +54,7 @@ pub async fn target_from_profile_create(
     let database_input =
         DietTargetInput::calculate_nutrients(modifier, tdee, target_user.id, date, latest_weight);
 
-    DietTargetBase::create(&pool, database_input, user.id).await?;
+    DietTarget::create(&pool, database_input, user.id).await?;
     Ok(())
 }
 

@@ -8,7 +8,7 @@ use leptos_router::*;
 use uuid::Uuid;
 
 use super::add_food_page::MealAddFoodComponent;
-use super::model::Meal;
+use super::model::MealQuery;
 use crate::component::bulk_delete::BulkDeleteForm;
 use crate::component::checkbox::CheckboxListItem;
 use crate::component::template::{
@@ -32,11 +32,15 @@ pub async fn get_meal_food_list(meal_id: Uuid) -> Result<Vec<MealFood>, ServerFn
 }
 
 #[server(endpoint = "meal-detail", input = GetUrl)]
-pub async fn get_meal_detail(id: Uuid) -> Result<Meal, ServerFnError> {
+pub async fn get_meal_detail(id: Uuid) -> Result<MealQuery, ServerFnError> {
     let user = get_request_user()?;
     let pool = get_pool()?;
-    let object = Meal::get_by_id(&pool, id).await?.ok_or(Error::NotFound)?;
-    object.can_view(&user)?;
+
+    let object = MealQuery::get_by_id(&pool, id)
+        .await?
+        .ok_or(Error::NotFound)?;
+    object.can_view(&user).await?;
+
     Ok(object)
 }
 

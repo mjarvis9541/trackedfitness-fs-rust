@@ -12,8 +12,7 @@ use super::detail_page::get_diet_target_detail;
 
 #[cfg(feature = "ssr")]
 use crate::{
-    auth::service::get_request_user, diet_target::model::DietTargetBase, error::Error,
-    setup::get_pool,
+    auth::service::get_request_user, diet_target::model::DietTarget, error::Error, setup::get_pool,
 };
 
 #[server(endpoint = "diet-target-delete")]
@@ -21,14 +20,14 @@ pub async fn diet_target_delete(id: Uuid, username: String) -> Result<(), Server
     let user = get_request_user()?;
     let pool = get_pool()?;
 
-    let object = DietTargetBase::get_by_id(&pool, id)
+    let object = DietTarget::get_by_id(&pool, id)
         .await?
         .ok_or(Error::NotFound)?;
     object.can_delete(&user).await?;
 
-    DietTargetBase::delete(&pool, object.id).await?;
+    DietTarget::delete(&pool, object.id).await?;
 
-    leptos_axum::redirect(&format!("/users/{username}/diet-targets"));
+    leptos_axum::redirect(&format!("/users/{}/{}", username, object.date));
     Ok(())
 }
 

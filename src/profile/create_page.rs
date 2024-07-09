@@ -11,33 +11,39 @@ use crate::component::template::DetailPageTemplate;
 use crate::util::param::get_username;
 use crate::util::validation_error::{extract_other_errors, get_non_field_errors};
 
+use super::activity_level::ActivityLevel;
+use super::fitness_goal::FitnessGoal;
+use super::sex::Sex;
+
 #[cfg(feature = "ssr")]
 use crate::{
     auth::model::User,
     auth::service::get_request_user,
     error::Error,
-    profile::model::{Profile, ProfileBase},
-    progress::model::{Progress, ProgressBase},
+    profile::model::{Profile, ProfileQuery},
+    progress::model::Progress,
     setup::get_pool,
 };
 
 #[server(endpoint = "profile-create")]
 pub async fn profile_create(
     username: String,
+    fitness_goal: String,
+    activity_level: String,
     sex: String,
     height: Decimal,
     weight: Decimal,
     date_of_birth: NaiveDate,
-    activity_level: String,
-    fitness_goal: String,
 ) -> Result<(), ServerFnError> {
     let user = get_request_user()?;
     let pool = get_pool()?;
+
     let target_user = User::get_by_username(&pool, &username)
         .await?
         .ok_or(Error::NotFound)?;
-    ProfileBase::can_create(&user, target_user.id).await?;
-    Profile::validate(
+
+    Profile::can_create(&user, target_user.id).await?;
+    ProfileQuery::validate(
         &sex,
         &activity_level,
         &fitness_goal,
@@ -47,10 +53,10 @@ pub async fn profile_create(
     )?;
 
     let latest_weight = Progress::get_latest_weight(&pool, user.id).await?;
-
+    dbg!(&latest_weight);
     if latest_weight.is_none() {
         let date = Utc::now().date_naive();
-        ProgressBase::create(
+        Progress::create(
             &pool,
             target_user.id,
             date,
@@ -61,7 +67,8 @@ pub async fn profile_create(
         )
         .await?;
     }
-    ProfileBase::create(
+
+    Profile::create(
         &pool,
         target_user.id,
         &sex,
@@ -73,7 +80,7 @@ pub async fn profile_create(
     )
     .await?;
 
-    leptos_axum::redirect(&format!("/users/{}", user.username));
+    leptos_axum::redirect(&format!("/users/{}", target_user.username));
     Ok(())
 }
 
@@ -88,51 +95,30 @@ pub fn ProfileCreatePage() -> impl IntoView {
     let action_error = move || extract_other_errors(action_value, &["name", "ordering"]);
     let non_field_errors = move || get_non_field_errors(action_value);
 
-    let sex_options = vec![("", "Select"), ("M", "Male"), ("F", "Female")];
-    let activity_options = vec![
-        ("", "Select"),
-        ("SD", "Sedentary - little or no exercise/desk job"),
-        (
-            "LA",
-            "Lightly Active - light exercise/sports 1-3 days a week",
-        ),
-        (
-            "MA",
-            "Moderately Active - Moderate exercise/sports 3-5 days a week",
-        ),
-        ("VA", "Very Active - Heavy exercise/sports 6-7 days a week"),
-        (
-            "EA",
-            "Extremely Active - Very heavy exercise/physical job/training twice a day",
-        ),
-    ];
-    let goal_options = vec![
-        ("", "Select"),
-        ("LW", "Lose Weight"),
-        ("MW", "Maintain Weight"),
-        ("GW", "Gain Weight"),
-    ];
+    let goal_options = FitnessGoal::to_form_options();
+    let activity_options = ActivityLevel::to_form_options();
+    let sex_options = Sex::to_form_options();
 
     view! {
-        <DetailPageTemplate title="Create Profile">
+        <DetailPageTemplate title="Set up Profile">
             <div class="mb-4 text-red-500 font-bold">{action_error}</div>
             <div class="mb-4 text-red-500 font-bold">{non_field_errors}</div>
             <ActionForm action>
                 <input type="hidden" name="username" value=username/>
-                <FieldSelect name="activity_level" options=activity_options/>
                 <FieldSelect name="fitness_goal" options=goal_options/>
+                <FieldSelect name="activity_level" options=activity_options/>
                 <FieldSelect name="sex" options=sex_options/>
                 <NumberInput
                     action_value
                     name="height"
-                    label="Height (cm)"
+                    label="Height"
                     step="1"
                     placeholder="Enter your height in cm"
                 />
                 <NumberInput
                     action_value
                     name="weight"
-                    label="Weight (kg)"
+                    label="Weight"
                     step="0.01"
                     placeholder="Enter your weight in kg"
                 />

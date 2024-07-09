@@ -27,10 +27,8 @@ pub async fn get_diet_target_month_summary(
     let start = get_month_start_comprehensive(date);
     let end = get_month_end_comprehensive(date);
     let query = UserDaySummary::get_target_range(&pool, &username, start, end).await?;
-    dbg!(&query);
 
     let complete_day_totals = UserDaySummary::fill_missing_days_with_previous(query, start, end)?;
-    // dbg!("completed totals {:?}", &complete_day_totals);
 
     let total_days = complete_day_totals.len() as i32;
     let week_avg = UserDaySummary::calculate_averages(&complete_day_totals, total_days)?;
@@ -42,7 +40,7 @@ pub async fn get_diet_target_month_summary(
 }
 
 #[component]
-pub fn DietTargetWeekSummaryComponent() -> impl IntoView {
+pub fn DietTargetMonthSummaryComponent() -> impl IntoView {
     let params = use_params_map();
     let username = move || get_username(&params);
     let date = move || get_date(&params);

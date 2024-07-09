@@ -9,31 +9,15 @@ use super::detail_page::get_profile_detail_latest;
 use super::detail_table::ProfileDetailTable;
 
 #[component]
-pub fn ProfileSetupComponent() -> impl IntoView {
-    view! {
-        <p class="mb-4 text-gray-500">"You do not currently have a fitness profile set up."</p>
-        <p class="mb-4 text-gray-500">
-            "Use this feature to establish your body mass index (BMI), basal matabolic rate (BMR), total daily energy expenditure (TDEE) and to enable auto-generation of diet targets based on your current condition and fitness goals."
-        </p>
-        <div class="flex gap-2 justify-end pt-4">
-            <A
-                id="profile-create"
-                class="block py-1.5 px-3 bg-amber-200 rounded hover:bg-gray-300"
-                href="profile/create"
-            >
-                "Set up profile"
-            </A>
-        </div>
-    }
-}
-
-#[component]
 pub fn ProfileDetailPanel() -> impl IntoView {
     let params = use_params_map();
     let username = move || get_username(&params);
     let date = move || get_date(&params);
+
     let user_context = expect_context::<RequestUserContext>();
+    let is_self = move || user_context.is_object_owner(username());
     let is_not_self = move || user_context.is_not_object_owner(username());
+
     let profile_resource = Resource::new(
         move || (username(), date()),
         |(username, date)| get_profile_detail_latest(username, date),
@@ -43,9 +27,25 @@ pub fn ProfileDetailPanel() -> impl IntoView {
             data.as_ref().map_or_else(
                 || {
                     view! {
-                        <div>"No profile set up."</div>
+                        <div class="mb-4 text-gray-500" class=("hidden", is_self)>
+                            "This user has not set up a fitness profile."
+                        </div>
                         <div class=("hidden", is_not_self)>
-                            <ProfileSetupComponent/>
+                            <p class="mb-4 text-gray-500">
+                                "You do not currently have a fitness profile set up."
+                            </p>
+                            <p class="mb-4 text-gray-500">
+                                "Use this feature to establish your body mass index (BMI), basal matabolic rate (BMR), total daily energy expenditure (TDEE) and to enable auto-generation of diet targets based on your current condition and fitness goals."
+                            </p>
+                            <div class="flex gap-2 justify-end">
+                                <A
+                                    id="profile-create"
+                                    class="block py-1.5 px-3 bg-amber-200 rounded hover:bg-gray-300"
+                                    href="profile/create"
+                                >
+                                    "Set up profile"
+                                </A>
+                            </div>
                         </div>
                     }
                 },

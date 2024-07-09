@@ -11,9 +11,7 @@ use crate::diet::detail_page::NutritionTable;
 use crate::food::router::MealFoodParam;
 
 #[cfg(feature = "ssr")]
-use crate::{
-    auth::service::get_request_user, error::Error, meal::model::MealBase, setup::get_pool,
-};
+use crate::{auth::service::get_request_user, error::Error, meal::model::Meal, setup::get_pool};
 
 #[server(endpoint = "meal-food-detail")]
 pub async fn get_meal_food_detail(meal_food_id: Uuid) -> Result<MealFood, ServerFnError> {
@@ -21,11 +19,11 @@ pub async fn get_meal_food_detail(meal_food_id: Uuid) -> Result<MealFood, Server
     let pool = get_pool()?;
 
     let meal_food = MealFood::get_object_or_404(&pool, meal_food_id).await?;
-    let meal = MealBase::get_by_id(&pool, meal_food.meal_id)
+    let meal = Meal::get_by_id(&pool, meal_food.meal_id)
         .await?
         .ok_or(Error::NotFound)?;
 
-    meal.can_view(&user)?;
+    meal.can_view(&user).await?;
 
     Ok(meal_food)
 }

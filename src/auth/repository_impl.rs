@@ -3,13 +3,14 @@ use sqlx::postgres::PgRow;
 use sqlx::{FromRow, PgPool, Row};
 use uuid::Uuid;
 
-use crate::auth::model::{User, UserRelation};
-use crate::auth::privacy_level::PrivacyLevel;
 use crate::component::select::SelectUuidName;
 use crate::error::{handle_sqlx_contraint_error, Error, Result};
+use crate::setup::get_pool;
 use crate::util::server::{normalize_whitespace, slugify};
 
-use super::model::RequestUser;
+use super::model::{RequestUser, User, UserRelation};
+use super::privacy_level::PrivacyLevel;
+use super::token::AuthToken;
 
 impl FromRow<'_, PgRow> for User {
     fn from_row(row: &PgRow) -> sqlx::Result<Self> {
@@ -141,14 +142,14 @@ impl User {
             r#"
             UPDATE users_user
             SET
-                name = $1,
-                username = $2,
-                email = $3,
-                email_verified = $4,
-                is_active = $5,
-                is_staff = $6,
-                is_superuser = $7,
-                privacy_level = $8,
+                name = COALESCE($1, name),
+                username = COALESCE($2, username),
+                email = COALESCE($3, email),
+                email_verified = COALESCE($4, email_verified),
+                is_active = COALESCE($5, is_active),
+                is_staff = COALESCE($6, is_staff),
+                is_superuser = COALESCE($7, is_superuser),
+                privacy_level = COALESCE($8, privacy_level),
                 updated_at = NOW()
             WHERE
                 id = $9
@@ -452,5 +453,55 @@ impl UserRelation {
         .fetch_one(pool)
         .await?;
         Ok(query)
+    }
+}
+
+impl From<AuthToken> for RequestUser {
+    fn from(auth_token: AuthToken) -> Self {
+        RequestUser {
+            id: auth_token.user_id,
+            username: auth_token.username,
+            is_active: auth_token.is_active,
+            is_staff: auth_token.is_staff,
+            is_superuser: auth_token.is_superuser,
+        }
+    }
+}
+
+impl From<User> for RequestUser {
+    fn from(user: User) -> Self {
+        RequestUser {
+            id: user.id,
+            username: user.username,
+            is_active: user.is_active,
+            is_staff: user.is_staff,
+            is_superuser: user.is_superuser,
+        }
+    }
+}
+
+impl RequestUser {
+    pub async fn is_authenticated(&self) -> Result<()> {
+        let pool = get_pool()?;
+        let user = User::get_by_id(&pool, self.id)
+            .await?
+            .ok_or(Error::Unauthorized)?;
+        user.is_active.then(|| ()).ok_or(Error::Unauthorized)
+    }
+
+    pub async fn is_staff(&self) -> Result<()> {
+        let pool = get_pool()?;
+        let user = User::get_by_id(&pool, self.id)
+            .await?
+            .ok_or(Error::Unauthorized)?;
+        user.is_superuser.then(|| ()).ok_or(Error::Unauthorized)
+    }
+
+    pub async fn is_superuser(&self) -> Result<()> {
+        let pool = get_pool()?;
+        let user = User::get_by_id(&pool, self.id)
+            .await?
+            .ok_or(Error::Unauthorized)?;
+        user.is_superuser.then(|| ()).ok_or(Error::Unauthorized)
     }
 }

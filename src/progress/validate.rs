@@ -27,7 +27,7 @@ impl Progress {
         }
 
         if let Some(notes) = notes {
-            errors.validate_string("name", &notes, Some(3), Some(10000), None);
+            errors.validate_string("name", &notes, None, Some(10000), None);
         }
 
         if errors.is_empty() {

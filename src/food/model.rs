@@ -7,8 +7,35 @@ use crate::diet::model::FormattedFoodData;
 
 use super::data_measurement::DataMeasurement;
 
-#[derive(Debug, Deserialize, Serialize, Clone, Default)]
+#[derive(Debug, Deserialize, Serialize, Clone)]
 pub struct Food {
+    pub id: Uuid,
+    pub name: String,
+    pub slug: String,
+    pub brand_id: Uuid,
+    pub data_value: i32,
+    pub data_measurement: String,
+    pub energy: i32,
+    pub fat: Decimal,
+    pub saturates: Decimal,
+    pub carbohydrate: Decimal,
+    pub sugars: Decimal,
+    pub fibre: Decimal,
+    pub protein: Decimal,
+    pub salt: Decimal,
+    pub created_at: DateTime<Utc>,
+    pub updated_at: Option<DateTime<Utc>>,
+    pub created_by_id: Uuid,
+    pub updated_by_id: Option<Uuid>,
+    pub food_code: String,
+    pub food_description: Option<String>,
+    pub food_category: Option<String>,
+    pub food_data_source: String,
+    pub data_value_numeric: Decimal,
+}
+
+#[derive(Debug, Deserialize, Serialize, Clone)]
+pub struct FoodQuery {
     pub id: Uuid,
     pub name: String,
     pub slug: String,
@@ -70,6 +97,7 @@ impl Nutrition {
             self.fat_pct = (fat_energy / total_energy) * Decimal::new(100, 0);
         }
     }
+
     pub fn format(&self) -> FormattedFoodData {
         FormattedFoodData {
             energy: format!("{:.0}kcal", self.energy),
@@ -95,22 +123,25 @@ pub struct NutritionPerKg {
     pub fat_per_kg: Decimal,
 }
 
-impl Food {
+impl FoodQuery {
     pub fn get_title(&self) -> String {
         format!(
             "{}, {:.0}{}",
             self.name, self.data_value, self.data_measurement
         )
     }
+
     pub fn get_value_display(&self) -> String {
         match self.data_measurement {
             DataMeasurement::Servings => format!("Per {} Serving", self.data_value),
             _ => format!("Per {}{}", self.data_value, self.data_measurement),
         }
     }
+
     pub fn get_brand_url(&self) -> String {
         format!("/food/brands/{}", self.brand_slug)
     }
+
     pub fn format(&self) -> FormattedFoodData {
         FormattedFoodData {
             energy: format!("{:.0}kcal", self.energy),
@@ -128,91 +159,25 @@ impl Food {
     }
 
     pub fn get_last_added_data_value(&self) -> Decimal {
-        // self.last_added_quantity.map_or_else(
-        //     || Decimal::from(self.data_value),
-        //     |last_added_quantity| match self.data_measurement {
-        //         DataMeasurement::Servings => last_added_quantity,
-        //         _ => last_added_quantity * Decimal::from(100),
-        //     },
-        // )
-        if let Some(last) = self.last_added_quantity {
-            let quantity = self.data_measurement.get_quantity_value();
-            last * quantity
-        } else {
-            Decimal::from(self.data_value)
-        }
+        self.last_added_quantity.map_or_else(
+            || Decimal::from(self.data_value),
+            |last_added_quantity| match self.data_measurement {
+                DataMeasurement::Servings => last_added_quantity,
+                _ => last_added_quantity * Decimal::from(100),
+            },
+        )
+        // if let Some(last) = self.last_added_quantity {
+        //     last * self.data_measurement.get_quantity_value()
+        // } else {
+        //     Decimal::from(self.data_value)
+        // }
     }
-
-    pub fn get_order_by_column(order_by: &str) -> &str {
-        match order_by {
-            "name" => "t1.name",
-            "-name" => "t1.name DESC",
-            "brand_name" => "t2.name",
-            "-brand_name" => "t2.name DESC",
-            "food_count" => "food_count",
-            "-food_count" => "food_count DESC",
-            "created_at" => "t1.created_at",
-            "-created_at" => "t1.created_at DESC",
-            "updated" => "t1.updated_at",
-            "-updated" => "t1.updated_at DESC",
-            "energy" => "t1.energy",
-            "-energy" => "t1.energy DESC",
-            "protein" => "t1.protein",
-            "-protein" => "t1.protein DESC",
-            "carbohydrate" => "t1.carbohydrate",
-            "-carbohydrate" => "t1.carbohydrate DESC",
-            "fat" => "t1.fat",
-            "-fat" => "t1.fat DESC",
-            "saturates" => "t1.saturates",
-            "-saturates" => "t1.saturates DESC",
-            "sugars" => "t1.sugars",
-            "-sugars" => "t1.sugars DESC",
-            "fibre" => "t1.fibre",
-            "-fibre" => "t1.fibre DESC",
-            "salt" => "t1.salt",
-            "-salt" => "t1.salt DESC",
-            "last_added_quantity" => "last_added_quantity",
-            "-last_added_quantity" => "last_added_quantity DESC",
-            "last_added_date" => "last_added_date",
-            "-last_added_date" => "last_added_date DESC",
-            _ => "t1.created_at",
-        }
-    }
-
-    const SORT_OPTIONS: &'static [(&'static str, &'static str)] = &[
-        ("name", "t1.name"),
-        ("-name", "t1.name DESC"),
-        ("brand_name", "t2.name"),
-        ("-brand_name", "t2.name DESC"),
-        ("food_count", "food_count"),
-        ("-food_count", "food_count DESC"),
-        ("created_at", "t1.created_at"),
-        ("-created_at", "t1.created_at DESC"),
-        ("updated", "t1.updated_at"),
-        ("-updated", "t1.updated_at DESC"),
-        ("energy", "energy"),
-        ("-energy", "energy DESC"),
-        ("protein", "protein"),
-        ("-protein", "protein DESC"),
-        ("carbohydrate", "carbohydrate"),
-        ("-carbohydrate", "carbohydrate DESC"),
-        ("fat", "fat"),
-        ("-fat", "fat DESC"),
-        ("saturates", "saturates"),
-        ("-saturates", "saturates DESC"),
-        ("sugars", "sugars"),
-        ("-sugars", "sugars DESC"),
-        ("fibre", "fibre"),
-        ("-fibre", "fibre DESC"),
-        ("salt", "salt"),
-        ("-salt", "salt DESC"),
-        ("last_added_quantity", "last_added_quantity"),
-        ("-last_added_quantity", "last_added_quantity DESC"),
-        ("last_added_date", "last_added_date"),
-        ("-last_added_date", "last_added_date DESC"),
-    ];
 
     const SORT_DISPLAY: &'static [(&'static str, &'static str)] = &[
+        ("name", "Food (A-z)"),
+        ("-name", "Food (Z-a)"),
+        ("brand_name", "Brand (A-z)"),
+        ("-brand_name", "Brand (Z-a)"),
         ("-energy", "Calories (High-Low)"),
         ("energy", "Calories (Low-High)"),
         ("-protein", "Protein (High-Low)"),
@@ -229,13 +194,30 @@ impl Food {
         ("fibre", "Fibre (Low-High)"),
         ("-salt", "Salt (High-Low)"),
         ("salt", "Salt (Low-High)"),
+        ("-created_at", "Created (Desc)"),
+        ("created_at", "Created (Asc)"),
+        ("-updated_at", "Updated (Desc)"),
+        ("updated_at", "Updated (Asc)"),
     ];
 
-    pub fn get_order_options() -> &'static [(&'static str, &'static str)] {
-        Self::SORT_OPTIONS
+    const SORT_DISPLAY_DIET: &'static [(&'static str, &'static str)] = &[
+        ("-last_added_quantity", "last_added_quantity (High-Low)"),
+        ("last_added_quantity", "last_added_quantity (Low-High)"),
+        ("-last_added_date", "last_added_date (High-Low)"),
+        ("last_added_date", "last_added_date (Low-High)"),
+    ];
+
+    pub fn to_filter_options() -> Vec<(&'static str, &'static str)> {
+        let options = Self::SORT_DISPLAY;
+        options.to_vec()
     }
 
-    pub fn get_order_display() -> &'static [(&'static str, &'static str)] {
-        Self::SORT_DISPLAY
+    pub fn to_diet_filter_options() -> Vec<(&'static str, &'static str)> {
+        let combined = Self::SORT_DISPLAY
+            .iter()
+            .chain(Self::SORT_DISPLAY_DIET.iter())
+            .copied()
+            .collect();
+        combined
     }
 }

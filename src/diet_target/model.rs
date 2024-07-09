@@ -3,8 +3,8 @@ use rust_decimal::Decimal;
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 
-#[derive(Debug, Deserialize, Serialize, Clone)]
-pub struct DietTargetBase {
+#[derive(Debug, Deserialize, Serialize)]
+pub struct DietTarget {
     pub id: Uuid,
     pub user_id: Uuid,
     pub date: NaiveDate,
@@ -24,7 +24,7 @@ pub struct DietTargetBase {
 }
 
 #[derive(Debug, Deserialize, Serialize, Clone)]
-pub struct DietTarget {
+pub struct DietTargetQuery {
     pub id: Uuid,
     pub user_id: Uuid,
     pub date: NaiveDate,

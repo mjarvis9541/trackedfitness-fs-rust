@@ -3,7 +3,7 @@ use rust_decimal::Decimal;
 
 use crate::util::validation_error::ValidationError;
 
-use super::model::{DietTarget, DietTargetGramKg};
+use super::model::{DietTargetGramKg, DietTargetQuery};
 
 impl DietTargetGramKg {
     pub fn validate(&self) -> Result<(), ValidationError> {
@@ -44,7 +44,7 @@ impl DietTargetGramKg {
     }
 }
 
-impl DietTarget {
+impl DietTargetQuery {
     pub fn validate(
         date: NaiveDate,
         weight: Decimal,

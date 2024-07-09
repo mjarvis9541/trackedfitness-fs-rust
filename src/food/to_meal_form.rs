@@ -11,8 +11,8 @@ use crate::util::validation_error::{extract_other_errors, get_non_field_errors};
 
 #[cfg(feature = "ssr")]
 use crate::{
-    auth::service::get_request_user, error::Error, meal::model::MealBase,
-    meal_food::model::MealFood, setup::get_pool,
+    auth::service::get_request_user, error::Error, meal::model::Meal, meal_food::model::MealFood,
+    setup::get_pool,
 };
 
 #[server(endpoint = "food-to-meal-food-create")]
@@ -23,7 +23,7 @@ pub async fn food_to_meal_create(
 ) -> Result<(), ServerFnError> {
     let user = get_request_user()?;
     let pool = get_pool()?;
-    let meal = MealBase::get_by_id(&pool, meal_id)
+    let meal = Meal::get_by_id(&pool, meal_id)
         .await?
         .ok_or(Error::NotFound)?;
     meal.can_update(&user).await?;

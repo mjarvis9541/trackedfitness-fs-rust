@@ -99,3 +99,33 @@ where
         </A>
     }
 }
+
+// pub enum HTMLLinkVariant {
+//     Primary,
+//     Secondary,
+//     Danger,
+// }
+
+// impl HTMLLinkVariant {
+//     pub fn to_css(&self) -> &'static str {
+//         match self {
+//             HTMLLinkVariant::Primary => "block px-3 py-1.5 rounded bg-gray-100 hover:bg-gray-200",
+//             HTMLLinkVariant::Secondary => todo!(),
+//             HTMLLinkVariant::Danger => todo!(),
+//         }
+//     }
+// }
+
+// #[component]
+// pub fn HTMLLink(
+//     #[prop(into)] href: String,
+//     #[prop(into)] text: String,
+//     #[prop(default = HTMLLinkVariant::Primary)] variant: HTMLLinkVariant,
+//     #[prop(attrs)] attrs: Vec<(&'static str, Attribute)>,
+// ) -> impl IntoView {
+//     view! {
+//         <a {..attrs} href=href>
+//             {text}
+//         </a>
+//     }
+// }

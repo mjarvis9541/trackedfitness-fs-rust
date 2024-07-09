@@ -17,7 +17,6 @@ pub enum FitnessGoal {
 
 impl FromStr for FitnessGoal {
     type Err = ();
-
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         match s.to_lowercase().as_str() {
             "lw" => Ok(FitnessGoal::LoseWeight),
@@ -51,6 +50,16 @@ impl FitnessGoal {
 
     pub fn all_variants() -> Vec<&'static str> {
         vec!["LW", "MW", "GW"]
+    }
+
+    pub fn to_form_options() -> Vec<(&'static str, &'static str)> {
+        let options = [
+            ("", "Select"),
+            ("LW", "Lose Weight"),
+            ("MW", "Maintain Weight"),
+            ("GW", "Gain Weight"),
+        ];
+        options.to_vec()
     }
 }
 

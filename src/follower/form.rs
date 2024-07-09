@@ -3,7 +3,7 @@ use leptos_router::*;
 
 use crate::component::button::Button;
 use crate::component::icon::{IconUserMinus, IconUserPlus};
-use crate::error_extract::{extract_error_message, process_non_field_errors};
+use crate::util::validation_error::{extract_other_errors, get_non_field_errors};
 
 #[cfg(feature = "ssr")]
 use crate::{auth::service::get_request_user, follower::model::Follower, setup::get_pool};
@@ -57,11 +57,14 @@ pub fn FollowerRequestForm(
     username: String,
     action: Action<FollowerRequest, Result<(), ServerFnError>>,
 ) -> impl IntoView {
-    let error = move || extract_error_message(&action);
-    let non_field_errors = move || process_non_field_errors(error);
+    let action_value = action.value();
+    let action_error = move || extract_other_errors(action_value, &["non_field_errors", "name"]);
+    let non_field_errors = move || get_non_field_errors(action_value);
     view! {
         <div>
-            {error} {non_field_errors} <ActionForm action class="contents">
+            <div class="mb-4 text-red-500 font-bold">{action_error}</div>
+            <div class="mb-4 text-red-500 font-bold">{non_field_errors}</div>
+            <ActionForm action class="contents">
                 <input type="hidden" name="username" value=username/>
                 <Button label="Follow">
                     <IconUserPlus/>
@@ -76,11 +79,14 @@ pub fn FollowerAcceptForm(
     username: String,
     action: Action<FollowerAccept, Result<(), ServerFnError>>,
 ) -> impl IntoView {
-    let error = move || extract_error_message(&action);
-    let non_field_errors = move || process_non_field_errors(error);
+    let action_value = action.value();
+    let action_error = move || extract_other_errors(action_value, &["non_field_errors", "name"]);
+    let non_field_errors = move || get_non_field_errors(action_value);
     view! {
         <div>
-            {error} {non_field_errors} <ActionForm action class="contents">
+            <div class="mb-4 text-red-500 font-bold">{action_error}</div>
+            <div class="mb-4 text-red-500 font-bold">{non_field_errors}</div>
+            <ActionForm action class="contents">
                 <input type="hidden" name="username" value=username/>
                 <Button label="Accept">
                     <IconUserPlus/>
@@ -96,11 +102,14 @@ pub fn FollowerRemoveForm(
     username: String,
     action: Action<FollowerRemove, Result<(), ServerFnError>>,
 ) -> impl IntoView {
-    let error = move || extract_error_message(&action);
-    let non_field_errors = move || process_non_field_errors(error);
+    let action_value = action.value();
+    let action_error = move || extract_other_errors(action_value, &["non_field_errors", "name"]);
+    let non_field_errors = move || get_non_field_errors(action_value);
     view! {
         <div>
-            {error} {non_field_errors} <ActionForm action class="contents">
+            <div class="mb-4 text-red-500 font-bold">{action_error}</div>
+            <div class="mb-4 text-red-500 font-bold">{non_field_errors}</div>
+            <ActionForm action class="contents">
                 <input type="hidden" name="username" value=username/>
                 <Button label>
                     <IconUserMinus/>
@@ -116,11 +125,14 @@ pub fn FollowerUnfollowForm(
     username: String,
     action: Action<FollowerUnfollow, Result<(), ServerFnError>>,
 ) -> impl IntoView {
-    let error = move || extract_error_message(&action);
-    let non_field_errors = move || process_non_field_errors(error);
+    let action_value = action.value();
+    let action_error = move || extract_other_errors(action_value, &["non_field_errors", "name"]);
+    let non_field_errors = move || get_non_field_errors(action_value);
     view! {
         <div>
-            {error} {non_field_errors} <ActionForm action class="contents">
+            <div class="mb-4 text-red-500 font-bold">{action_error}</div>
+            <div class="mb-4 text-red-500 font-bold">{non_field_errors}</div>
+            <ActionForm action class="contents">
                 <input type="hidden" name="username" value=username/>
                 <Button label>
                     <IconUserMinus/>

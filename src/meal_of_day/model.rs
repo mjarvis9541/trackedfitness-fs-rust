@@ -2,6 +2,7 @@ use chrono::prelude::*;
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 
+#[cfg_attr(feature = "ssr", derive(sqlx::FromRow))]
 #[derive(Debug, Deserialize, Serialize, Clone)]
 pub struct MealOfDay {
     pub id: Uuid,

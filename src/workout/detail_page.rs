@@ -18,13 +18,10 @@ use crate::{auth::model::User, auth::service::get_request_user, error::Error, se
 pub async fn get_workout_detail(workout_id: Uuid) -> Result<WorkoutBase, ServerFnError> {
     let user = get_request_user()?;
     let pool = get_pool()?;
-
     let workout = WorkoutBase::get_by_id(&pool, workout_id)
         .await?
         .ok_or(Error::NotFound)?;
-
     User::check_view_permission_by_user_id(&pool, &user, workout.user_id).await?;
-
     Ok(workout)
 }
 
@@ -34,7 +31,8 @@ pub fn WorkoutDetailPage() -> impl IntoView {
     let workout_id = move || params.with(|q| q.as_ref().map(|q| q.workout_id).unwrap_or_default());
 
     let resource = Resource::new(workout_id, get_workout_detail);
-    let response = move || resource.and_then(|data| view! { <WorkoutDetail data=data.clone()/> });
+    let response =
+        move || resource.and_then(|data| view! { <WorkoutDetailComponent data=data.clone()/> });
     view! {
         <DetailPageTemplate title="Workout">
             <Transition fallback=LoadingComponent>
@@ -47,7 +45,7 @@ pub fn WorkoutDetailPage() -> impl IntoView {
 }
 
 #[component]
-pub fn WorkoutDetail(data: WorkoutBase) -> impl IntoView {
+pub fn WorkoutDetailComponent(data: WorkoutBase) -> impl IntoView {
     let created_at = format_datetime(&Some(data.created_at));
     let updated_at = format_datetime(&data.updated_at);
 

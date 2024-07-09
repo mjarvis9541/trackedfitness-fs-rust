@@ -3,9 +3,9 @@ use rust_decimal::Decimal;
 use crate::meal_food::model::MealFood;
 use crate::util::validation_error::ValidationError;
 
-use super::model::MealBase;
+use super::model::Meal;
 
-impl MealBase {
+impl Meal {
     pub fn validate(name: &str) -> Result<(), ValidationError> {
         let mut errors = ValidationError::new();
 

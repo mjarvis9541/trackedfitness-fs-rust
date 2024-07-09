@@ -7,51 +7,18 @@ use uuid::Uuid;
 use super::detail_page::get_set_detail;
 use crate::auth::context::CanEditContext;
 use crate::component::button::{Button, SubmitButton};
-use crate::component::icon::{Chevron, IconCheck};
+use crate::component::icon::IconCheck;
 use crate::component::input::NumberInput;
 use crate::component::template::{DetailPageTemplate, ErrorComponent, LoadingComponent};
 use crate::util::validation_error::{extract_other_errors, get_non_field_errors};
-use crate::workout::model::SetQueryWithPrevious;
+use crate::workout::model::WorkoutDaySetQuery;
 use crate::workout::router::SetDetailParam;
 
 #[cfg(feature = "ssr")]
 use crate::{
-    auth::service::get_request_user, error::Error, exercise::model::ExerciseModel,
+    auth::service::get_request_user, error::Error, exercise::model::ExerciseBase,
     set::model::SetModel, setup::get_pool, workout::model::WorkoutBase,
 };
-
-#[server(endpoint = "set-order-increment")]
-pub async fn set_order_update(set_id: Uuid, order: i32) -> Result<(), ServerFnError> {
-    let user = get_request_user()?;
-    let pool = get_pool()?;
-
-    let set = SetModel::get_by_id(&pool, set_id)
-        .await?
-        .ok_or(Error::NotFound)?;
-
-    let new_order = order + set.order;
-    if new_order <= 1 {
-        return Err(ServerFnError::new("must be a postivie number"));
-    }
-    SetModel::update_order(&pool, set.id, new_order, user.id).await?;
-    Ok(())
-}
-
-#[component]
-pub fn SetOrderUpdateForm(id: String, increment: bool) -> impl IntoView {
-    let action = expect_context::<Action<SetOrderUpdate, Result<(), ServerFnError>>>();
-    let order = if increment { 1 } else { -1 };
-    let direction = move || if increment { "down" } else { "up" };
-    view! {
-        <ActionForm action class="contents">
-            <input type="hidden" name="set_id" value=id/>
-            <input type="hidden" name="order" value=order/>
-            <Button>
-                <Chevron direction=direction()/>
-            </Button>
-        </ActionForm>
-    }
-}
 
 #[server(endpoint = "set-update")]
 pub async fn set_update(
@@ -67,12 +34,13 @@ pub async fn set_update(
     let set = SetModel::get_by_id(&pool, set_id)
         .await?
         .ok_or(Error::NotFound)?;
-    let exercise = ExerciseModel::get_by_id(&pool, set.exercise_id)
+    let exercise = ExerciseBase::get_by_id(&pool, set.exercise_id)
         .await?
         .ok_or(Error::NotFound)?;
-    let _workout = WorkoutBase::get_by_id(&pool, exercise.workout_id)
+    let workout = WorkoutBase::get_by_id(&pool, exercise.workout_id)
         .await?
         .ok_or(Error::NotFound)?;
+    workout.can_update(&user).await?;
 
     SetModel::validate(order, weight, reps, rest)?;
     SetModel::update(
@@ -120,7 +88,7 @@ pub fn SetRowInput(
 }
 
 #[component]
-pub fn SetRowUpdateForm(data: SetQueryWithPrevious) -> impl IntoView {
+pub fn SetRowUpdateForm(data: WorkoutDaySetQuery) -> impl IntoView {
     let action = expect_context::<Action<SetUpdate, Result<(), ServerFnError>>>();
     let set_id = data.set_id.to_string();
     let order = data.order.to_string();

@@ -5,7 +5,7 @@ use leptos_router::*;
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 
-use super::model::{ExerciseModel, ExerciseQuery};
+use super::model::{ExerciseBase, ExerciseQuery};
 use crate::component::template::{ErrorComponent, LoadingComponent};
 use crate::set::model::SetQuery;
 use crate::util::datetime::DATE_FORMAT_SHORT;
@@ -24,11 +24,11 @@ pub struct ExerciseQueryResponse {
 }
 
 #[server(endpoint = "exercise-detail")]
-pub async fn get_exercise_detail(exercise_id: Uuid) -> Result<ExerciseModel, ServerFnError> {
+pub async fn get_exercise_detail(exercise_id: Uuid) -> Result<ExerciseBase, ServerFnError> {
     let user = get_request_user()?;
     let pool = get_pool()?;
 
-    let exercise = ExerciseModel::get_by_id(&pool, exercise_id)
+    let exercise = ExerciseBase::get_by_id(&pool, exercise_id)
         .await?
         .ok_or(Error::NotFound)?;
     let workout = WorkoutBase::get_by_id(&pool, exercise.workout_id)
@@ -55,7 +55,7 @@ pub async fn get_exercise_detail_with_previous(
     workout.can_update(&user).await?;
 
     let previous_exercise_id =
-        ExerciseModel::try_get_previous_exercise_id(&pool, exercise_id).await?;
+        ExerciseBase::try_get_previous_exercise_id(&pool, exercise_id).await?;
 
     let previous = if let Some(id) = previous_exercise_id {
         Some(

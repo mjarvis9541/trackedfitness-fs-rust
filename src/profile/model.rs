@@ -8,8 +8,10 @@ use super::activity_level::ActivityLevel;
 use super::fitness_goal::FitnessGoal;
 use super::sex::Sex;
 
-#[derive(Debug, Deserialize, Serialize, Clone)]
-pub struct ProfileBase {
+#[cfg(feature = "ssr")]
+#[allow(dead_code)]
+#[derive(Debug)]
+pub struct Profile {
     pub id: Uuid,
     pub user_id: Uuid,
     pub sex: String,
@@ -31,7 +33,7 @@ pub struct ProfileImage {
 }
 
 #[derive(Debug, Deserialize, Serialize, Clone)]
-pub struct Profile {
+pub struct ProfileQuery {
     pub id: Uuid,
     pub user_id: Uuid,
     pub sex: String,
@@ -79,8 +81,8 @@ pub struct ProfileMetric {
     pub total_daily_energy_expenditure: Decimal,
 }
 
-impl From<Profile> for ProfileMetric {
-    fn from(data: Profile) -> Self {
+impl From<ProfileQuery> for ProfileMetric {
+    fn from(data: ProfileQuery) -> Self {
         // let fitness_goal = data.fitness_goal.parse::<FitnessGoal>().unwrap_or_default();
         // let activity_level = data
         //     .activity_level
@@ -129,7 +131,7 @@ impl From<Profile> for ProfileMetric {
     }
 }
 
-impl Profile {
+impl ProfileQuery {
     pub fn get_age(&self) -> u32 {
         Utc::now()
             .date_naive()

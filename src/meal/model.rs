@@ -5,7 +5,7 @@ use uuid::Uuid;
 use crate::food::model::Nutrition;
 
 #[derive(Debug, Deserialize, Serialize)]
-pub struct MealBase {
+pub struct Meal {
     pub id: Uuid,
     pub user_id: Uuid,
     pub name: String,
@@ -16,7 +16,7 @@ pub struct MealBase {
 }
 
 #[derive(Debug, Deserialize, Serialize, Clone, Default)]
-pub struct Meal {
+pub struct MealQuery {
     pub id: Uuid,
     pub user_id: Uuid,
     pub name: String,
@@ -29,8 +29,40 @@ pub struct Meal {
     pub nutrition: Nutrition,
 }
 
-impl Meal {
+impl MealQuery {
+    const SORT_OPTIONS_DISPLAY: &'static [(&'static str, &'static str)] = &[
+        ("name", "Name (A-z)"),
+        ("-name", "Name (Z-a)"),
+        ("-food_count", "Food Count (High-Low)"),
+        ("food_count", "Food Count (Low-High)"),
+        ("-energy", "Calories (High-Low)"),
+        ("energy", "Calories (Low-High)"),
+        ("-protein", "Protein (High-Low)"),
+        ("protein", "Protein (Low-High)"),
+        ("-carbohydrate", "Carbs (High-Low)"),
+        ("carbohydrate", "Carbs (Low-High)"),
+        ("-fat", "Fat (High-Low)"),
+        ("fat", "Fat (Low-High)"),
+        ("-saturates", "Saturates (High-Low)"),
+        ("saturates", "Saturates (Low-High)"),
+        ("-sugars", "Sugars (High-Low)"),
+        ("sugars", "Sugars (Low-High)"),
+        ("-fibre", "Fibre (High-Low)"),
+        ("fibre", "Fibre (Low-High)"),
+        ("-salt", "Salt (High-Low)"),
+        ("salt", "Salt (Low-High)"),
+        ("-created_at", "Created (Desc)"),
+        ("created_at", "Created (Asc)"),
+        ("-updated_at", "Updated (Desc)"),
+        ("updated_at", "Updated (Asc)"),
+    ];
+
     pub fn get_detail_href(&self) -> String {
         format!("/food/meals/{}", self.id)
+    }
+
+    pub fn to_sort_options() -> Vec<(&'static str, &'static str)> {
+        let options = Self::SORT_OPTIONS_DISPLAY;
+        options.to_vec()
     }
 }

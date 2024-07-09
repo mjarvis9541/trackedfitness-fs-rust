@@ -41,7 +41,6 @@ pub async fn upload_file_action(data: MultipartData) -> Result<(), ServerFnError
         let field_name = field.name().unwrap_or_default().to_string();
         if field_name == "brand_slug" {
             slug = field.text().await.unwrap_or_default();
-            dbg!(slug.clone());
         } else if field_name == "file_to_upload" {
             let file_name = field.file_name().unwrap_or_default().to_string();
             file_extension = Path::new(&file_name)

@@ -6,15 +6,19 @@ use uuid::Uuid;
 
 use crate::brand::select::{get_brand_select, BrandSelect};
 use crate::component::button::SubmitButton;
-use crate::component::template::DetailPageTemplate;
-
 use crate::component::input::{NumberInput, TextInput};
 use crate::component::select::FieldSelect;
+use crate::component::template::DetailPageTemplate;
 use crate::util::validation_error::{extract_other_errors, get_non_field_errors};
+
+use super::data_measurement::DataMeasurement;
 
 #[cfg(feature = "ssr")]
 use crate::{
-    auth::service::get_request_user, brand::model::Brand, error::Error, food::model::Food,
+    auth::service::get_request_user,
+    brand::model::Brand,
+    error::Error,
+    food::model::{Food, FoodQuery},
     setup::get_pool,
 };
 
@@ -35,10 +39,13 @@ pub async fn food_create(
     let user = get_request_user()?;
     let pool = get_pool()?;
 
+    Food::can_create(&user).await?;
+
     let brand = Brand::get_by_id(&pool, brand_id)
         .await?
         .ok_or(Error::NotFound)?;
-    Food::validate(
+
+    FoodQuery::validate(
         &name,
         &serving,
         energy,
@@ -69,7 +76,7 @@ pub async fn food_create(
     )
     .await?;
 
-    leptos_axum::redirect(&format!("/food/{}", object));
+    leptos_axum::redirect(&format!("/food/{}", object.slug));
     Ok(())
 }
 
@@ -100,12 +107,7 @@ pub fn FoodCreatePage() -> impl IntoView {
 
     let brand_resource = Resource::once(get_brand_select);
     provide_context(brand_resource);
-    let serving_options = vec![
-        ("", "Select"),
-        ("g", "100g"),
-        ("ml", "100ml"),
-        ("srv", "1 Serving"),
-    ];
+    let serving_options = DataMeasurement::to_form_options();
     view! {
         <DetailPageTemplate title="New Food">
             <div class="mb-4 text-red-500 font-bold">{action_error}</div>

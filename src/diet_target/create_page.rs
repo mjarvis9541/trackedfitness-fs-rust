@@ -14,7 +14,7 @@ use crate::util::validation_error::{extract_other_errors, get_non_field_errors};
 use crate::{
     auth::model::User,
     auth::service::get_request_user,
-    diet_target::model::{DietTargetBase, DietTargetGramKg, DietTargetInput},
+    diet_target::model::{DietTarget, DietTargetGramKg, DietTargetInput},
     error::Error,
     setup::get_pool,
 };
@@ -34,7 +34,7 @@ pub async fn diet_target_create(
     let target_user = User::get_by_username(&pool, &username)
         .await?
         .ok_or(Error::NotFound)?;
-    DietTargetBase::can_create(&user, target_user.id).await?;
+    DietTarget::can_create(&user, target_user.id).await?;
 
     let data = DietTargetGramKg {
         user_id: target_user.id,
@@ -45,13 +45,10 @@ pub async fn diet_target_create(
         fat_per_kg,
     };
     data.validate()?;
-    let database_input = DietTargetInput::from(data);
-    let query = DietTargetBase::create(&pool, database_input, user.id).await?;
+    let input = DietTargetInput::from(data);
+    DietTarget::create(&pool, input, user.id).await?;
 
-    leptos_axum::redirect(&format!(
-        "/users/{}/diet-targets/{}",
-        target_user.username, query.date
-    ));
+    leptos_axum::redirect(&format!("/users/{}/{}", username, date));
     Ok(())
 }
 
@@ -91,12 +88,7 @@ pub fn DietTargetCreatePage() -> impl IntoView {
 
             <ActionForm action>
                 <input type="hidden" name="username" value=username/>
-                <TextInput
-                    action_value
-                    input_type="date"
-                    name="date"
-                    value=create_for_date()
-                />
+                <TextInput action_value input_type="date" name="date" value=create_for_date()/>
                 <NumberInput
                     action_value
                     step="0.01"

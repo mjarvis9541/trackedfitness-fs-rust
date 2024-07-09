@@ -13,15 +13,16 @@ use crate::component::checkbox::{CheckboxListHeader, CheckboxListItem};
 use crate::component::date_navigation::DateNavigation;
 use crate::component::icon::IconFilePlus;
 use crate::component::template::{ErrorComponent, LoadingSpinner};
-use crate::diet::copy_previous_day_form::{DietCopyPreviousDay, DietCopyPreviousDayForm};
-use crate::diet::copy_previous_meal_form::DietCopyPrevious;
-use crate::diet::to_meal_form::{DietToMealForm, SaveToMeal};
-use crate::diet_target::model::DietTarget;
+use crate::diet_target::model::DietTargetQuery;
 use crate::food::model::Nutrition;
 use crate::util::param::{get_date, get_username};
 
 use super::component::{DietFoodGridHeader, DietMealGridHeader};
-use super::model::{DietDayDTO, DietFoodQuery, DietMealDTO};
+use super::copy_previous_day_form::{DietCopyPreviousDay, DietCopyPreviousDayForm};
+use super::copy_previous_meal_form::DietCopyPrevious;
+use super::model::{DietDayDTO, DietFoodQuery, DietMealDTO, FormattedFoodData};
+use super::to_meal_form::{DietToMealForm, SaveToMeal};
+use super::week_navigation::DietWeekNavComponent;
 
 #[cfg(feature = "ssr")]
 use crate::{
@@ -31,7 +32,7 @@ use crate::{
 #[derive(Debug, Deserialize, Serialize, Clone)]
 pub struct DietDayResponse {
     pub diet_day: DietDayDTO,
-    pub diet_target: Option<DietTarget>,
+    pub diet_target: Option<DietTargetQuery>,
     pub remaining: Option<Nutrition>,
 }
 
@@ -84,34 +85,16 @@ pub fn DietDayPage() -> impl IntoView {
                     <section class="flex col-span-4 items-center p-2 font-bold bg-gray-200">
                         "Target"
                     </section>
-                    <div class=DAY_TOTAL_ROW_CSS>{total.energy}</div>
-                    <div class=DAY_TOTAL_ROW_CSS>{total.protein}" "{total.protein_pct}</div>
-                    <div class=DAY_TOTAL_ROW_CSS>
-                        {total.carbohydrate}" "{total.carbohydrate_pct}
-                    </div>
-                    <div class=DAY_TOTAL_ROW_CSS>{total.fat}" "{total.fat_pct}</div>
-                    <div class=DAY_TOTAL_ROW_CSS>{total.saturates}</div>
-                    <div class=DAY_TOTAL_ROW_CSS>{total.sugars}</div>
-                    <div class=DAY_TOTAL_ROW_CSS>{total.fibre}</div>
-                    <div class=DAY_TOTAL_ROW_CSS>{total.salt}</div>
+                    <DietDayTotalComponent formatted=total/>
                 }
             });
-            let remain_view = data.remaining.map(|target| {
-                let total = target.format();
+            let remain_view = data.remaining.map(|remaining| {
+                let total = remaining.format();
                 view! {
                     <section class="flex col-span-4 items-center p-2 font-bold bg-gray-200">
                         "Remaining"
                     </section>
-                    <div class=DAY_TOTAL_ROW_CSS>{total.energy}</div>
-                    <div class=DAY_TOTAL_ROW_CSS>{total.protein}" "{total.protein_pct}</div>
-                    <div class=DAY_TOTAL_ROW_CSS>
-                        {total.carbohydrate}" "{total.carbohydrate_pct}
-                    </div>
-                    <div class=DAY_TOTAL_ROW_CSS>{total.fat}" "{total.fat_pct}</div>
-                    <div class=DAY_TOTAL_ROW_CSS>{total.saturates}</div>
-                    <div class=DAY_TOTAL_ROW_CSS>{total.sugars}</div>
-                    <div class=DAY_TOTAL_ROW_CSS>{total.fibre}</div>
-                    <div class=DAY_TOTAL_ROW_CSS>{total.salt}</div>
+                    <DietDayTotalComponent formatted=total/>
                 }
             });
             view! {
@@ -130,6 +113,7 @@ pub fn DietDayPage() -> impl IntoView {
         <Title text="Diet"/>
         <main class="p-4">
             <DateNavigation/>
+            <DietWeekNavComponent/>
             <section class="grid grid-cols-4 lg:grid-cols-12">
                 <Transition fallback=LoadingSpinner>
                     <ErrorBoundary fallback=|errors| {
@@ -180,14 +164,21 @@ pub fn DietDayComponent(
         {diet_meal_list_view}
         <div class="col-span-full h-2 bg-gray-100 lg:hidden"></div>
         <section class="flex col-span-4 items-center p-2 font-bold bg-gray-200">"Total"</section>
-        <div class=DAY_TOTAL_ROW_CSS>{total.energy}</div>
-        <div class=DAY_TOTAL_ROW_CSS>{total.protein}" "{total.protein_pct}</div>
-        <div class=DAY_TOTAL_ROW_CSS>{total.carbohydrate}" "{total.carbohydrate_pct}</div>
-        <div class=DAY_TOTAL_ROW_CSS>{total.fat}" "{total.fat_pct}</div>
-        <div class=SECONDARY_DAY_TOTAL_ROW_CSS>{total.saturates}</div>
-        <div class=SECONDARY_DAY_TOTAL_ROW_CSS>{total.sugars}</div>
-        <div class=SECONDARY_DAY_TOTAL_ROW_CSS>{total.fibre}</div>
-        <div class=SECONDARY_DAY_TOTAL_ROW_CSS>{total.salt}</div>
+        <DietDayTotalComponent formatted=total/>
+    }
+}
+
+#[component]
+pub fn DietDayTotalComponent(formatted: FormattedFoodData) -> impl IntoView {
+    view! {
+        <div class=DAY_TOTAL_ROW_CSS>{formatted.energy}</div>
+        <div class=DAY_TOTAL_ROW_CSS>{formatted.protein}" "{formatted.protein_pct}</div>
+        <div class=DAY_TOTAL_ROW_CSS>{formatted.carbohydrate}" "{formatted.carbohydrate_pct}</div>
+        <div class=DAY_TOTAL_ROW_CSS>{formatted.fat}" "{formatted.fat_pct}</div>
+        <div class=SECONDARY_DAY_TOTAL_ROW_CSS>{formatted.saturates}</div>
+        <div class=SECONDARY_DAY_TOTAL_ROW_CSS>{formatted.sugars}</div>
+        <div class=SECONDARY_DAY_TOTAL_ROW_CSS>{formatted.fibre}</div>
+        <div class=SECONDARY_DAY_TOTAL_ROW_CSS>{formatted.salt}</div>
     }
 }
 

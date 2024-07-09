@@ -60,7 +60,7 @@ pub fn ChartAxisY(
     let y_axis_max = y_max.get();
     let y_axis_num_points = y_num_points.get();
     let y_axis_num_points = if y_axis_num_points == 0.0 {
-        6.0
+        7.0
     } else {
         y_axis_num_points
     };

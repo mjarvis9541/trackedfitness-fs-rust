@@ -15,7 +15,7 @@ use crate::component::template::{
 };
 use crate::progress::create_page::ProgressCreate;
 use crate::progress::delete_page::ProgressDelete;
-use crate::progress::model::Progress;
+use crate::progress::model::ProgressQuery;
 use crate::progress::update_page::ProgressUpdate;
 use crate::util::param::{extract_page, extract_param, extract_size, UsernameParam};
 
@@ -29,11 +29,11 @@ pub async fn get_progress_list(
     order: String,
     size: i64,
     page: i64,
-) -> Result<Vec<Progress>, ServerFnError> {
+) -> Result<Vec<ProgressQuery>, ServerFnError> {
     let user = get_request_user()?;
     let pool = get_pool()?;
     User::check_view_permission(&pool, &user, &username).await?;
-    let results = Progress::filter(&pool, &search, &username, &order, size, page).await?;
+    let results = ProgressQuery::filter(&pool, &search, &username, &order, size, page).await?;
     Ok(results)
 }
 
@@ -45,7 +45,7 @@ pub async fn get_progress_list_count(
     let user = get_request_user()?;
     let pool = get_pool()?;
     User::check_view_permission(&pool, &user, &username).await?;
-    let count = Progress::count(&pool, &search, &username).await?;
+    let count = ProgressQuery::count(&pool, &search, &username).await?;
     Ok(count)
 }
 
@@ -157,7 +157,11 @@ pub fn ProgressListPage() -> impl IntoView {
                 <Form method="GET" action="" class="contents">
                     <input type="hidden" name="size" value=size/>
                     <input type="hidden" name="page" value=1/>
-                    <FilterInput name="search" value=Signal::derive(search)/>
+                    <FilterInput
+                        name="search"
+                        value=Signal::derive(search)
+                        placeholder="Search year YYYYY"
+                    />
                     <FilterSelect name="order" value=Signal::derive(order) options=sort_options/>
                 </Form>
             </section>
@@ -203,7 +207,7 @@ pub fn ProgressListPage() -> impl IntoView {
 
 #[component]
 pub fn ProgressListItem<'a>(
-    data: &'a Progress,
+    data: &'a ProgressQuery,
     checked_items: RwSignal<HashSet<String>>,
 ) -> impl IntoView {
     let date = data.date.to_string();

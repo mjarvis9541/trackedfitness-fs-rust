@@ -6,8 +6,9 @@ use uuid::Uuid;
 
 use crate::error::Result;
 use crate::meal_food::model::MealFoodModel;
+use crate::util::datetime::{get_week_end, get_week_start};
 
-use super::model::{Diet, DietDayQuery, DietFoodQuery, DietMealQuery};
+use super::model::{Diet, DietDayQuery, DietDaySummary, DietFoodQuery, DietMealQuery};
 
 impl Diet {
     pub async fn get_by_id(pool: &PgPool, id: Uuid) -> Result<Option<Self>> {
@@ -302,6 +303,63 @@ impl DietDayQuery {
         let query = sqlx::query_file_as!(Self, "sql/diet_day_total.sql", username, date)
             .fetch_optional(pool)
             .await?;
+        Ok(query)
+    }
+}
+
+impl DietDaySummary {
+    pub async fn get_by_username_date(
+        pool: &PgPool,
+        username: &str,
+        date: NaiveDate,
+    ) -> Result<Vec<Self>> {
+        let start = get_week_start(date);
+        let end = get_week_end(date);
+        let query = sqlx::query_as!(
+            Self,
+            r#"
+            WITH
+            user_info AS (SELECT id FROM users_user WHERE username = $1),
+            week_series AS (
+                SELECT
+                    ui.id AS user_id,
+                    DATE_TRUNC('day', dd)::date AS date
+                FROM
+                    GENERATE_SERIES($2::DATE, $3::DATE, '1 day'::INTERVAL) AS dd
+                CROSS JOIN user_info ui
+            ),
+            cte_diet_day_total AS (
+                SELECT
+                    t1.user_id,
+                    t1.date,
+                    SUM(t1.quantity * t2.energy) AS energy,
+                    SUM(t1.quantity * t2.protein) AS protein,
+                    SUM(t1.quantity * t2.carbohydrate) AS carbohydrate,
+                    SUM(t1.quantity * t2.fat) AS fat
+                FROM
+                    food_log t1
+                    LEFT JOIN food t2 ON t2.id = t1.food_id
+                GROUP BY
+                    t1.user_id,
+                    t1.date
+                )
+            SELECT
+                $1 as "username!",
+                t1.date as "date!",
+                COALESCE(t2.energy, 0) AS "energy!",
+                COALESCE(t2.protein, 0) AS "protein!",
+                COALESCE(t2.carbohydrate, 0) AS "carbohydrate!",
+                COALESCE(t2.fat, 0) AS "fat!"
+            FROM
+                week_series t1
+                LEFT JOIN cte_diet_day_total t2 ON t2.user_id = t1.user_id AND t2.date = t1.date
+            "#,
+            username,
+            start,
+            end
+        )
+        .fetch_all(pool)
+        .await?;
         Ok(query)
     }
 }

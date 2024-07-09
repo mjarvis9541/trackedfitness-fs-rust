@@ -3,9 +3,34 @@ use std::collections::HashSet;
 use chrono::Utc;
 use leptos::*;
 
-use crate::component::checkbox::CheckboxListItem;
+use crate::component::checkbox::{CheckboxListHeader, CheckboxListItem};
 
 use super::model::{UserDaySummary, Variant};
+
+#[component]
+pub fn SummaryListHeader(
+    children: Children,
+    all_items: RwSignal<HashSet<String>>,
+    checked_items: RwSignal<HashSet<String>>,
+) -> impl IntoView {
+    let children = children()
+        .nodes
+        .into_iter()
+        .map(|child| {
+            view! {
+                <div class="p-2 font-bold whitespace-nowrap border-b flex items-center justify-end">
+                    {child}
+                </div>
+            }
+        })
+        .collect_view();
+    view! {
+        <div class="p-2 border-b flex items-center justify-center">
+            <CheckboxListHeader all_items checked_items/>
+        </div>
+        {children}
+    }
+}
 
 #[component]
 pub fn DaySummaryListItem(

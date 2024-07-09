@@ -12,28 +12,23 @@ use super::detail_page::get_progress_detail;
 
 #[cfg(feature = "ssr")]
 use crate::{
-    auth::service::get_request_user, error::Error, progress::model::ProgressBase, setup::get_pool,
+    auth::service::get_request_user, error::Error, progress::model::Progress, setup::get_pool,
 };
 
-#[server]
-pub async fn progress_delete(
-    username: String,
-    date: NaiveDate,
-    redirect_to: Option<String>,
-) -> Result<(), ServerFnError> {
+#[server(endpoint = "progress-delete")]
+pub async fn progress_delete(username: String, date: NaiveDate) -> Result<(), ServerFnError> {
     let user = get_request_user()?;
     let pool = get_pool()?;
 
-    let object = ProgressBase::get_by_username_date(&pool, &username, date)
+    let object = Progress::get_by_username_date(&pool, &username, date)
         .await?
         .ok_or(Error::NotFound)?;
     object.can_delete(&user).await?;
 
-    ProgressBase::delete(&pool, object.id).await?;
-    if redirect_to.is_some() {
-        leptos_axum::redirect(&format!("/users/{username}/{date}"));
-    }
-    leptos_axum::redirect(&format!("/users/{username}/progress"));
+    Progress::delete(&pool, object.id).await?;
+
+    leptos_axum::redirect(&format!("/users/{}/{}", username, date));
+
     Ok(())
 }
 

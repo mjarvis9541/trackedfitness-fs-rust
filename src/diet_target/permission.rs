@@ -1,6 +1,6 @@
 use uuid::Uuid;
 
-use super::model::{DietTarget, DietTargetBase};
+use super::model::{DietTarget, DietTargetQuery};
 use crate::auth::model::RequestUser;
 use crate::error::{Error, Result};
 
@@ -9,7 +9,7 @@ impl DietTarget {
         if target_user_id == request_user.id || request_user.is_superuser {
             Ok(())
         } else {
-            Err(Error::Unauthorized)
+            Err(Error::Forbidden)
         }
     }
 
@@ -17,7 +17,7 @@ impl DietTarget {
         if self.user_id == request_user.id || request_user.is_superuser {
             Ok(())
         } else {
-            Err(Error::Unauthorized)
+            Err(Error::Forbidden)
         }
     }
 
@@ -25,17 +25,17 @@ impl DietTarget {
         if self.user_id == request_user.id || request_user.is_superuser {
             Ok(())
         } else {
-            Err(Error::Unauthorized)
+            Err(Error::Forbidden)
         }
     }
 }
 
-impl DietTargetBase {
+impl DietTargetQuery {
     pub async fn can_create(request_user: &RequestUser, target_user_id: Uuid) -> Result<()> {
         if target_user_id == request_user.id || request_user.is_superuser {
             Ok(())
         } else {
-            Err(Error::Unauthorized)
+            Err(Error::Forbidden)
         }
     }
 
@@ -43,7 +43,7 @@ impl DietTargetBase {
         if self.user_id == request_user.id || request_user.is_superuser {
             Ok(())
         } else {
-            Err(Error::Unauthorized)
+            Err(Error::Forbidden)
         }
     }
 
@@ -51,7 +51,7 @@ impl DietTargetBase {
         if self.user_id == request_user.id || request_user.is_superuser {
             Ok(())
         } else {
-            Err(Error::Unauthorized)
+            Err(Error::Forbidden)
         }
     }
 }

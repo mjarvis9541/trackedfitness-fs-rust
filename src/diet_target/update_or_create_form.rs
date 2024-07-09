@@ -15,7 +15,7 @@ use {
     crate::{
         auth::model::User,
         auth::service::get_request_user,
-        diet_target::model::{DietTarget, DietTargetBase, DietTargetGramKg, DietTargetInput},
+        diet_target::model::{DietTarget, DietTargetGramKg, DietTargetInput, DietTargetQuery},
         error::Error,
         setup::get_pool,
         util::server::parse_dates_from_strings,
@@ -44,7 +44,7 @@ pub async fn diet_target_bulk_update_or_create(
     let target_user = User::get_by_username(&pool, &username)
         .await?
         .ok_or(Error::NotFound)?;
-    DietTarget::can_create(&user, target_user.id).await?;
+    DietTargetQuery::can_create(&user, target_user.id).await?;
 
     let data = DietTargetGramKg {
         user_id: target_user.id,
@@ -57,7 +57,7 @@ pub async fn diet_target_bulk_update_or_create(
     data.validate()?;
     let database_input = DietTargetInput::from(data);
 
-    DietTargetBase::bulk_create_update(&pool, database_input, &date_list, user.id).await?;
+    DietTarget::bulk_create_update(&pool, database_input, &date_list, user.id).await?;
     Ok(())
 }
 

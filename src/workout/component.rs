@@ -6,7 +6,6 @@ use crate::component::icon::IconFilePlus;
 use crate::component::link::Link;
 use crate::util::datetime::DATE_FORMAT_LONG;
 use crate::util::param::{generate_create_workout_url, get_date};
-use crate::workout::create_page::WorkoutCreateForm;
 
 #[component]
 pub fn WorkoutDayHeader(title: &'static str) -> impl IntoView {
@@ -26,17 +25,11 @@ pub fn WorkoutDayHeader(title: &'static str) -> impl IntoView {
             </section>
 
             <section class="flex gap-2">
-                <WorkoutCreateForm/>
-                <Link href=create_workout_url text="New with Exercises">
+                <Link href=create_workout_url text="New Workout">
                     <IconFilePlus/>
                 </Link>
             </section>
 
         </header>
     }
-}
-
-#[component]
-pub fn WorkoutDayItem() -> impl IntoView {
-    view! { <div></div> }
 }

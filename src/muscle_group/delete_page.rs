@@ -10,20 +10,20 @@ use crate::util::param::get_slug;
 use crate::util::validation_error::{extract_other_errors, get_non_field_errors};
 
 #[cfg(feature = "ssr")]
-use crate::{auth::service::get_request_user, error::Error, muscle_group::model::MuscleGroupBase};
+use crate::{auth::service::get_request_user, error::Error, muscle_group::model::MuscleGroup};
 
 #[server(endpoint = "muscle-group-delete")]
 async fn muscle_group_delete(id: Uuid) -> Result<(), ServerFnError> {
     let user = get_request_user()?;
     let pool = expect_context::<sqlx::PgPool>();
 
-    let object = MuscleGroupBase::get_by_id(&pool, id)
+    let object = MuscleGroup::get_by_id(&pool, id)
         .await?
         .ok_or(Error::NotFound)?;
 
     object.can_delete(&user).await?;
 
-    MuscleGroupBase::delete(&pool, id).await?;
+    MuscleGroup::delete(&pool, id).await?;
 
     leptos_axum::redirect("/exercises/muscle-groups");
     Ok(())

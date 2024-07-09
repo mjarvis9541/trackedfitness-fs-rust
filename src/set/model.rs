@@ -18,6 +18,7 @@ pub struct SetModel {
     pub updated_by_id: Option<Uuid>,
 }
 
+#[cfg_attr(feature = "ssr", derive(sqlx::FromRow))]
 #[derive(Debug, Deserialize, Serialize, Clone, Default)]
 pub struct SetQuery {
     pub id: Uuid,

@@ -12,7 +12,7 @@ use uuid::Uuid;
 
 #[cfg(feature = "ssr")]
 use crate::{
-    auth::service::get_request_user, error::Error, movement::model::MovementBase, setup::get_pool,
+    auth::service::get_request_user, error::Error, movement::model::Movement, setup::get_pool,
 };
 
 #[server(endpoint = "movement-update")]
@@ -23,12 +23,12 @@ pub async fn movement_update(
 ) -> Result<(), ServerFnError> {
     let user = get_request_user()?;
     let pool = get_pool()?;
-    let object = MovementBase::get_by_id(&pool, id)
+    let object = Movement::get_by_id(&pool, id)
         .await?
         .ok_or(Error::NotFound)?;
     object.can_update(&user).await?;
-    MovementBase::validate(&name)?;
-    MovementBase::update(&pool, object.id, &name, muscle_group_id, user.id).await?;
+    Movement::validate(&name)?;
+    Movement::update(&pool, object.id, &name, muscle_group_id, user.id).await?;
 
     leptos_axum::redirect(&format!("/exercises/{}", object.slug));
     Ok(())

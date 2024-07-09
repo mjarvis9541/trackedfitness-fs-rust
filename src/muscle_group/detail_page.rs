@@ -9,19 +9,21 @@ use crate::component::template::{
 use crate::util::datetime::format_datetime;
 use crate::util::param::get_slug;
 
-use super::model::MuscleGroup;
+use super::model::MuscleGroupQuery;
 
 #[cfg(feature = "ssr")]
 use crate::{auth::service::get_request_user, error::Error, setup::get_pool};
 
 #[server(endpoint = "get-muscle-group", input = GetUrl)]
-pub async fn get_muscle_group(slug: String) -> Result<MuscleGroup, ServerFnError> {
+pub async fn get_muscle_group(slug: String) -> Result<MuscleGroupQuery, ServerFnError> {
     let user = get_request_user()?;
     let pool = get_pool()?;
-    let object = MuscleGroup::get_by_slug(&pool, &slug)
+
+    let object = MuscleGroupQuery::get_by_slug(&pool, &slug)
         .await?
         .ok_or(Error::NotFound)?;
-    object.can_view(&user)?;
+    object.can_view(&user).await?;
+
     Ok(object)
 }
 
@@ -46,7 +48,7 @@ pub fn MuscleGroupDetailPage() -> impl IntoView {
 }
 
 #[component]
-pub fn MuscleGroupDetail(data: MuscleGroup) -> impl IntoView {
+pub fn MuscleGroupDetail(data: MuscleGroupQuery) -> impl IntoView {
     let created_at = format_datetime(&Some(data.created_at));
     let updated_at = format_datetime(&data.updated_at);
 

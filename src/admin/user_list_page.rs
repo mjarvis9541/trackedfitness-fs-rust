@@ -34,6 +34,22 @@ async fn get_admin_user_list(
     crate::auth::service::extract_superuser_from_request()?;
     let pool = crate::setup::get_pool()?;
 
+    let order_by_column = match order.as_str() {
+        "username" => "username",
+        "-username" => "username DESC",
+        "name" => "name",
+        "-name" => "name DESC",
+        "email" => "email",
+        "-email" => "email DESC",
+        "created_at" => "created_at",
+        "-created_at" => "created_at DESC",
+        "updated_at" => "updated_at",
+        "-updated_at" => "updated_at DESC",
+        "last_login" => "last_login",
+        "-last_login" => "last_login DESC",
+        _ => "username",
+    };
+
     let mut qbc = sqlx::QueryBuilder::new("SELECT COUNT(*) FROM users_user WHERE TRUE");
     qbc.filter("username", "ilike", &search);
     let count = qbc.build_query_scalar().fetch_one(&pool).await?;
@@ -67,7 +83,9 @@ async fn get_admin_user_list(
         qb.push_bind(privacy);
     }
 
-    qb.order("last_login desc, created_at desc", &order);
+    qb.push(" ORDER BY ");
+    qb.push(order_by_column);
+
     qb.paginate(size, page);
 
     let results = qb.build_query_as().fetch_all(&pool).await?;

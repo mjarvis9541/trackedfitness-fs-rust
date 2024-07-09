@@ -12,12 +12,12 @@ use crate::util::param::{get_date, get_username};
 use crate::util::validation_error::{extract_other_errors, get_non_field_errors};
 
 use super::detail_page::get_diet_target_detail;
-use super::model::DietTarget;
+use super::model::DietTargetQuery;
 
 #[cfg(feature = "ssr")]
 use crate::{
     auth::service::get_request_user,
-    diet_target::model::{DietTargetBase, DietTargetGramKg, DietTargetInput},
+    diet_target::model::{DietTarget, DietTargetGramKg, DietTargetInput},
     error::Error,
     setup::get_pool,
 };
@@ -35,7 +35,7 @@ pub async fn diet_target_update(
     let user = get_request_user()?;
     let pool = get_pool()?;
 
-    let object = DietTargetBase::get_by_id(&pool, id)
+    let object = DietTarget::get_by_id(&pool, id)
         .await?
         .ok_or(Error::NotFound)?;
     object.can_update(&user).await?;
@@ -50,9 +50,9 @@ pub async fn diet_target_update(
     };
     data.validate()?;
     let database_input = DietTargetInput::from(data);
-    let query = DietTargetBase::update(&pool, object.id, database_input, user.id).await?;
+    DietTarget::update(&pool, object.id, database_input, user.id).await?;
 
-    leptos_axum::redirect(&format!("/users/{username}/diet-targets/{}", query.date));
+    leptos_axum::redirect(&format!("/users/{}/{}", username, date));
     Ok(())
 }
 
@@ -85,7 +85,7 @@ pub fn DietTargetUpdatePage() -> impl IntoView {
 
 #[component]
 pub fn DietTargetForm(
-    data: DietTarget,
+    data: DietTargetQuery,
     action: Action<DietTargetUpdate, Result<(), ServerFnError>>,
 ) -> impl IntoView {
     let action_loading = action.pending();
@@ -113,12 +113,7 @@ pub fn DietTargetForm(
         <ActionForm action>
             <input type="hidden" name="id" value=data.id.to_string()/>
             <input type="hidden" name="username" value=data.username/>
-            <TextInput
-                action_value
-                input_type="date"
-                name="date"
-                value=data.date.to_string()
-            />
+            <TextInput action_value input_type="date" name="date" value=data.date.to_string()/>
             <NumberInput
                 action_value
                 name="weight"

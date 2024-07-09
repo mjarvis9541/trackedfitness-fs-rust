@@ -9,7 +9,7 @@ use crate::util::validation_error::{extract_other_errors, get_non_field_errors};
 
 #[cfg(feature = "ssr")]
 use crate::{
-    auth::service::get_request_user, error::Error, profile::model::ProfileBase, setup::get_pool,
+    auth::service::get_request_user, error::Error, profile::model::Profile, setup::get_pool,
 };
 
 #[server(endpoint = "profile-delete")]
@@ -17,12 +17,12 @@ pub async fn profile_delete(username: String) -> Result<(), ServerFnError> {
     let user = get_request_user()?;
     let pool = get_pool()?;
 
-    let object = ProfileBase::get_by_username(&pool, &username)
+    let object = Profile::get_by_username(&pool, &username)
         .await?
         .ok_or(Error::NotFound)?;
     object.can_delete(&user).await?;
 
-    ProfileBase::delete(&pool, object.id).await?;
+    Profile::delete(&pool, object.id).await?;
 
     leptos_axum::redirect(&format!("/users/{username}"));
     Ok(())

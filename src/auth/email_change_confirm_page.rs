@@ -55,12 +55,7 @@ pub fn EmailChangeConfirmPage() -> impl IntoView {
                 </p>
 
                 <ActionForm action>
-                    <TextInput
-                        action_value
-                        name="token"
-                        label="Activation code"
-                        value=token()
-                    />
+                    <TextInput action_value name="token" label="Activation code" value=token()/>
                     <SubmitButton loading=action_loading label="Update Email"/>
                 </ActionForm>
 

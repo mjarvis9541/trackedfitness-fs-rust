@@ -20,7 +20,7 @@ use crate::util::param::{extract_page, extract_param, extract_size, get_date, ge
 #[cfg(feature = "ssr")]
 use crate::{
     auth::model::User, auth::service::get_request_user, error::Error,
-    exercise::model::ExerciseModel, movement::model::Movement, set::model::SetModel,
+    exercise::model::ExerciseBase, movement::model::MovementQuery, set::model::SetModel,
     setup::get_pool, workout::model::WorkoutBase,
 };
 
@@ -47,7 +47,7 @@ pub async fn workout_exercise_set_create(
 
     WorkoutBase::can_create(&target_user, &user).await?;
     let workout = WorkoutBase::create(&pool, target_user.id, date, user.id).await?;
-    let exercise = ExerciseModel::create(&pool, workout.id, movement_id, user.id).await?;
+    let exercise = ExerciseBase::create(&pool, workout.id, movement_id, user.id).await?;
 
     SetModel::bulk_create(&pool, exercise.id, weight, reps, rest, set_count, user.id).await?;
     if let Some(redirect_to) = redirect_to {
@@ -67,7 +67,7 @@ pub async fn all_movement_with_latest_weight(
 ) -> Result<ListResponse<MovementWithLatestWeight>, ServerFnError> {
     get_request_user()?;
     let pool = get_pool()?;
-    let count = Movement::count(&pool, &search, &muscle_group).await?;
+    let count = MovementQuery::count(&pool, &search, &muscle_group).await?;
     let results = MovementWithLatestWeight::with_latest_weight(
         &pool,
         &username,

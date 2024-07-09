@@ -10,7 +10,7 @@ use crate::component::select::FilterSelect;
 use crate::component::template::{
     AutoListHeader, ErrorComponent, ListLoadingComponent, ListNotFoundComponent,
 };
-use crate::user_statistic::model::UserStat;
+use crate::user_statistic::model::UserStatistic;
 use crate::util::param::{extract_page, extract_param, extract_size};
 
 #[server]
@@ -19,10 +19,10 @@ pub async fn get_admin_user_stat_list(
     order: String,
     size: i64,
     page: i64,
-) -> Result<Vec<UserStat>, ServerFnError> {
+) -> Result<Vec<UserStatistic>, ServerFnError> {
     crate::auth::service::extract_superuser_from_request()?;
     let pool = crate::setup::get_pool()?;
-    let results = UserStat::filter(&pool, &search, &order, size, page).await?;
+    let results = UserStatistic::filter(&pool, &search, &order, size, page).await?;
     Ok(results)
 }
 
@@ -33,6 +33,7 @@ pub fn AdminUserStatListPage() -> impl IntoView {
     let order = move || extract_param(&query, "order");
     let size = move || extract_size(&query);
     let page = move || extract_page(&query);
+
     let resource = Resource::new(
         move || (search(), order(), size(), page()),
         |(search, order, size, page)| get_admin_user_stat_list(search, order, size, page),
@@ -158,7 +159,7 @@ pub fn AdminUserStatListPage() -> impl IntoView {
 
 #[component]
 pub fn AdminUserStatListItem(
-    data: UserStat,
+    data: UserStatistic,
     checked_items: RwSignal<HashSet<String>>,
 ) -> impl IntoView {
     view! {

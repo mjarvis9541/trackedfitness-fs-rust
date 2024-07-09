@@ -8,10 +8,10 @@ use super::user_select::UserSelect;
 use crate::component::button::SubmitButton;
 use crate::component::select::FieldSelect;
 use crate::component::template::{ErrorComponent, LoadingComponent};
-use crate::error_extract::{extract_error_message, process_non_field_errors};
 use crate::user_block::model::UserBlock;
 use crate::util::datetime::format_datetime;
 use crate::util::param::UuidParam;
+use crate::util::validation_error::{extract_other_errors, get_non_field_errors};
 
 #[server]
 async fn admin_user_block_update(
@@ -40,8 +40,14 @@ pub fn AdminUserBlockDetailPage() -> impl IntoView {
     let id = move || params.with(|q| q.as_ref().map(|q| q.id).unwrap_or_default());
 
     let action = Action::<AdminUserBlockUpdate, _>::server();
-    let error = move || extract_error_message(&action);
-    let non_field_errors = move || process_non_field_errors(error);
+    let action_value = action.value();
+    let action_error = move || {
+        extract_other_errors(
+            action_value,
+            &["non_field_errors", "blocker_id", "blocked_id"],
+        )
+    };
+    let non_field_errors = move || get_non_field_errors(action_value);
 
     let resource = Resource::new(
         move || (id(), action.version().get()),
@@ -69,8 +75,8 @@ pub fn AdminUserBlockDetailPage() -> impl IntoView {
             <section class="col-span-4">
                 <div class="p-4 mb-4 bg-white">
                     <h2 class="mb-4 text-xl font-bold">"Update Blocked User"</h2>
-                    {error}
-                    {non_field_errors}
+                    <div class="mb-4 text-red-500 font-bold">{action_error}</div>
+                    <div class="mb-4 text-red-500 font-bold">{non_field_errors}</div>
                     <Transition fallback=LoadingComponent>
                         <ErrorBoundary fallback=|errors| {
                             view! { <ErrorComponent errors/> }

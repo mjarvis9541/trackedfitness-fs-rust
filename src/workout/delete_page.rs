@@ -23,14 +23,11 @@ pub async fn workout_delete(
 ) -> Result<(), ServerFnError> {
     let user = get_request_user()?;
     let pool = get_pool()?;
-
     let workout = WorkoutBase::get_by_id(&pool, workout_id)
         .await?
         .ok_or(Error::NotFound)?;
     workout.can_delete(&user).await?;
-
     WorkoutBase::delete(&pool, workout_id).await?;
-
     if let Some(redirect_to) = redirect_to {
         leptos_axum::redirect(&redirect_to);
     }
@@ -75,6 +72,8 @@ pub fn WorkoutDeletePage() -> impl IntoView {
         resource.and_then(|data| {
             let workout_id = data.id.to_string();
             view! {
+                <p class="mb-4">"Are you sure you wish to delete this workout?"</p>
+                <p class="mb-4">"Ths action cannot be undone."</p>
                 <ActionForm action>
                     <input type="hidden" name="workout_id" value=workout_id/>
                     <input type="hidden" name="redirect_to" value=redirect_to_url/>

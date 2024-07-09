@@ -1,17 +1,20 @@
-use leptos::server_fn::codec::GetUrl;
 use leptos::*;
 use leptos_meta::*;
 use leptos_router::*;
 
 use uuid::Uuid;
 
-use super::user_select::{get_user_select, UserSelect, UserSelectResource};
 use crate::component::button::SubmitButton;
 use crate::component::select::FieldSelect;
 use crate::component::template::{ErrorComponent, LoadingComponent};
 use crate::follower::model::Follower;
 use crate::util::datetime::format_datetime;
 use crate::util::param::UuidParam;
+
+use super::user_select::{get_user_select, UserSelect, UserSelectResource};
+
+#[cfg(feature = "ssr")]
+use crate::{auth::service::extract_superuser_from_request, error::Error, setup::get_pool};
 
 #[server(endpoint = "admin-follower-update")]
 pub async fn admin_follower_update(
@@ -20,17 +23,19 @@ pub async fn admin_follower_update(
     follower_id: Uuid,
     status: i32,
 ) -> Result<(), ServerFnError> {
-    crate::auth::service::extract_superuser_from_request()?;
-    let pool = crate::setup::get_pool()?;
+    extract_superuser_from_request()?;
+    let pool = get_pool()?;
     Follower::update(&pool, id, user_id, follower_id, status).await?;
     Ok(())
 }
 
-#[server(endpoint = "admin-follower-detail", input = GetUrl)]
+#[server(endpoint = "admin-follower-detail")]
 pub async fn get_admin_follower_detail(id: Uuid) -> Result<Follower, ServerFnError> {
-    crate::auth::service::extract_superuser_from_request()?;
-    let pool = crate::setup::get_pool()?;
-    let query = Follower::get_object_or_404(&pool, id).await?;
+    extract_superuser_from_request()?;
+    let pool = get_pool()?;
+    let query = Follower::get_by_id(&pool, id)
+        .await?
+        .ok_or(Error::NotFound)?;
     Ok(query)
 }
 

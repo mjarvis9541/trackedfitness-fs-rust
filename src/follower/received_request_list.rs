@@ -4,14 +4,13 @@ use leptos_router::*;
 use crate::component::template::{
     ErrorComponent, ListNotFoundComponent, Loading, LoadingComponent,
 };
-use crate::follower::component::UserFollowerListItem;
-use crate::follower::form::{
-    FollowerAccept, FollowerAcceptForm, FollowerRemove, FollowerRemoveForm,
-};
-use crate::follower::model::Follower;
 use crate::util::datetime::format_datetime;
 use crate::util::misc::ListResponse;
 use crate::util::param::{extract_page, extract_param, extract_size};
+
+use super::component::UserFollowerListItem;
+use super::form::{FollowerAccept, FollowerAcceptForm, FollowerRemove, FollowerRemoveForm};
+use super::model::Follower;
 
 #[cfg(feature = "ssr")]
 use crate::{auth::service::get_request_user, follower::status::FollowerStatus};

@@ -11,23 +11,19 @@ use crate::util::param::UuidParam;
 use crate::util::validation_error::{extract_other_errors, get_non_field_errors};
 
 #[cfg(feature = "ssr")]
-use crate::{
-    auth::service::get_request_user, error::Error, meal::model::MealBase, setup::get_pool,
-};
+use crate::{auth::service::get_request_user, error::Error, meal::model::Meal, setup::get_pool};
 
 #[server(endpoint = "meal-update")]
 pub async fn meal_update(id: Uuid, name: String) -> Result<(), ServerFnError> {
     let user = get_request_user()?;
     let pool = get_pool()?;
 
-    let object = MealBase::get_by_id(&pool, id)
-        .await?
-        .ok_or(Error::NotFound)?;
+    let object = Meal::get_by_id(&pool, id).await?.ok_or(Error::NotFound)?;
     object.can_update(&user).await?;
 
-    MealBase::validate(&name)?;
+    Meal::validate(&name)?;
 
-    let meal = MealBase::update(&pool, object.id, &name, user.id).await?;
+    let meal = Meal::update(&pool, object.id, &name, user.id).await?;
 
     leptos_axum::redirect(&format!("/food/meals/{}", meal.id));
     Ok(())
@@ -52,12 +48,7 @@ pub fn MealUpdatePage() -> impl IntoView {
             view! {
                 <ActionForm action>
                     <input type="hidden" name="id" value=id/>
-                    <TextInput
-                        action_value
-                        name="name"
-                        placeholder="Enter meal name"
-                        value=name
-                    />
+                    <TextInput action_value name="name" placeholder="Enter meal name" value=name/>
                     <SubmitButton loading=action_loading label="Update Meal"/>
                 </ActionForm>
             }

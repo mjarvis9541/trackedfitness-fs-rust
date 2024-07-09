@@ -8,7 +8,7 @@ use crate::component::icon::IconFilePlus;
 
 #[cfg(feature = "ssr")]
 use crate::{
-    auth::service::get_request_user, error::Error, exercise::model::ExerciseModel, setup::get_pool,
+    auth::service::get_request_user, error::Error, exercise::model::ExerciseBase, setup::get_pool,
     workout::model::WorkoutBase,
 };
 
@@ -26,7 +26,7 @@ pub async fn exercise_create(
         .ok_or(Error::NotFound)?;
     workout.can_update(&user).await?;
 
-    ExerciseModel::create(&pool, workout.id, movement_id, user.id).await?;
+    ExerciseBase::create(&pool, workout.id, movement_id, user.id).await?;
     if let Some(redirect_to) = redirect_to {
         leptos_axum::redirect(&redirect_to);
     }

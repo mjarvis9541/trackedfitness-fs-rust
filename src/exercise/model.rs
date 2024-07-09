@@ -5,7 +5,7 @@ use uuid::Uuid;
 use crate::set::model::SetQuery;
 
 #[derive(Debug, Deserialize, Serialize, Clone)]
-pub struct ExerciseModel {
+pub struct ExerciseBase {
     pub id: Uuid,
     pub order: i32,
     pub workout_id: Uuid,

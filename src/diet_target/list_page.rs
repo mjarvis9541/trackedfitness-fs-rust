@@ -17,7 +17,7 @@ use crate::util::param::{extract_page, extract_param, extract_size, get_username
 
 #[cfg(feature = "ssr")]
 use crate::{
-    auth::model::User, auth::service::get_request_user, diet_target::model::DietTarget,
+    auth::model::User, auth::service::get_request_user, diet_target::model::DietTargetQuery,
     setup::get_pool,
 };
 
@@ -31,9 +31,11 @@ pub async fn get_diet_target_list(
 ) -> Result<Vec<UserDaySummary>, ServerFnError> {
     let user = get_request_user()?;
     let pool = get_pool()?;
-    let _search = search;
     User::check_view_permission(&pool, &user, &username).await?;
-    let results = DietTarget::filter_by_username(&pool, &username, &order, size, page).await?;
+
+    let results =
+        DietTargetQuery::filter_by_username(&pool, &username, &search, &order, size, page).await?;
+
     Ok(results)
 }
 
@@ -44,9 +46,10 @@ pub async fn get_diet_target_list_count(
 ) -> Result<i64, ServerFnError> {
     let user = get_request_user()?;
     let pool = get_pool()?;
-    let _search = search;
     User::check_view_permission(&pool, &user, &username).await?;
-    let count = DietTarget::count_by_username(&pool, &username).await?;
+
+    let count = DietTargetQuery::count_by_username(&pool, &username, &search).await?;
+
     Ok(count)
 }
 
@@ -135,7 +138,11 @@ pub fn DietTargetListPage() -> impl IntoView {
                 <Form method="GET" action="" class="contents">
                     <input type="hidden" name="size" value=size/>
                     <input type="hidden" name="page" value=1/>
-                    <FilterInput name="search" value=Signal::derive(search)/>
+                    <FilterInput
+                        name="search"
+                        value=Signal::derive(search)
+                        placeholder="Search year YYYYY"
+                    />
                     <FilterSelect name="order" value=Signal::derive(order) options=sort_options/>
                 </Form>
             </section>

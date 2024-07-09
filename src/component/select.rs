@@ -87,7 +87,7 @@ pub fn FieldSelect(
             <span class="block mb-1 text-sm font-bold">{capitalize_and_replace(label)}</span>
             <select
                 name=name
-                class="block py-2.5 px-3 w-full bg-white rounded border focus:border-blue-500 focus:ring-2 focus:ring-blue-500 focus:outline-none"
+                class="block py-2 px-3 w-full bg-white rounded border focus:border-blue-500 focus:ring-2 focus:ring-blue-500 focus:outline-none"
             >
                 {options_view}
             </select>

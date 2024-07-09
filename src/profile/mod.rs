@@ -11,7 +11,6 @@ pub mod permission;
 pub mod profile_image;
 #[cfg(feature = "ssr")]
 pub mod repository_impl;
-pub mod setup_page;
 pub mod sex;
 pub mod update_page;
 pub mod upload_page;

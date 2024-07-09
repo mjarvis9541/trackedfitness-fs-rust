@@ -1,8 +1,8 @@
 use crate::util::validation_error::ValidationError;
 
-use super::model::MuscleGroupBase;
+use super::model::MuscleGroup;
 
-impl MuscleGroupBase {
+impl MuscleGroup {
     pub fn validate(name: &str) -> Result<(), ValidationError> {
         let mut errors = ValidationError::new();
 

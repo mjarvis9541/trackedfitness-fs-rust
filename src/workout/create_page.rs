@@ -17,13 +17,10 @@ use crate::{
 pub async fn workout_create(username: String, date: NaiveDate) -> Result<(), ServerFnError> {
     let user = get_request_user()?;
     let pool = get_pool()?;
-
     let target_user = User::get_by_username(&pool, &username)
         .await?
         .ok_or(Error::NotFound)?;
-
     WorkoutBase::can_create(&target_user, &user).await?;
-
     WorkoutBase::create(&pool, target_user.id, date, user.id).await?;
     Ok(())
 }

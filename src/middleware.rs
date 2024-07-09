@@ -1,5 +1,5 @@
 // use chrono::DateTime;
-use leptos::*;
+// use leptos::*;
 
 use axum::body::Body;
 use axum::extract::Request;
@@ -15,8 +15,7 @@ use crate::config::get_config;
 
 pub async fn auth_token_middleware(mut req: Request<Body>, next: Next) -> Response {
     let path = req.uri().path();
-    tracing::info!("Running middleware: {}", path);
-
+    // tracing::info!("Running middleware: {}", path);
     // Skip middleware for static assets
     if path.starts_with("/pkg") || path.starts_with("/favicon.ico") || path.starts_with("/images") {
         return next.run(req).await;
@@ -25,10 +24,10 @@ pub async fn auth_token_middleware(mut req: Request<Body>, next: Next) -> Respon
     let config = get_config();
     let headers = req.headers();
     if let Some(auth_cookie) = get_cookie(headers, &config.auth_cookie_name) {
-        tracing::info!("auth cookie found: {}", auth_cookie);
+        // tracing::info!("auth cookie found: {}", auth_cookie);
         if let Ok(auth_token) = JwtManager::validate_auth_token(&auth_cookie) {
             let user = RequestUser::from(auth_token);
-            tracing::info!("User added to request extension: {:?}", user);
+            // tracing::info!("User added to request extension: {:?}", user);
             req.extensions_mut().insert(user);
         }
     }

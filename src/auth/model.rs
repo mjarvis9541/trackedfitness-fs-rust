@@ -3,11 +3,7 @@ use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 
 #[cfg(feature = "ssr")]
-use crate::{
-    auth::token::AuthToken,
-    error::{Error, Result},
-    setup::get_pool,
-};
+use crate::error::{Error, Result};
 
 use super::privacy_level::PrivacyLevel;
 
@@ -72,59 +68,6 @@ pub struct RequestUser {
     pub is_active: bool,
     pub is_staff: bool,
     pub is_superuser: bool,
-}
-
-#[cfg(feature = "ssr")]
-impl RequestUser {
-    pub async fn is_authenticated(&self) -> Result<()> {
-        let pool = get_pool()?;
-        let user = User::get_by_id(&pool, self.id)
-            .await?
-            .ok_or(Error::Unauthorized)?;
-        user.is_active.then(|| ()).ok_or(Error::Unauthorized)
-    }
-
-    pub async fn is_staff(&self) -> Result<()> {
-        let pool = get_pool()?;
-        let user = User::get_by_id(&pool, self.id)
-            .await?
-            .ok_or(Error::Unauthorized)?;
-        user.is_superuser.then(|| ()).ok_or(Error::Unauthorized)
-    }
-
-    pub async fn is_superuser(&self) -> Result<()> {
-        let pool = get_pool()?;
-        let user = User::get_by_id(&pool, self.id)
-            .await?
-            .ok_or(Error::Unauthorized)?;
-        user.is_superuser.then(|| ()).ok_or(Error::Unauthorized)
-    }
-}
-
-#[cfg(feature = "ssr")]
-impl From<AuthToken> for RequestUser {
-    fn from(auth_token: AuthToken) -> Self {
-        RequestUser {
-            id: auth_token.user_id,
-            username: auth_token.username,
-            is_active: auth_token.is_active,
-            is_staff: auth_token.is_staff,
-            is_superuser: auth_token.is_superuser,
-        }
-    }
-}
-
-#[cfg(feature = "ssr")]
-impl From<User> for RequestUser {
-    fn from(user: User) -> Self {
-        RequestUser {
-            id: user.id,
-            username: user.username,
-            is_active: user.is_active,
-            is_staff: user.is_staff,
-            is_superuser: user.is_superuser,
-        }
-    }
 }
 
 #[derive(Debug, Deserialize, Serialize, Clone)]

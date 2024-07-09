@@ -12,7 +12,7 @@ use crate::util::validation_error::{extract_other_errors, get_non_field_errors};
 
 #[cfg(feature = "ssr")]
 use crate::{
-    auth::service::get_request_user, error::Error, muscle_group::model::MuscleGroupBase,
+    auth::service::get_request_user, error::Error, muscle_group::model::MuscleGroup,
     setup::get_pool,
 };
 
@@ -20,12 +20,12 @@ use crate::{
 async fn muscle_group_update(id: Uuid, name: String) -> Result<(), ServerFnError> {
     let user = get_request_user()?;
     let pool = get_pool()?;
-    let object = MuscleGroupBase::get_by_id(&pool, id)
+    let object = MuscleGroup::get_by_id(&pool, id)
         .await?
         .ok_or(Error::NotFound)?;
     object.can_update(&user).await?;
-    MuscleGroupBase::validate(&name)?;
-    let updated = MuscleGroupBase::update(&pool, object.id, &name, user.id).await?;
+    MuscleGroup::validate(&name)?;
+    let updated = MuscleGroup::update(&pool, object.id, &name, user.id).await?;
     leptos_axum::redirect(&format!("/exercises/muscle-groups/{}", updated.slug));
     Ok(())
 }

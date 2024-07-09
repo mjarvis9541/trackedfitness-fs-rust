@@ -8,14 +8,12 @@ use crate::follower::following_list_page::UserFollowingPage;
 use crate::profile::create_page::ProfileCreatePage;
 use crate::profile::delete_page::ProfileDeletePage;
 use crate::profile::detail_page::ProfileDetailPage;
-use crate::profile::setup_page::InitialSetupPage;
 use crate::profile::update_page::ProfileUpdatePage;
 
 use crate::user::detail_page::UserDetailPage;
-use crate::user::month_page::UserMonthPage;
 use crate::workout::router::WorkoutRouter;
 
-// use crate::summary::month_page::UserSummaryMonthPage;
+use crate::summary::month_page::UserSummaryMonthPage;
 use crate::summary::week_page::UserSummaryWeekPage;
 
 use crate::diet_target::create_page::DietTargetCreatePage;
@@ -52,9 +50,8 @@ pub fn UserRouter() -> impl IntoView {
                 <Route path="/progress/:date/delete" view=ProgressDeletePage/>
 
                 <Route path="/week/:date?" view=UserSummaryWeekPage/>
-                <Route path="/month/:date?" view=UserMonthPage/>
+                <Route path="/month/:date?" view=UserSummaryMonthPage/>
 
-                <Route path="/setup" view=InitialSetupPage/>
                 <Route path="/profile" view=ProfileDetailPage/>
                 <Route path="/profile/create" view=ProfileCreatePage/>
                 <Route path="/profile/update" view=ProfileUpdatePage/>

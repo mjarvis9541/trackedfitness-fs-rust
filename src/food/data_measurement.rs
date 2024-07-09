@@ -48,6 +48,25 @@ impl From<String> for DataMeasurement {
 }
 
 impl DataMeasurement {
+    pub fn to_form_options() -> Vec<(&'static str, &'static str)> {
+        let options = [
+            ("", "Select"),
+            ("g", "100g"),
+            ("ml", "100ml"),
+            ("srv", "1 Serving"),
+        ];
+        options.to_vec()
+    }
+    pub fn to_filter_options() -> Vec<(&'static str, &'static str)> {
+        let options = [
+            ("", "All"),
+            ("g", "100g"),
+            ("ml", "100ml"),
+            ("srv", "Serving"),
+        ];
+        options.to_vec()
+    }
+
     pub fn to_form_step(&self) -> f64 {
         match self {
             DataMeasurement::Servings => 0.1,

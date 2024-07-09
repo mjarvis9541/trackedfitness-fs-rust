@@ -12,7 +12,7 @@ use super::detail_page::get_movement_detail;
 
 #[cfg(feature = "ssr")]
 use crate::{
-    auth::service::get_request_user, error::Error, movement::model::MovementBase, setup::get_pool,
+    auth::service::get_request_user, error::Error, movement::model::Movement, setup::get_pool,
 };
 
 #[server(endpoint = "movement-delete")]
@@ -20,12 +20,12 @@ pub async fn movement_delete(id: Uuid) -> Result<(), ServerFnError> {
     let user = get_request_user()?;
     let pool = get_pool()?;
 
-    let object = MovementBase::get_by_id(&pool, id)
+    let object = Movement::get_by_id(&pool, id)
         .await?
         .ok_or(Error::NotFound)?;
     object.can_delete(&user).await?;
 
-    MovementBase::delete(&pool, object.id).await?;
+    Movement::delete(&pool, object.id).await?;
 
     leptos_axum::redirect("/movement");
     Ok(())

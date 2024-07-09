@@ -18,11 +18,10 @@ use crate::set::delete_page::{SetDelete, SetDeleteForm};
 use crate::set::update_page::{SetRowUpdateForm, SetUpdate};
 use crate::util::param::{get_date, get_username};
 
-use crate::workout::create_page::WorkoutCreate;
-use crate::workout::delete_page::{WorkoutDelete, WorkoutDeleteForm};
-use crate::workout::model::{
-    ExerciseQueryWithPrevious, SetQueryWithPrevious, WorkoutQueryWithPrevious,
-};
+use super::create_page::WorkoutCreate;
+use super::delete_page::{WorkoutDelete, WorkoutDeleteForm};
+use super::model::{WorkoutDayExerciseQuery, WorkoutDayQuery, WorkoutDaySetQuery};
+use super::week_navigation::WorkoutWeekNavComponent;
 
 #[cfg(feature = "ssr")]
 use crate::{auth::model::User, auth::service::get_request_user, setup::get_pool};
@@ -31,20 +30,20 @@ use crate::{auth::model::User, auth::service::get_request_user, setup::get_pool}
 pub async fn get_workout_day(
     username: String,
     date: NaiveDate,
-) -> Result<Vec<WorkoutQueryWithPrevious>, ServerFnError> {
+) -> Result<Vec<WorkoutDayQuery>, ServerFnError> {
     let user = get_request_user()?;
     let pool = get_pool()?;
     User::check_view_permission(&pool, &user, &username).await?;
-    let query = WorkoutQueryWithPrevious::get(&pool, &username, date).await?;
-    // let q2 = WorkoutDetail::aggregate_workout_day_data(&pool, &username, date).await?;
-    // let json = serde_json::to_string_pretty(&query).unwrap();
-    // let json2 = serde_json::to_string_pretty(&q2).unwrap();
-    // Print the JSON string
+    let query = WorkoutDayQuery::all_by_username_date(&pool, &username, date).await?;
     Ok(query)
 }
 
 #[component]
 pub fn WorkoutDayPage() -> impl IntoView {
+    let params = use_params_map();
+    let username = move || get_username(&params);
+    let date = move || get_date(&params);
+
     let action_workout_create =
         expect_context::<Action<WorkoutCreate, Result<(), ServerFnError>>>();
     let action_workout_delete =
@@ -56,10 +55,6 @@ pub fn WorkoutDayPage() -> impl IntoView {
     let action_set_create = expect_context::<Action<SetCreate, Result<(), ServerFnError>>>();
     let action_set_update = expect_context::<Action<SetUpdate, Result<(), ServerFnError>>>();
     let action_set_delete = expect_context::<Action<SetDelete, Result<(), ServerFnError>>>();
-
-    let params = use_params_map();
-    let username = move || get_username(&params);
-    let date = move || get_date(&params);
 
     let resource = Resource::new(
         move || {
@@ -94,6 +89,7 @@ pub fn WorkoutDayPage() -> impl IntoView {
     view! {
         <main class="p-4">
             <DateNavigation/>
+            <WorkoutWeekNavComponent/>
             <WorkoutDayHeader title="Workouts"/>
 
             <Transition fallback=LoadingComponent>
@@ -106,10 +102,9 @@ pub fn WorkoutDayPage() -> impl IntoView {
 }
 
 #[component]
-pub fn WorkoutListItemComponent(data: WorkoutQueryWithPrevious) -> impl IntoView {
+pub fn WorkoutListItemComponent(data: WorkoutDayQuery) -> impl IntoView {
     let subtitle = data.format_date();
     let add_exercise_url = data.get_add_exercise_url();
-    let add_workout_url = data.get_add_workout_plan_url();
     let detail_url = data.get_workout_detail_url();
 
     let data = data.clone();
@@ -151,9 +146,6 @@ pub fn WorkoutListItemComponent(data: WorkoutQueryWithPrevious) -> impl IntoView
                 <Link href=add_exercise_url text="Add Exercise">
                     <IconFilePlus/>
                 </Link>
-                <Link href=add_workout_url text="Add Workout Plan">
-                    <IconFilePlus/>
-                </Link>
                 <WorkoutDeleteForm id=workout_id/>
             </section>
         </header>
@@ -166,7 +158,7 @@ pub fn WorkoutListItemComponent(data: WorkoutQueryWithPrevious) -> impl IntoView
 
 #[component]
 pub fn ExerciseListItemComponent(
-    data: ExerciseQueryWithPrevious,
+    data: WorkoutDayExerciseQuery,
     username: String,
     date: NaiveDate,
     workout_id: Uuid,
@@ -224,7 +216,7 @@ pub fn ExerciseListItemComponent(
 
 #[component]
 pub fn SetListItemComponent(
-    data: SetQueryWithPrevious,
+    data: WorkoutDaySetQuery,
     username: String,
     date: NaiveDate,
     workout_id: Uuid,

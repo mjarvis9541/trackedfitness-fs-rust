@@ -13,9 +13,11 @@ pub fn ProgressDetailPanelComponent() -> impl IntoView {
     let params = use_params_map();
     let username = move || get_username(&params);
     let date = move || get_date(&params);
-    let user_context = expect_context::<RequestUserContext>();
 
+    let user_context = expect_context::<RequestUserContext>();
+    let is_self = move || user_context.is_object_owner(username());
     let is_not_self = move || user_context.is_not_object_owner(username());
+
     let resource = Resource::new(
         move || (username(), date()),
         |(username, date)| get_progress_detail_latest(username, date),
@@ -27,9 +29,19 @@ pub fn ProgressDetailPanelComponent() -> impl IntoView {
                     let create_href =
                         format!("/users/{}/progress/create?date={}", username(), date());
                     view! {
-                        <div>"No progress logged today or in the past."</div>
+                        <div class="mb-4 text-gray-500" class=("hidden", is_self)>
+                            "This user has not logged any progress."
+                        </div>
                         <div class=("hidden", is_not_self)>
-                            <CreateButton text="Log Progress" create_href/>
+                            <p class="mb-4 text-gray-500">"You have not logged any progress."</p>
+                            <p class="mb-4 text-gray-500">
+                                "Use this feature to log daily body weight changes and energy burnt (kcal) over time."
+                            </p>
+                            <CreateButton
+                                attr:id="progress-create"
+                                text="Log Progress"
+                                create_href
+                            />
                         </div>
                     }
                 },

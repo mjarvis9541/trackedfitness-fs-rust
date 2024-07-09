@@ -74,9 +74,9 @@ pub fn SignupPage() -> impl IntoView {
                     <TextInput
                         name="code"
                         input_type="password"
-                        label="Early access code"
+                        label="Access code"
                         autocomplete="new-password"
-                        placeholder="Enter your early access code"
+                        placeholder="Enter access code"
                         action_value
                     />
                     <TextInput
@@ -87,7 +87,6 @@ pub fn SignupPage() -> impl IntoView {
                     />
                     <TextInput
                         name="email"
-                        label="Email address"
                         placeholder="Enter your email address"
                         input_type="email"
                         action_value

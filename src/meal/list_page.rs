@@ -5,7 +5,7 @@ use leptos::*;
 use leptos_meta::*;
 use leptos_router::*;
 
-use super::model::Meal;
+use super::model::MealQuery;
 use crate::component::bulk_delete::BulkDeleteForm;
 use crate::component::checkbox::CheckboxListItem;
 use crate::component::input::FilterInput;
@@ -28,12 +28,12 @@ pub async fn get_meal_list(
     order: String,
     size: i64,
     page: i64,
-) -> Result<ListResponse<Meal>, ServerFnError> {
+) -> Result<ListResponse<MealQuery>, ServerFnError> {
     get_request_user()?;
     let pool = expect_context::<sqlx::PgPool>();
     let username = String::from("");
-    let count = Meal::count(&pool, &username, &search).await?;
-    let results = Meal::filter(&pool, &username, &search, &order, size, page).await?;
+    let count = MealQuery::count(&pool, &username, &search).await?;
+    let results = MealQuery::filter(&pool, &username, &search, &order, size, page).await?;
     Ok(ListResponse { count, results })
 }
 
@@ -88,32 +88,7 @@ pub fn MealListPage() -> impl IntoView {
                 .and_then(|data| data.as_ref().ok().map(|res| res.count))
         })
     };
-    let sort_options = vec![
-        ("name", "Name (A-z)"),
-        ("-name", "Name (Z-a)"),
-        ("-food_count", "Food Count (High-Low)"),
-        ("food_count", "Food Count (Low-High)"),
-        ("-energy", "Calories (High-Low)"),
-        ("energy", "Calories (Low-High)"),
-        ("-protein", "Protein (High-Low)"),
-        ("protein", "Protein (Low-High)"),
-        ("-carbohydrate", "Carbs (High-Low)"),
-        ("carbohydrate", "Carbs (Low-High)"),
-        ("-fat", "Fat (High-Low)"),
-        ("fat", "Fat (Low-High)"),
-        ("-saturates", "Saturates (High-Low)"),
-        ("saturates", "Saturates (Low-High)"),
-        ("-sugars", "Sugars (High-Low)"),
-        ("sugars", "Sugars (Low-High)"),
-        ("-fibre", "Fibre (High-Low)"),
-        ("fibre", "Fibre (Low-High)"),
-        ("-salt", "Salt (High-Low)"),
-        ("salt", "Salt (Low-High)"),
-        ("-created_at", "Created (Desc)"),
-        ("created_at", "Created (Asc)"),
-        ("-updated_at", "Updated (Desc)"),
-        ("updated_at", "Updated (Asc)"),
-    ];
+    let sort_options = MealQuery::to_sort_options();
     view! {
         <Title text="Meals"/>
         <main class="md:p-4">
@@ -179,7 +154,7 @@ pub fn MealListPage() -> impl IntoView {
 }
 
 #[component]
-pub fn MealListItem(data: Meal, checked_items: RwSignal<HashSet<String>>) -> impl IntoView {
+pub fn MealListItem(data: MealQuery, checked_items: RwSignal<HashSet<String>>) -> impl IntoView {
     let nutrition = &data.nutrition;
     view! {
         <div class="contents group">

@@ -13,7 +13,8 @@ use crate::component::template::{
     AddFoodListHeader, ErrorComponent, ListNotFoundComponent, ListPageHeaderWithCreate, Loading,
     Skeleton,
 };
-use crate::food::model::Food;
+use crate::food::data_measurement::DataMeasurement;
+use crate::food::model::FoodQuery;
 use crate::food::nutrition_row_calc::FoodNutritionCalculationRow;
 use crate::util::datetime::DATE_FORMAT_LONG;
 use crate::util::misc::ListResponse;
@@ -36,7 +37,7 @@ pub async fn get_add_food_list(
     order: String,
     size: i64,
     page: i64,
-) -> Result<ListResponse<Food>, ServerFnError> {
+) -> Result<ListResponse<FoodQuery>, ServerFnError> {
     let user = get_request_user()?;
     let pool = get_pool()?;
     let user_id = if username.is_empty() {
@@ -47,8 +48,8 @@ pub async fn get_add_food_list(
             .ok_or(Error::NotFound)?
             .id
     };
-    let count = Food::count(&pool, &search, &brand, &serving).await?;
-    let results = Food::filter(
+    let count = FoodQuery::count(&pool, &search, &brand, &serving).await?;
+    let results = FoodQuery::filter(
         &pool,
         &search,
         &brand,
@@ -72,21 +73,16 @@ pub async fn diet_add_food(
 ) -> Result<(), ServerFnError> {
     let user = get_request_user()?;
     let pool = get_pool()?;
-
     let target_user = User::get_by_username(&pool, &username)
         .await?
         .ok_or(Error::NotFound)?;
-
     Diet::can_create(&user, target_user.id)?;
-
     Diet::validate(date, quantity)?;
-
-    let food = Food::get_by_slug(&pool, &food_slug)
+    let food = FoodQuery::get_by_slug(&pool, &food_slug)
         .await?
         .ok_or(Error::NotFound)?;
 
     let quantity = food.data_measurement.to_quantity_modifier(&quantity);
-
     let meal_of_day = MealOfDay::get_by_slug(&pool, &meal_of_day_slug)
         .await?
         .ok_or(Error::NotFound)?;
@@ -197,42 +193,8 @@ pub fn DietAddFoodPage() -> impl IntoView {
             })
         })
     };
-    let serving_options = vec![
-        ("", "All"),
-        ("g", "100g"),
-        ("ml", "100ml"),
-        ("srv", "1 Serving"),
-    ];
-    let sort_options = vec![
-        ("name", "Food (A-z)"),
-        ("-name", "Food (Z-a)"),
-        ("brand_name", "Brand (A-z)"),
-        ("-brand_name", "Brand (Z-a)"),
-        ("-last_added_quantity", "Last Added Quantity (Desc)"),
-        ("last_added_quantity", "Last Added Quantity (Asc)"),
-        ("-last_added_date", "Last Added Date (Desc)"),
-        ("last_added_date", "Last Added Date (Asc)"),
-        ("-energy", "Calories (High-Low)"),
-        ("energy", "Calories (Low-High)"),
-        ("-protein", "Protein (High-Low)"),
-        ("protein", "Protein (Low-High)"),
-        ("-carbohydrate", "Carbs (High-Low)"),
-        ("carbohydrate", "Carbs (Low-High)"),
-        ("-fat", "Fat (High-Low)"),
-        ("fat", "Fat (Low-High)"),
-        ("-saturates", "Saturates (High-Low)"),
-        ("saturates", "Saturates (Low-High)"),
-        ("-sugars", "Sugars (High-Low)"),
-        ("sugars", "Sugars (Low-High)"),
-        ("-fibre", "Fibre (High-Low)"),
-        ("fibre", "Fibre (Low-High)"),
-        ("-salt", "Salt (High-Low)"),
-        ("salt", "Salt (Low-High)"),
-        ("-created_at", "Created (Desc)"),
-        ("created_at", "Created (Asc)"),
-        ("-updated_at", "Updated (Desc)"),
-        ("updated_at", "Updated (Asc)"),
-    ];
+    let serving_options = DataMeasurement::to_filter_options();
+    let sort_options = FoodQuery::to_diet_filter_options();
     view! {
         <Title text="Add Food to Diet"/>
         <main class="p-4 space-y-4 bg-white border md:m-4">
@@ -288,7 +250,7 @@ pub fn DietAddFoodListItem(
     username: String,
     date: NaiveDate,
     meal: String,
-    data: Food,
+    data: FoodQuery,
     action: Action<DietAddFood, Result<(), ServerFnError>>,
 ) -> impl IntoView {
     let data_value_decimal = data.get_last_added_data_value();

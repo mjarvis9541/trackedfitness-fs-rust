@@ -10,16 +10,16 @@ use crate::muscle_group::select::{get_muscle_group_form_select, MuscleGroupFormS
 use crate::util::validation_error::{extract_other_errors, get_non_field_errors};
 
 #[cfg(feature = "ssr")]
-use crate::{auth::service::get_request_user, movement::model::MovementBase, setup::get_pool};
+use crate::{auth::service::get_request_user, movement::model::Movement, setup::get_pool};
 
 #[server(endpoint = "movement-create")]
 pub async fn movement_create(muscle_group_id: Uuid, name: String) -> Result<(), ServerFnError> {
     let user = get_request_user()?;
     let pool = get_pool()?;
 
-    MovementBase::can_create(&user).await?;
-    MovementBase::validate(&name)?;
-    let object = MovementBase::create(&pool, muscle_group_id, &name, user.id).await?;
+    Movement::can_create(&user).await?;
+    Movement::validate(&name)?;
+    let object = Movement::create(&pool, muscle_group_id, &name, user.id).await?;
 
     leptos_axum::redirect(&format!("/exercises/{}", object.slug));
     Ok(())

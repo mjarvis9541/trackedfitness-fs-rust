@@ -1,8 +1,8 @@
 use crate::util::validation_error::ValidationError;
 
-use super::model::MovementBase;
+use super::model::Movement;
 
-impl MovementBase {
+impl Movement {
     pub fn validate(name: &str) -> Result<(), ValidationError> {
         let mut errors = ValidationError::new();
 

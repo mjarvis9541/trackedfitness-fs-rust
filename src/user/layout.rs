@@ -2,8 +2,7 @@ use leptos::*;
 use leptos_router::*;
 
 use crate::auth::context::CanEditContext;
-use crate::component::icon::{IconCalendar, IconFile, IconSettings};
-use crate::component::link::{CircularIconLink, CircularIconLinkVariant, Link, LinkVariant};
+use crate::component::link::{CircularIconLink, CircularIconLinkVariant};
 use crate::component::template::{ErrorComponent, LoadingComponent};
 use crate::follower::component::FollowerCountComponent;
 use crate::follower::form::{
@@ -12,6 +11,8 @@ use crate::follower::form::{
 use crate::follower::status::FollowerStatus;
 use crate::user::model::UserQuery;
 use crate::util::param::UsernameParam;
+
+use super::user_navigation::UserNavigation;
 
 #[cfg(feature = "ssr")]
 use crate::{auth::service::get_request_user, setup::get_pool};
@@ -70,64 +71,7 @@ pub fn UserLayout() -> impl IntoView {
                         following_count=data.following_count
                     />
                     <section class=("hidden", !show_user_nav)>
-                        <div class="flex flex-wrap gap-2">
-                            <Link
-                                exact=true
-                                variant=LinkVariant::UserNavLink
-                                href="diet"
-                                text="Diet"
-                            >
-                                <IconFile/>
-                            </Link>
-                            <Link
-                                exact=true
-                                variant=LinkVariant::UserNavLink
-                                href="workouts"
-                                text="Workouts"
-                            >
-                                <IconFile/>
-                            </Link>
-                            <Link
-                                exact=true
-                                variant=LinkVariant::UserNavLink
-                                href="diet-targets"
-                                text="Diet Targets"
-                            >
-                                <IconFile/>
-                            </Link>
-                            <Link
-                                exact=true
-                                variant=LinkVariant::UserNavLink
-                                href="progress"
-                                text="Progress"
-                            >
-                                <IconFile/>
-                            </Link>
-                            <Link
-                                exact=true
-                                variant=LinkVariant::UserNavLink
-                                href="week"
-                                text="Week"
-                            >
-                                <IconCalendar/>
-                            </Link>
-                            <Link
-                                exact=true
-                                variant=LinkVariant::UserNavLink
-                                href="month"
-                                text="Month"
-                            >
-                                <IconCalendar/>
-                            </Link>
-                            <Link
-                                exact=true
-                                variant=LinkVariant::UserNavLink
-                                href="/settings"
-                                text="Settings"
-                            >
-                                <IconSettings/>
-                            </Link>
-                        </div>
+                        <UserNavigation/>
                     </section>
                     <section class="flex flex-wrap gap-2">
                         <div class=("hidden", !can_request)>

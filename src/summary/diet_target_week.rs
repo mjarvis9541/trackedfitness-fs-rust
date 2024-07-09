@@ -5,11 +5,11 @@ use leptos::*;
 use leptos_router::*;
 
 use crate::component::bulk_delete_date::BulkDeleteDateRangeForm;
-use crate::component::template::{AutoListHeader, ErrorComponent, ListLoadingComponent};
+use crate::component::template::{ErrorComponent, ListLoadingComponent};
 use crate::diet_target::update_or_create_form::DietTargetBulkUpdateOrCreateForm;
 use crate::util::param::{get_date, get_username};
 
-use super::component::DaySummaryListItem;
+use super::component::{DaySummaryListItem, SummaryListHeader};
 use super::model::{UserWeekSummary, Variant};
 
 #[cfg(feature = "ssr")]
@@ -114,7 +114,7 @@ pub fn DietTargetWeekSummaryComponent() -> impl IntoView {
             <div class="col-span-full">
                 <h2 class="text-base font-bold">"Diet Target Week Summary"</h2>
             </div>
-            <AutoListHeader all_items checked_items align_right=true>
+            <SummaryListHeader all_items checked_items>
                 "Date"
                 "Day"
                 "Calories"
@@ -130,7 +130,7 @@ pub fn DietTargetWeekSummaryComponent() -> impl IntoView {
                 "Carbs/kg"
                 "Fat/kg"
                 "Weight"
-            </AutoListHeader>
+            </SummaryListHeader>
             <Transition fallback=ListLoadingComponent>
                 <ErrorBoundary fallback=|errors| {
                     view! { <ErrorComponent errors/> }

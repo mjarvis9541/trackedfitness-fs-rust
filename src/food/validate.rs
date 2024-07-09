@@ -2,9 +2,9 @@ use rust_decimal::Decimal;
 
 use crate::util::validation_error::ValidationError;
 
-use super::model::Food;
+use super::model::FoodQuery;
 
-impl Food {
+impl FoodQuery {
     pub fn validate(
         name: &str,
         serving: &str,

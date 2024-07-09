@@ -4,20 +4,23 @@ use leptos_router::*;
 use rust_decimal::Decimal;
 use uuid::Uuid;
 
-use super::detail_page::get_food_detail;
 use crate::brand::select::{get_brand_select, BrandSelect};
-
 use crate::component::button::SubmitButton;
 use crate::component::input::{NumberInput, TextInput};
-
 use crate::component::select::FieldSelect;
 use crate::component::template::{DetailPageTemplate, ErrorComponent, LoadingComponent};
 use crate::util::param::get_slug;
 use crate::util::validation_error::{extract_other_errors, get_non_field_errors};
 
+use super::data_measurement::DataMeasurement;
+use super::detail_page::get_food_detail;
+
 #[cfg(feature = "ssr")]
 use crate::{
-    auth::service::get_request_user, brand::model::Brand, error::Error, food::model::Food,
+    auth::service::get_request_user,
+    brand::model::Brand,
+    error::Error,
+    food::model::{Food, FoodQuery},
     setup::get_pool,
 };
 
@@ -47,7 +50,7 @@ pub async fn food_update(
     let brand = Brand::get_by_id(&pool, brand_id)
         .await?
         .ok_or(Error::NotFound)?;
-    Food::validate(
+    FoodQuery::validate(
         &name,
         &serving,
         energy,
@@ -79,7 +82,7 @@ pub async fn food_update(
     )
     .await?;
 
-    leptos_axum::redirect(&format!("/food/{}", object));
+    leptos_axum::redirect(&format!("/food/{}", object.slug));
     Ok(())
 }
 
@@ -130,12 +133,8 @@ pub fn FoodUpdatePage() -> impl IntoView {
             let protein = format!("{:.2}", data.protein);
             let salt = format!("{:.2}", data.salt);
             let brand_id = data.brand_id;
-            let serving_options = vec![
-                ("", "Select"),
-                ("g", "100g"),
-                ("ml", "100ml"),
-                ("srv", "1 Serving"),
-            ];
+
+            let serving_options = DataMeasurement::to_form_options();
             view! {
                 <ActionForm action>
                     <input type="hidden" name="slug" value=slug/>

@@ -57,8 +57,6 @@ impl From<jsonwebtoken::errors::Error> for Error {
 
 impl From<Error> for ServerFnError {
     fn from(error: Error) -> Self {
-        dbg!(&error);
-
         match error {
             Error::Validation(val_error) => {
                 #[cfg(feature = "ssr")]

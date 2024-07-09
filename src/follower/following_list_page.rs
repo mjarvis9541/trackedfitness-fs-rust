@@ -2,14 +2,14 @@ use leptos::*;
 use leptos_meta::*;
 use leptos_router::*;
 
-use super::model::Follower;
 use crate::component::input::FilterInput;
 use crate::component::paginator::Paginator;
-use crate::component::select::FilterSelect;
 use crate::component::template::{ErrorComponent, ListNotFoundComponent, LoadingComponent};
-use crate::follower::component::FollowerListItem;
 use crate::util::misc::ListResponse;
 use crate::util::param::{extract_page, extract_param, extract_size, get_username};
+
+use super::component::FollowerListItem;
+use super::model::Follower;
 
 #[cfg(feature = "ssr")]
 use crate::auth::service::get_request_user;
@@ -66,20 +66,20 @@ pub fn UserFollowingPage() -> impl IntoView {
         })
     };
     let count = move || resource.map(|res| res.as_ref().map(|res| res.count).unwrap_or_default());
-    let sort_options = vec![
-        ("username", "Username (A-z)"),
-        ("-username", "Username (Z-a)"),
-        ("name", "Name (A-z)"),
-        ("-name", "Name (Z-a)"),
-        ("email", "Email (A-z)"),
-        ("-email", "Email (Z-a)"),
-        ("created_at", "Created (Asc)"),
-        ("-created_at", "Created (Desc)"),
-        ("updated_at", "Updated (Asc)"),
-        ("-updated_at", "Updated (Desc)"),
-        ("last_login", "Last Login (Asc)"),
-        ("-last_login", "Last Login (Desc)"),
-    ];
+    // let sort_options = vec![
+    //     ("username", "Username (A-z)"),
+    //     ("-username", "Username (Z-a)"),
+    //     ("name", "Name (A-z)"),
+    //     ("-name", "Name (Z-a)"),
+    //     ("email", "Email (A-z)"),
+    //     ("-email", "Email (Z-a)"),
+    //     ("created_at", "Created (Asc)"),
+    //     ("-created_at", "Created (Desc)"),
+    //     ("updated_at", "Updated (Asc)"),
+    //     ("-updated_at", "Updated (Desc)"),
+    //     ("last_login", "Last Login (Asc)"),
+    //     ("-last_login", "Last Login (Desc)"),
+    // ];
     view! {
         <Title text="Following"/>
         <main class="p-4 m-4 bg-white border">
@@ -92,7 +92,6 @@ pub fn UserFollowingPage() -> impl IntoView {
                     <input type="hidden" name="page" value=1/>
                     <input type="hidden" name="size" value=size/>
                     <FilterInput name="search" value=Signal::derive(search)/>
-                    <FilterSelect name="order" value=Signal::derive(order) options=sort_options/>
                 </Form>
             </section>
 

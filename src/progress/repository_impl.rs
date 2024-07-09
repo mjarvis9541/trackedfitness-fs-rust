@@ -1,35 +1,14 @@
 use chrono::prelude::*;
 use rust_decimal::Decimal;
-use sqlx::postgres::PgRow;
-use sqlx::{FromRow, PgPool, Row};
+use sqlx::PgPool;
 use uuid::Uuid;
 
 use crate::error::Result;
 use crate::util::database::Filter;
 
-use super::model::{Progress, ProgressBase};
+use super::model::{Progress, ProgressQuery};
 
-impl FromRow<'_, PgRow> for Progress {
-    fn from_row(row: &PgRow) -> sqlx::Result<Self> {
-        Ok(Self {
-            id: row.try_get("id")?,
-            user_id: row.try_get("user_id")?,
-            date: row.try_get("date")?,
-            weight: row.try_get("weight_kg")?,
-            week_avg_weight: row.try_get("week_avg_weight")?,
-            month_avg_weight: row.try_get("month_avg_weight")?,
-            energy_burnt: row.try_get("energy_burnt")?,
-            week_avg_energy_burnt: row.try_get("week_avg_energy_burnt")?,
-            month_avg_energy_burnt: row.try_get("month_avg_energy_burnt")?,
-            notes: row.try_get("notes")?,
-            username: row.try_get("username")?,
-            created_at: row.try_get("created_at")?,
-            updated_at: row.try_get("updated_at")?,
-        })
-    }
-}
-
-impl ProgressBase {
+impl Progress {
     pub async fn get_by_username_date(
         pool: &PgPool,
         username: &str,
@@ -37,9 +16,16 @@ impl ProgressBase {
     ) -> Result<Option<Self>> {
         let query = sqlx::query_as!(
             Self,
-            "SELECT t1.* FROM progress t1
-            LEFT JOIN users_user t2 ON t2.id = t1.user_id
-            WHERE t2.username = $1 AND t1.date = $2",
+            "
+            SELECT
+                t1.*
+            FROM
+                progress t1
+                LEFT JOIN users_user t2 ON t2.id = t1.user_id
+            WHERE
+                t2.username = $1
+                AND t1.date = $2
+            ",
             username,
             date
         )
@@ -59,8 +45,20 @@ impl ProgressBase {
     ) -> Result<Self> {
         let query = sqlx::query_as!(
             Self,
-            "INSERT INTO progress (user_id, date, weight_kg, energy_burnt, notes, created_by_id)
-            VALUES ($1, $2, $3, $4, $5, $6) RETURNING *
+            "
+            INSERT INTO
+                progress (
+                    user_id,
+                    date,
+                    weight_kg,
+                    energy_burnt,
+                    notes,
+                    created_by_id
+                )
+            VALUES
+                ($1, $2, $3, $4, $5, $6)
+            RETURNING
+                *
             ",
             user_id,
             date,
@@ -85,7 +83,8 @@ impl ProgressBase {
     ) -> Result<Self> {
         let query = sqlx::query_as!(
             Self,
-            "UPDATE progress
+            "
+            UPDATE progress
             SET
                 date = $1,
                 weight_kg = $2,
@@ -115,19 +114,19 @@ impl ProgressBase {
             .await?;
         Ok(query)
     }
-}
 
-impl Progress {
     pub async fn get_latest_weight(pool: &PgPool, user_id: Uuid) -> Result<Option<Decimal>> {
-        let query = sqlx::query_scalar!(
+        let query: Option<Decimal> = sqlx::query_scalar(
             "SELECT weight_kg FROM progress WHERE user_id = $1 ORDER BY date DESC LIMIT 1",
-            user_id
         )
-        .fetch_one(pool)
+        .bind(user_id)
+        .fetch_optional(pool)
         .await?;
         Ok(query)
     }
+}
 
+impl ProgressQuery {
     pub async fn get_latest_by_username_date(
         pool: &PgPool,
         username: &str,
@@ -267,10 +266,13 @@ impl Progress {
     pub async fn count(pool: &PgPool, search: &str, username: &str) -> sqlx::Result<i64> {
         let mut qb = sqlx::QueryBuilder::new(
             "
-            SELECT COUNT(*) 
-            FROM progress t1 
-            LEFT JOIN users_user t2 ON t2.id = t1.user_id 
-            WHERE t2.username = 
+            SELECT
+                COUNT(*)
+            FROM
+                progress t1
+                LEFT JOIN users_user t2 ON t2.id = t1.user_id
+            WHERE
+                t2.username =
             ",
         );
         qb.push_bind(username);
@@ -290,6 +292,15 @@ impl Progress {
         size: i64,
         page: i64,
     ) -> Result<Vec<Self>> {
+        let order_by_column = match order {
+            "date" => "t1.date",
+            "-date" => "t1.date DESC",
+            "created_at" => "t1.created_at",
+            "-created_at" => "t1.created_at DESC",
+            "updated_at" => "t1.updated_at",
+            "-updated_at" => "t1.updated_at DESC",
+            _ => "t1.date DESC",
+        };
         let mut qb = sqlx::QueryBuilder::new(
             "
             WITH
@@ -342,9 +353,11 @@ impl Progress {
             qb.push(" AND EXTRACT(YEAR FROM t1.date) = ");
             qb.push_bind(search);
         }
-        qb.order("t1.date desc", order);
+        qb.push(" ORDER BY ");
+        qb.push(order_by_column);
+
         qb.paginate(size, page);
-        let q = qb.build_query_as().fetch_all(pool).await?;
-        Ok(q)
+        let query = qb.build_query_as().fetch_all(pool).await?;
+        Ok(query)
     }
 }

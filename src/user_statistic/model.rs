@@ -2,7 +2,7 @@ use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 
 #[derive(Debug, Deserialize, Serialize, Clone)]
-pub struct UserStat {
+pub struct UserStatistic {
     pub id: Uuid,
     pub username: String,
     pub profile_id: Option<Uuid>,

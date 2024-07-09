@@ -10,21 +10,17 @@ use crate::util::param::UuidParam;
 use crate::util::validation_error::{extract_other_errors, get_non_field_errors};
 
 #[cfg(feature = "ssr")]
-use crate::{
-    auth::service::get_request_user, error::Error, meal::model::MealBase, setup::get_pool,
-};
+use crate::{auth::service::get_request_user, error::Error, meal::model::Meal, setup::get_pool};
 
 #[server(endpoint = "meal-delete")]
 pub async fn meal_delete(id: Uuid) -> Result<(), ServerFnError> {
     let user = get_request_user()?;
     let pool = get_pool()?;
 
-    let object = MealBase::get_by_id(&pool, id)
-        .await?
-        .ok_or(Error::NotFound)?;
+    let object = Meal::get_by_id(&pool, id).await?.ok_or(Error::NotFound)?;
     object.can_delete(&user).await?;
 
-    MealBase::delete(&pool, id).await?;
+    Meal::delete(&pool, id).await?;
 
     leptos_axum::redirect("/food/meals");
     Ok(())

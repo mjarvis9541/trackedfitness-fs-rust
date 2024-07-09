@@ -1,6 +1,7 @@
+use std::collections::HashMap;
+
 use chrono::{NaiveDate, TimeDelta};
 use rust_decimal::prelude::*;
-use std::collections::HashMap;
 
 use crate::error::Result;
 
@@ -14,6 +15,7 @@ impl UserDaySummary {
         username: &str,
     ) -> Result<Vec<UserDaySummary>> {
         let mut complete_data: Vec<UserDaySummary> = Vec::new();
+
         let summary_map: HashMap<NaiveDate, UserDaySummary> =
             summaries.into_iter().map(|s| (s.date, s)).collect();
 

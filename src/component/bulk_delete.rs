@@ -5,7 +5,6 @@ use leptos_router::*;
 
 use crate::component::button::{Button, ButtonVariant};
 use crate::component::icon::IconTrash;
-use crate::util::validation_error::{extract_other_errors, get_non_field_errors};
 
 #[cfg(feature = "ssr")]
 use {
@@ -90,16 +89,7 @@ pub fn BulkDeleteForm(
             action.dispatch(data)
         }
     };
-
     let action_loading = action.pending();
-    let action_value = action.value();
-    let action_error = move || {
-        extract_other_errors(
-            action_value,
-            &["non_field_errors", "table", "username", "items"],
-        )
-    };
-    let non_field_errors = move || get_non_field_errors(action_value);
 
     view! {
         <div>

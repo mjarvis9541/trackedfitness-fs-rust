@@ -1,11 +1,12 @@
 use leptos::*;
 use leptos_router::*;
 
-use super::detail_page::get_food_detail;
 use crate::component::button::SubmitButton;
 use crate::component::template::{DetailPageTemplate, ErrorComponent, LoadingComponent};
 use crate::util::param::get_slug;
 use crate::util::validation_error::{extract_other_errors, get_non_field_errors};
+
+use super::detail_page::get_food_detail;
 
 #[cfg(feature = "ssr")]
 use crate::{auth::service::get_request_user, error::Error, food::model::Food, setup::get_pool};

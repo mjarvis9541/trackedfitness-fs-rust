@@ -2,10 +2,10 @@ use leptos::*;
 
 use crate::util::datetime::{format_datetime, DATE_FORMAT_SHORT};
 
-use super::model::Progress;
+use super::model::ProgressQuery;
 
 #[component]
-pub fn ProgressDetailTable(data: Progress) -> impl IntoView {
+pub fn ProgressDetailTable(data: ProgressQuery) -> impl IntoView {
     let date = data.date.format(DATE_FORMAT_SHORT).to_string();
 
     let weight = data

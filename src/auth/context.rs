@@ -28,8 +28,8 @@ impl RequestUserContext {
         self.user
             .with(|user| user.is_superuser || user.id == user_id)
     }
-    pub fn is_object_owner(&self, user_id: Uuid) -> bool {
-        self.user.with(|user| user.id == user_id)
+    pub fn is_object_owner(&self, username: String) -> bool {
+        self.user.with(|user| user.username == username)
     }
     pub fn is_not_object_owner(&self, username: String) -> bool {
         self.user.with(|user| user.username != username)

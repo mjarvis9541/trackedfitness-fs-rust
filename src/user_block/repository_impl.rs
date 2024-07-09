@@ -137,7 +137,7 @@ impl UserBlock {
         blocked: &str,
         status: &str,
     ) -> sqlx::Result<i64> {
-        let mut qb_scalar = sqlx::QueryBuilder::new(
+        let mut qbc = sqlx::QueryBuilder::new(
             "
             SELECT COUNT(t1.*) 
             FROM user_block t1
@@ -146,14 +146,14 @@ impl UserBlock {
             WHERE TRUE
             ",
         );
-        qb_scalar.filter("t2.username", "=", blocker);
-        qb_scalar.filter("t3.username", "ilike", blocked);
+        qbc.filter("t2.username", "=", blocker);
+        qbc.filter("t3.username", "ilike", blocked);
         if !status.is_empty() {
             let status = status.parse::<i64>().unwrap_or_default();
-            qb_scalar.push(" AND t1.blocked_status = ");
-            qb_scalar.push_bind(status);
+            qbc.push(" AND t1.blocked_status = ");
+            qbc.push_bind(status);
         };
-        qb_scalar.build_query_scalar().fetch_one(pool).await
+        qbc.build_query_scalar().fetch_one(pool).await
     }
 
     pub async fn filter(
@@ -165,6 +165,18 @@ impl UserBlock {
         size: i64,
         page: i64,
     ) -> sqlx::Result<Vec<Self>> {
+        let order_by_column = match order {
+            "blocker_username" => "t2.username",
+            "-blocker_username" => "t2.username DESC",
+            "blocked_username" => "t3.username",
+            "-blocked_username" => "t3.username DESC",
+            "blocked_at" => "t1.blocked_at",
+            "-blocked_at" => "t1.blocked_at DESC",
+            "unblocked_at" => "t1.unblocked_at",
+            "-unblocked_at" => "t1.unblocked_at DESC",
+            _ => "t1.blocker_username",
+        };
+
         let mut qb = sqlx::QueryBuilder::new(
             "
             SELECT
@@ -185,8 +197,11 @@ impl UserBlock {
             let status = status.parse::<i64>().unwrap_or_default();
             qb.push(" AND t1.blocked_status = ");
             qb.push_bind(status);
-        };
-        qb.order("t2.username", order);
+        }
+
+        qb.push(" ORDER BY ");
+        qb.push(order_by_column);
+
         qb.paginate(size, page);
         qb.build_query_as().fetch_all(pool).await
     }

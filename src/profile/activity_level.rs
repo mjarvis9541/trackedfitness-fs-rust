@@ -62,4 +62,25 @@ impl ActivityLevel {
     pub fn all_variants() -> Vec<&'static str> {
         vec!["SD", "LA", "MA", "VA", "EA"]
     }
+
+    pub fn to_form_options() -> Vec<(&'static str, &'static str)> {
+        let options = [
+            ("", "Select"),
+            ("SD", "Sedentary - little or no exercise/desk job"),
+            (
+                "LA",
+                "Lightly Active - light exercise/sports 1-3 days a week",
+            ),
+            (
+                "MA",
+                "Moderately Active - Moderate exercise/sports 3-5 days a week",
+            ),
+            ("VA", "Very Active - Heavy exercise/sports 6-7 days a week"),
+            (
+                "EA",
+                "Extremely Active - Very heavy exercise/physical job/training twice a day",
+            ),
+        ];
+        options.to_vec()
+    }
 }

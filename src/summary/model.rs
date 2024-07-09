@@ -1,10 +1,11 @@
-use chrono::NaiveDate;
+use chrono::{Datelike, NaiveDate};
 use rust_decimal::prelude::*;
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 
-use crate::diet_target::model::DietTarget;
+use crate::diet_target::model::DietTargetQuery;
 use crate::error::{Error, Result};
+use crate::util::datetime::get_week_start;
 
 #[derive(Debug)]
 pub enum Variant {
@@ -12,6 +13,7 @@ pub enum Variant {
     DietTarget,
 }
 
+#[cfg_attr(feature = "ssr", derive(sqlx::FromRow))]
 #[derive(Debug, Deserialize, Serialize, Clone, Default)]
 pub struct UserDaySummary {
     pub user_id: Uuid,
@@ -106,8 +108,8 @@ impl UserDaySummary {
     }
 }
 
-impl From<DietTarget> for UserDaySummary {
-    fn from(diet_target: DietTarget) -> Self {
+impl From<DietTargetQuery> for UserDaySummary {
+    fn from(diet_target: DietTargetQuery) -> Self {
         UserDaySummary {
             user_id: diet_target.user_id,
             username: diet_target.username,
@@ -129,6 +131,69 @@ impl From<DietTarget> for UserDaySummary {
             carbohydrate_per_kg: diet_target.carbohydrate_per_kg,
             fat_per_kg: diet_target.fat_per_kg,
             actual: true,
+        }
+    }
+}
+
+#[derive(Debug, Deserialize, Serialize, Clone)]
+pub struct MonthSummary {
+    pub username: String,
+    pub date: NaiveDate,
+    pub energy: Decimal,
+    pub protein: Decimal,
+    pub fat: Decimal,
+    pub carbohydrate: Decimal,
+    pub week_avg_energy: Decimal,
+    pub week_avg_protein: Decimal,
+    pub week_avg_carbohydrate: Decimal,
+    pub week_avg_fat: Decimal,
+    pub workout_count: i64,
+    pub exercise_count: i64,
+    pub set_count: i64,
+    pub rep_count: i64,
+    pub week_total_workouts: i64,
+    pub week_total_exercises: i64,
+    pub week_total_sets: i64,
+    pub week_total_reps: i64,
+    pub progress_date: Option<NaiveDate>,
+    pub weight: Option<Decimal>,
+    pub energy_burnt: Option<i32>,
+    pub week_avg_weight: Decimal,
+    pub week_avg_energy_burnt: i64,
+}
+
+impl MonthSummary {
+    pub fn get_calendar_date_title(&self) -> String {
+        self.date.format("%d %b").to_string()
+    }
+    pub fn get_week_title(&self) -> String {
+        format!(
+            "Week {}, {}",
+            self.date.iso_week().week(),
+            self.date.format("%Y")
+        )
+    }
+    pub fn get_week_href(&self) -> String {
+        let monday = get_week_start(self.date);
+        format!("/users/{}/week/{}", self.username, monday)
+    }
+    pub fn get_profile_href(&self) -> String {
+        format!("/users/{}/{}", self.username, self.date)
+    }
+    pub fn get_diet_day_href(&self) -> String {
+        format!("/users/{}/diet/{}", self.username, self.date)
+    }
+    pub fn get_workout_day_href(&self) -> String {
+        format!("/users/{}/workouts/{}", self.username, self.date)
+    }
+    pub fn get_progress_detail_or_create_href(&self) -> String {
+        if let Some(date) = self.progress_date {
+            format!("/users/{}/progress/{}", self.username, date)
+        } else {
+            format!(
+                "/users/{}/progress/create?date={}",
+                self.username, self.date
+            )
         }
     }
 }

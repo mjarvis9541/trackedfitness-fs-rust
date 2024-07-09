@@ -7,7 +7,7 @@ use crate::component::template::{
     DetailPageTemplate, ErrorComponent, LoadingComponent, UpdateDeleteButtonRow,
 };
 use crate::exercise::exercise_per_movement::ExerciseMovementComponent;
-use crate::movement::model::Movement;
+use crate::movement::model::MovementQuery;
 use crate::util::datetime::format_datetime;
 use crate::util::param::get_slug;
 
@@ -15,10 +15,10 @@ use crate::util::param::get_slug;
 use crate::{auth::service::get_request_user, error::Error};
 
 #[server(endpoint = "movement-detail", input = GetUrl)]
-pub async fn get_movement_detail(slug: String) -> Result<Movement, ServerFnError> {
+pub async fn get_movement_detail(slug: String) -> Result<MovementQuery, ServerFnError> {
     let user = get_request_user()?;
     let pool = crate::setup::get_pool()?;
-    let object = Movement::get_by_slug(&pool, &slug)
+    let object = MovementQuery::get_by_slug(&pool, &slug)
         .await?
         .ok_or(Error::NotFound)?;
     object.can_view(&user)?;
@@ -46,7 +46,7 @@ pub fn MovementDetailPage() -> impl IntoView {
 }
 
 #[component]
-pub fn MovementDetail(data: Movement) -> impl IntoView {
+pub fn MovementDetail(data: MovementQuery) -> impl IntoView {
     let created_at = format_datetime(&Some(data.created_at));
     let updated_at = format_datetime(&data.updated_at);
     let updated_by = data.updated_by.map_or_else(

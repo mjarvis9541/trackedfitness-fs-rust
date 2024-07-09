@@ -93,7 +93,7 @@ where
                 placeholder=placeholder.get()
                 class=move || {
                     if has_field_errors() {
-                        "block w-full rounded border border-red-500 px-3 py-1.5 ring-2 ring-red-500 focus:outline-none "
+                        "block w-full rounded border border-red-500 px-3 py-1.5 ring-2 ring-red-500 focus:outline-none"
                     } else {
                         "block w-full rounded border px-3 py-1.5 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:text-gray-800 disabled:bg-gray-300 disabled:opacity-50"
                     }
@@ -190,7 +190,7 @@ pub fn SetInput(
                 name=name
                 step=step
                 value=value
-                class="py-1.5 px-2 pr-10 w-full bg-gray-50 focus:border focus:border-blue-500 focus:ring-2 focus:ring-blue-500 focus:outline-none disabled:text-gray-800 disabled:bg-gray-300 disabled:opacity-50"
+                class="py-1.5 px-2 pr-10 w-full bg-gray-50 border focus:border focus:border-blue-500 focus:ring-2 focus:ring-blue-500 focus:outline-none disabled:text-gray-800 disabled:bg-gray-300 disabled:opacity-50"
             />
         </label>
     }
@@ -202,6 +202,7 @@ pub fn FilterInput(
     value: Signal<String>,
     #[prop(default = name)] label: &'static str,
     #[prop(default = "Search")] placeholder: &'static str,
+    #[prop(default = false)] disabled: bool,
 ) -> impl IntoView {
     view! {
         <label class="block flex-1 min-w-40">
@@ -211,9 +212,10 @@ pub fn FilterInput(
                 value=value
                 type="text"
                 placeholder=placeholder
+                disabled=disabled
                 autocomplete="off"
                 oninput="this.form.requestSubmit()"
-                class="block py-1.5 px-3 w-full bg-white rounded border focus:border-blue-500 focus:ring-2 focus:ring-blue-500 focus:focus:outline-none"
+                class="block py-1.5 px-3 w-full bg-white rounded border focus:border-blue-500 focus:ring-2 focus:ring-blue-500 focus:focus:outline-none disabled:text-gray-800 disabled:bg-gray-300 disabled:opacity-50"
             />
         </label>
     }

@@ -10,9 +10,9 @@ pub type MoveSelectResource = Resource<(), Result<Vec<SelectUuidName>, ServerFnE
 #[server]
 pub async fn get_movement_select() -> Result<Vec<SelectUuidName>, ServerFnError> {
     crate::auth::service::get_request_user()?;
-    use crate::movement::model::Movement;
+    use crate::movement::model::MovementQuery;
     let pool = expect_context::<sqlx::PgPool>();
-    Ok(Movement::option_list_id(&pool).await?)
+    Ok(MovementQuery::option_list_id(&pool).await?)
 }
 
 #[component]

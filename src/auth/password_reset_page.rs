@@ -12,14 +12,11 @@ use crate::{auth::model::User, auth::service::AuthService, setup::get_pool};
 #[server(endpoint = "password-reset")]
 pub async fn password_reset_request(email: String) -> Result<(), ServerFnError> {
     let pool = get_pool()?;
-
     User::validate_email(&email)?;
-
     let user = User::get_by_email(&pool, &email).await?;
     if let Some(user) = user {
         AuthService::send_password_reset_email(user.id, &user.name, &user.email).await?;
     }
-
     leptos_axum::redirect("/password-reset/email-sent");
     Ok(())
 }
@@ -47,7 +44,6 @@ pub fn PasswordResetRequestPage() -> impl IntoView {
                         action_value
                         name="email"
                         input_type="email"
-                        label="Email address"
                         placeholder="Enter your email address"
                     />
 

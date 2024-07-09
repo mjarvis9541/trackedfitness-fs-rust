@@ -14,7 +14,7 @@ use crate::util::validation_error::{extract_other_errors, get_non_field_errors};
 
 #[cfg(feature = "ssr")]
 use crate::{
-    auth::service::get_request_user, error::Error, food::model::Food, meal::model::MealBase,
+    auth::service::get_request_user, error::Error, food::model::FoodQuery, meal::model::Meal,
     setup::get_pool,
 };
 
@@ -28,12 +28,12 @@ async fn meal_food_update(
     let user = get_request_user()?;
     let pool = get_pool()?;
 
-    let food = Food::get_by_id(&pool, food_id)
+    let food = FoodQuery::get_by_id(&pool, food_id)
         .await?
         .ok_or(Error::NotFound)?;
     let quantity = food.data_measurement.to_quantity_modifier(&quantity);
 
-    let meal = MealBase::get_by_id(&pool, meal_id)
+    let meal = Meal::get_by_id(&pool, meal_id)
         .await?
         .ok_or(Error::NotFound)?;
     meal.can_update(&user).await?;

@@ -1,14 +1,14 @@
 use chrono::prelude::*;
-use sqlx::{PgPool, Row};
+use sqlx::PgPool;
 use uuid::Uuid;
 
 use crate::error::Result;
 use crate::summary::model::UserDaySummary;
 use crate::util::database::Filter;
 
-use super::model::{DietTarget, DietTargetBase, DietTargetInput};
+use super::model::{DietTarget, DietTargetInput, DietTargetQuery};
 
-impl DietTargetBase {
+impl DietTarget {
     pub async fn get_by_id(pool: &PgPool, id: Uuid) -> Result<Option<Self>> {
         let query = sqlx::query_as!(Self, "SELECT * FROM diet_target WHERE id = $1", id)
             .fetch_optional(pool)
@@ -83,7 +83,7 @@ impl DietTargetBase {
         request_user_id: Uuid,
     ) -> Result<Self> {
         let query = sqlx::query_as!(
-            DietTargetBase,
+            DietTarget,
             "
             UPDATE diet_target
             SET
@@ -199,7 +199,7 @@ impl DietTargetBase {
     }
 }
 
-impl DietTarget {
+impl DietTargetQuery {
     pub async fn get_by_username_date(
         pool: &PgPool,
         username: &str,
@@ -300,24 +300,45 @@ impl DietTarget {
         Ok(query)
     }
 
-    pub async fn count_by_username(pool: &PgPool, username: &str) -> sqlx::Result<i64> {
+    pub async fn count_by_username(
+        pool: &PgPool,
+        username: &str,
+        search: &str,
+    ) -> sqlx::Result<i64> {
+        let _search = search;
         let mut qb = sqlx::QueryBuilder::new(
-            "SELECT COUNT(t1.*)
-            FROM diet_target t1
-            LEFT JOIN users_user t2 ON t2.id = t1.user_id
-            WHERE t2.username = ",
+            "
+            SELECT
+                COUNT(t1.*)
+            FROM
+                diet_target t1
+                LEFT JOIN users_user t2 ON t2.id = t1.user_id
+            WHERE
+                t2.username =
+            ",
         );
         qb.push_bind(username);
+
         qb.build_query_scalar().fetch_one(pool).await
     }
 
     pub async fn filter_by_username(
         pool: &PgPool,
         username: &str,
+        search: &str,
         order: &str,
         size: i64,
         page: i64,
     ) -> Result<Vec<UserDaySummary>> {
+        let order_by_column = match order {
+            "date" => "t1.date",
+            "-date" => "t1.date DESC",
+            "created_at" => "t1.created_at",
+            "-created_at" => "t1.created_at DESC",
+            "updated_at" => "t1.updated_at",
+            "-updated_at" => "t1.updated_at DESC",
+            _ => "t1.date DESC",
+        };
         let mut qb = sqlx::QueryBuilder::new(
             "
             SELECT
@@ -330,7 +351,8 @@ impl DietTarget {
                 COALESCE(t1.energy / NULLIF(t1.weight, 0), 0) AS energy_per_kg,
                 COALESCE(t1.protein / NULLIF(t1.weight, 0), 0) AS protein_per_kg,
                 COALESCE(t1.carbohydrate / NULLIF(t1.weight, 0), 0) AS carbohydrate_per_kg,
-                COALESCE(t1.fat / NULLIF(t1.weight, 0), 0) AS fat_per_kg
+                COALESCE(t1.fat / NULLIF(t1.weight, 0), 0) AS fat_per_kg,
+                true as actual
             FROM
                 diet_target t1
                 LEFT JOIN users_user t2 ON t2.id = t1.user_id
@@ -339,36 +361,18 @@ impl DietTarget {
             ",
         );
         qb.push_bind(username);
-        qb.order("t1.date desc", order);
+
+        if !search.is_empty() && search.len() == 4 {
+            let search = search.parse::<i32>().unwrap_or_default();
+            qb.push(" AND EXTRACT(YEAR FROM t1.date) = ");
+            qb.push_bind(search);
+        }
+
+        qb.push(" ORDER BY ");
+        qb.push(order_by_column);
 
         qb.paginate(size, page);
-
-        let rows = qb.build().fetch_all(pool).await?;
-        let query = rows
-            .into_iter()
-            .map(|row| UserDaySummary {
-                user_id: row.try_get("user_id").unwrap_or_default(),
-                username: row.try_get("username").unwrap_or_default(),
-                date: row.try_get("date").unwrap_or_default(),
-                weight: row.try_get("weight").unwrap_or_default(),
-                energy: row.try_get("energy").unwrap_or_default(),
-                fat: row.try_get("fat").unwrap_or_default(),
-                saturates: row.try_get("saturates").unwrap_or_default(),
-                carbohydrate: row.try_get("carbohydrate").unwrap_or_default(),
-                sugars: row.try_get("sugars").unwrap_or_default(),
-                fibre: row.try_get("fibre").unwrap_or_default(),
-                protein: row.try_get("protein").unwrap_or_default(),
-                salt: row.try_get("salt").unwrap_or_default(),
-                protein_pct: row.try_get("protein_pct").unwrap_or_default(),
-                carbohydrate_pct: row.try_get("carbohydrate_pct").unwrap_or_default(),
-                fat_pct: row.try_get("fat_pct").unwrap_or_default(),
-                energy_per_kg: row.try_get("energy_per_kg").unwrap_or_default(),
-                protein_per_kg: row.try_get("protein_per_kg").unwrap_or_default(),
-                carbohydrate_per_kg: row.try_get("carbohydrate_per_kg").unwrap_or_default(),
-                fat_per_kg: row.try_get("fat_per_kg").unwrap_or_default(),
-                actual: true,
-            })
-            .collect();
+        let query = qb.build_query_as().fetch_all(pool).await?;
         Ok(query)
     }
 }

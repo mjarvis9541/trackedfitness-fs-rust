@@ -8,30 +8,33 @@ use crate::component::button::SubmitButton;
 use crate::component::input::{NumberInput, TextInput};
 use crate::component::select::FieldSelect;
 use crate::component::template::{DetailPageTemplate, ErrorComponent, LoadingComponent};
-use crate::profile::model::Profile;
+use crate::profile::model::ProfileQuery;
 use crate::util::param::get_username;
 use crate::util::validation_error::{extract_other_errors, get_non_field_errors};
 
+use super::activity_level::ActivityLevel;
+use super::fitness_goal::FitnessGoal;
+use super::sex::Sex;
+
 #[cfg(feature = "ssr")]
 use crate::{
-    auth::model::User, auth::service::get_request_user, error::Error, profile::model::ProfileBase,
+    auth::model::User, auth::service::get_request_user, error::Error, profile::model::Profile,
     setup::get_pool,
 };
 
 #[server(endpoint = "get-profile-update")]
-async fn get_profile_update(username: String) -> Result<Profile, ServerFnError> {
+async fn get_profile_update(username: String) -> Result<ProfileQuery, ServerFnError> {
     let user = get_request_user()?;
     let pool = get_pool()?;
     User::check_view_permission(&pool, &user, &username).await?;
     let date = Utc::now().date_naive();
-    let object = Profile::get_latest_by_username(&pool, &username, date)
+    let object = ProfileQuery::get_latest_by_username(&pool, &username, date)
         .await?
         .ok_or(Error::NotFound)?;
-
     Ok(object)
 }
 
-#[server]
+#[server(endpoint = "profile-update")]
 async fn profile_update(
     username: String,
     sex: String,
@@ -46,13 +49,12 @@ async fn profile_update(
     User::check_view_permission(&pool, &user, &username).await?;
 
     let date = Utc::now().date_naive();
-    let object = Profile::get_latest_by_username(&pool, &username, date)
+    let object = ProfileQuery::get_latest_by_username(&pool, &username, date)
         .await?
         .ok_or(Error::NotFound)?;
-
     object.can_update(&user).await?;
 
-    Profile::validate(
+    ProfileQuery::validate(
         &sex,
         &activity_level,
         &fitness_goal,
@@ -60,7 +62,7 @@ async fn profile_update(
         Decimal::from(50),
         date_of_birth,
     )?;
-    ProfileBase::update(
+    Profile::update(
         &pool,
         object.id,
         &sex,
@@ -72,7 +74,7 @@ async fn profile_update(
     )
     .await?;
 
-    leptos_axum::redirect(&format!("/users/{username}/profile"));
+    leptos_axum::redirect(&format!("/users/{}", username));
     Ok(())
 }
 
@@ -91,30 +93,10 @@ pub fn ProfileUpdatePage() -> impl IntoView {
     let response = move || {
         resource.and_then(|data| {
             let data = data.clone();
-            let sex_options = vec![("", "Select"), ("M", "Male"), ("F", "Female")];
-            let activity_options = vec![
-                ("", "Select"),
-                ("SD", "Sedentary - little or no exercise/desk job"),
-                (
-                    "LA",
-                    "Lightly Active - light exercise/sports 1-3 days a week",
-                ),
-                (
-                    "MA",
-                    "Moderately Active - Moderate exercise/sports 3-5 days a week",
-                ),
-                ("VA", "Very Active - Heavy exercise/sports 6-7 days a week"),
-                (
-                    "EA",
-                    "Extremely Active - Very heavy exercise/physical job/training twice a day",
-                ),
-            ];
-            let goal_options = vec![
-                ("", "Select"),
-                ("LW", "Lose Weight"),
-                ("MW", "Maintain Weight"),
-                ("GW", "Gain Weight"),
-            ];
+            let sex_options = Sex::to_form_options();
+            let activity_options = ActivityLevel::to_form_options();
+            let goal_options = FitnessGoal::to_form_options();
+
             view! {
                 <ActionForm action>
                     <input type="hidden" name="id" value=data.id.to_string()/>
@@ -130,7 +112,7 @@ pub fn ProfileUpdatePage() -> impl IntoView {
                     <NumberInput
                         action_value
                         name="height"
-                        label="Height (cm)"
+                        label="Height"
                         step="1"
                         placeholder="Enter your height in cm"
                         value=data.height.to_string()

@@ -7,17 +7,17 @@ use crate::component::template::DetailPageTemplate;
 use crate::util::validation_error::{extract_other_errors, get_non_field_errors};
 
 #[cfg(feature = "ssr")]
-use crate::{auth::service::get_request_user, meal::model::MealBase, setup::get_pool};
+use crate::{auth::service::get_request_user, meal::model::Meal, setup::get_pool};
 
 #[server(endpoint = "meal-create")]
 pub async fn meal_create(name: String) -> Result<(), ServerFnError> {
     let user = get_request_user()?;
     let pool = get_pool()?;
 
-    MealBase::can_create(&user).await?;
-    MealBase::validate(&name)?;
+    Meal::can_create(&user).await?;
+    Meal::validate(&name)?;
 
-    let object = MealBase::create(&pool, user.id, &name, user.id).await?;
+    let object = Meal::create(&pool, user.id, &name, user.id).await?;
 
     leptos_axum::redirect(&format!("/food/meals/{}", object.id));
     Ok(())

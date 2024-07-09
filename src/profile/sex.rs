@@ -65,4 +65,9 @@ impl Sex {
     pub fn all_variants() -> Vec<&'static str> {
         vec!["M", "F"]
     }
+
+    pub fn to_form_options() -> Vec<(&'static str, &'static str)> {
+        let options = [("", "Select"), ("M", "Male"), ("F", "Female")];
+        options.to_vec()
+    }
 }

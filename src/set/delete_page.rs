@@ -13,7 +13,7 @@ use super::detail_page::get_set_detail;
 
 #[cfg(feature = "ssr")]
 use crate::{
-    auth::service::get_request_user, error::Error, exercise::model::ExerciseModel,
+    auth::service::get_request_user, error::Error, exercise::model::ExerciseBase,
     set::model::SetModel, setup::get_pool, workout::model::WorkoutBase,
 };
 
@@ -25,13 +25,12 @@ pub async fn set_delete(set_id: Uuid, redirect_to: Option<String>) -> Result<(),
     let set = SetModel::get_by_id(&pool, set_id)
         .await?
         .ok_or(Error::NotFound)?;
-    let exercise = ExerciseModel::get_by_id(&pool, set.exercise_id)
+    let exercise = ExerciseBase::get_by_id(&pool, set.exercise_id)
         .await?
         .ok_or(Error::NotFound)?;
     let workout = WorkoutBase::get_by_id(&pool, exercise.workout_id)
         .await?
         .ok_or(Error::NotFound)?;
-
     workout.can_update(&user).await?;
 
     SetModel::delete(&pool, set_id).await?;

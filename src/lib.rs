@@ -7,7 +7,6 @@ mod component;
 mod diet;
 mod diet_target;
 mod error;
-mod error_extract;
 mod exercise;
 mod follower;
 mod food;

@@ -2,7 +2,7 @@ use leptos::*;
 use leptos_meta::*;
 use leptos_router::*;
 
-use super::model::Food;
+use super::model::FoodQuery;
 use super::to_diet_form::FoodToDietForm;
 // use super::to_meal_form::FoodToMealForm;
 use crate::component::template::{ErrorComponent, LoadingComponent, UpdateDeleteButtonRow};
@@ -13,10 +13,10 @@ use crate::util::param::get_slug;
 use crate::{auth::service::get_request_user, error::Error, setup::get_pool};
 
 #[server]
-pub async fn get_food_detail(slug: String) -> Result<Food, ServerFnError> {
+pub async fn get_food_detail(slug: String) -> Result<FoodQuery, ServerFnError> {
     let user = get_request_user()?;
     let pool = get_pool()?;
-    let food = Food::get_by_slug(&pool, &slug)
+    let food = FoodQuery::get_by_slug(&pool, &slug)
         .await?
         .ok_or(Error::NotFound)?;
     food.can_view(&user)?;
@@ -86,7 +86,7 @@ pub fn FoodDetailPage() -> impl IntoView {
 }
 
 #[component]
-pub fn FoodDetailComponent<'a>(data: &'a Food) -> impl IntoView {
+pub fn FoodDetailComponent<'a>(data: &'a FoodQuery) -> impl IntoView {
     let created_at = format_datetime(&Some(data.created_at));
     let updated_at = format_datetime(&data.updated_at);
 

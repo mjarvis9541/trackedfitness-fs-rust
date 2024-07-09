@@ -1,9 +1,9 @@
 pub mod create_page;
+pub mod create_with_set_form;
 pub mod delete_page;
 pub mod detail_page;
 pub mod exercise_per_movement;
 pub mod model;
 #[cfg(feature = "ssr")]
-pub mod query;
+pub mod repository_impl;
 pub mod update_page;
-pub mod with_set_create_page;

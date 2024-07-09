@@ -7,15 +7,15 @@ use crate::component::template::DetailPageTemplate;
 use crate::util::validation_error::{extract_other_errors, get_non_field_errors};
 
 #[cfg(feature = "ssr")]
-use crate::{auth::service::get_request_user, muscle_group::model::MuscleGroupBase};
+use crate::{auth::service::get_request_user, muscle_group::model::MuscleGroup};
 
 #[server(endpoint = "muscle-group-create")]
 async fn muscle_group_create(name: String) -> Result<(), ServerFnError> {
     let user = get_request_user()?;
     let pool = expect_context::<sqlx::PgPool>();
-    MuscleGroupBase::can_create(&user).await?;
-    MuscleGroupBase::validate(&name)?;
-    let object = MuscleGroupBase::create(&pool, &name, user.id).await?;
+    MuscleGroup::can_create(&user).await?;
+    MuscleGroup::validate(&name)?;
+    let object = MuscleGroup::create(&pool, &name, user.id).await?;
     leptos_axum::redirect(&format!("/exercises/muscle-groups/{}", object.slug));
     Ok(())
 }

@@ -4,7 +4,7 @@ use leptos::*;
 use leptos_meta::*;
 use leptos_router::*;
 
-use super::model::MuscleGroup;
+use super::model::MuscleGroupQuery;
 use crate::component::bulk_delete::BulkDeleteForm;
 use crate::component::checkbox::CheckboxListItem;
 use crate::component::input::FilterInput;
@@ -26,11 +26,11 @@ pub async fn get_muscle_group_list(
     order: String,
     size: i64,
     page: i64,
-) -> Result<ListResponse<MuscleGroup>, ServerFnError> {
+) -> Result<ListResponse<MuscleGroupQuery>, ServerFnError> {
     get_request_user()?;
     let pool = expect_context::<sqlx::PgPool>();
-    let count = MuscleGroup::count(&pool, &search).await?;
-    let results = MuscleGroup::filter(&pool, &search, &order, size, page).await?;
+    let count = MuscleGroupQuery::count(&pool, &search).await?;
+    let results = MuscleGroupQuery::filter(&pool, &search, &order, size, page).await?;
     Ok(ListResponse { count, results })
 }
 
@@ -156,7 +156,7 @@ pub fn MuscleGroupListPage() -> impl IntoView {
 
 #[component]
 pub fn MuscleGroupListItem<'a>(
-    data: &'a MuscleGroup,
+    data: &'a MuscleGroupQuery,
     checked_items: RwSignal<HashSet<String>>,
 ) -> impl IntoView {
     let created_at = format_datetime(&Some(data.created_at));

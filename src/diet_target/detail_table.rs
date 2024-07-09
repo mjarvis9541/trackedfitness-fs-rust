@@ -2,10 +2,10 @@ use leptos::*;
 
 use crate::util::datetime::{format_datetime, DATE_FORMAT_SHORT};
 
-use super::model::DietTarget;
+use super::model::DietTargetQuery;
 
 #[component]
-pub fn DietTargetDetailTable(data: DietTarget) -> impl IntoView {
+pub fn DietTargetDetailTable(data: DietTargetQuery) -> impl IntoView {
     let date = data.date.format(DATE_FORMAT_SHORT).to_string();
 
     let created_at = format_datetime(&Some(data.created_at));

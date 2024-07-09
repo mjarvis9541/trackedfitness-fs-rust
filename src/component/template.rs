@@ -22,10 +22,15 @@ pub fn DetailPageTemplate(title: &'static str, children: Children) -> impl IntoV
 pub fn CreateButton(
     #[prop(into)] text: MaybeSignal<String>,
     #[prop(into)] create_href: MaybeSignal<String>,
+    #[prop(attrs)] attrs: Vec<(&'static str, Attribute)>,
 ) -> impl IntoView {
     view! {
-        <div class="flex gap-2 justify-end pt-4">
-            <a class="block py-1.5 px-3 bg-gray-200 rounded hover:bg-gray-300" href=create_href>
+        <div class="flex gap-2 justify-end">
+            <a
+                {..attrs}
+                class="block py-1.5 px-3 bg-gray-100 rounded hover:bg-gray-300"
+                href=create_href
+            >
                 {text}
             </a>
         </div>

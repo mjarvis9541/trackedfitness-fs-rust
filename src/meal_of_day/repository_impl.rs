@@ -1,5 +1,4 @@
-use sqlx::postgres::PgRow;
-use sqlx::{FromRow, PgPool, Row};
+use sqlx::PgPool;
 use uuid::Uuid;
 
 use crate::component::select::SelectUuidName;
@@ -8,21 +7,6 @@ use crate::util::database::Filter;
 use crate::util::server::{normalize_whitespace, slugify};
 
 use super::model::MealOfDay;
-
-impl FromRow<'_, PgRow> for MealOfDay {
-    fn from_row(row: &PgRow) -> sqlx::Result<Self> {
-        Ok(Self {
-            id: row.try_get("id")?,
-            name: row.try_get("name")?,
-            slug: row.try_get("slug")?,
-            ordering: row.try_get("ordering")?,
-            created_at: row.try_get("created_at")?,
-            updated_at: row.try_get("updated_at")?,
-            created_by_id: row.try_get("created_by_id")?,
-            updated_by_id: row.try_get("updated_by_id")?,
-        })
-    }
-}
 
 impl MealOfDay {
     pub async fn all(pool: &PgPool) -> Result<Vec<Self>> {
@@ -56,14 +40,9 @@ impl MealOfDay {
         let slug = slugify(name);
         let query = sqlx::query_as!(
             Self,
-            "
-            INSERT INTO
-                meal_of_day (name, ordering, slug, created_by_id)
-            VALUES
-                ($1, $2, $3, $4)
-            RETURNING
-                *
-            ",
+            "INSERT INTO meal_of_day (name, ordering, slug, created_by_id)
+            VALUES ($1, $2, $3, $4)
+            RETURNING *",
             normalized_name,
             ordering,
             slug,
@@ -85,8 +64,7 @@ impl MealOfDay {
         let slug = slugify(name);
         let query = sqlx::query_as!(
             Self,
-            "
-            UPDATE meal_of_day
+            "UPDATE meal_of_day
             SET
                 name = $1,
                 ordering = $2,
@@ -95,9 +73,7 @@ impl MealOfDay {
                 updated_by_id = $4
             WHERE
                 id = $5
-            RETURNING
-                *
-            ",
+            RETURNING *",
             normalized_name,
             ordering,
             slug,
@@ -120,6 +96,13 @@ impl MealOfDay {
         Ok(query)
     }
 
+    pub async fn count(pool: &PgPool, search: &str) -> Result<i64> {
+        let mut qbc = sqlx::QueryBuilder::new("SELECT COUNT(*) FROM meal_of_day t1 WHERE TRUE");
+        qbc.filter("t1.name", "ilike", &search);
+        let query = qbc.build_query_scalar().fetch_one(pool).await?;
+        Ok(query)
+    }
+
     pub async fn filter(
         pool: &PgPool,
         search: &str,
@@ -127,19 +110,26 @@ impl MealOfDay {
         size: i64,
         page: i64,
     ) -> Result<Vec<Self>> {
+        let order_by_column = match order {
+            "name" => "t1.name",
+            "-name" => "t1.name DESC",
+            "ordering" => "t1.ordering",
+            "-ordering" => "t1.ordering DESC",
+            "created_at" => "t1.created_at",
+            "-created_at" => "t1.created_at DESC",
+            "updated_at" => "t1.updated_at",
+            "-updated_at" => "t1.updated_at DESC",
+            _ => "t1.ordering",
+        };
+
         let mut qb = sqlx::QueryBuilder::new("SELECT t1.* FROM meal_of_day t1 WHERE TRUE");
         qb.filter("t1.name", "ilike", search);
-        qb.order("t1.ordering", order);
+
+        qb.push(" ORDER BY ");
+        qb.push(order_by_column);
+
         qb.paginate(size, page);
         let query = qb.build_query_as().fetch_all(pool).await?;
-        Ok(query)
-    }
-
-    pub async fn count(pool: &PgPool, search: &str) -> Result<i64> {
-        let mut qb_scalar =
-            sqlx::QueryBuilder::new("SELECT COUNT(*) FROM meal_of_day t1 WHERE TRUE");
-        qb_scalar.filter("t1.name", "ilike", &search);
-        let query = qb_scalar.build_query_scalar().fetch_one(pool).await?;
         Ok(query)
     }
 
