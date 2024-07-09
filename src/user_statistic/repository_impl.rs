@@ -1,39 +1,9 @@
-use sqlx::postgres::PgRow;
-use sqlx::{FromRow, PgPool, Row};
+use sqlx::PgPool;
 
 use crate::error::Result;
 use crate::util::database::Filter;
 
 use super::model::UserStatistic;
-
-impl FromRow<'_, PgRow> for UserStatistic {
-    fn from_row(row: &PgRow) -> sqlx::Result<Self> {
-        Ok(Self {
-            id: row.try_get("id")?,
-            username: row.try_get("username")?,
-            profile_id: row.try_get("profile_id")?,
-            follower_count: row.try_get("follower_count")?,
-            following_count: row.try_get("following_count")?,
-            diet_count: row.try_get("diet_count")?,
-            diet_day_log_count: row.try_get("diet_day_log_count")?,
-            diet_target_count: row.try_get("diet_target_count")?,
-            progress_count: row.try_get("progress_count")?,
-            workout_count: row.try_get("workout_count")?,
-            workout_day_log_count: row.try_get("workout_day_log_count")?,
-            exercise_count: row.try_get("exercise_count")?,
-            set_count: row.try_get("set_count").unwrap_or(0),
-            rep_count: row.try_get("rep_count")?,
-            food_created_count: row.try_get("food_created_count")?,
-            brand_created_count: row.try_get("brand_created_count")?,
-            meal_created_count: row.try_get("meal_created_count")?,
-            meal_food_created_count: row.try_get("meal_food_created_count")?,
-            meal_of_day_created_count: row.try_get("meal_of_day_created_count")?,
-            movement_created_count: row.try_get("movement_created_count")?,
-            muscle_group_created_count: row.try_get("muscle_group_created_count")?,
-        })
-    }
-}
-
 impl UserStatistic {
     pub async fn get_by_username(pool: &PgPool, username: &str) -> Result<Option<Self>> {
         let query = sqlx::query_file_as!(Self, "sql/user_statistic_by_username.sql", username)
